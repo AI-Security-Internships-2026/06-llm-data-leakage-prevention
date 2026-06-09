@@ -1,0 +1,9 @@
+presidio-analyzer
+presidio-anonymizer
+spacy
+transformers
+fastapi
+uvicorn
+pandas
+python-dotenv
+requests
