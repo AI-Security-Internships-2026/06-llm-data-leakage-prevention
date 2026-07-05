@@ -40,7 +40,7 @@ Minor: `source .venv/bin/activate` doesn't work on Windows PowerShell — had to
 ## Week 2
 
 **Branch:** `hashim-week-02`
-**PR link:** _[Add link after opening PR]_
+**PR link:** https://github.com/AI-Security-Internships-2026/06-llm-data-leakage-prevention/pull/2
 
 ### Completed this week
 - [x] Created branch `hashim-week-02` from `dev`
@@ -66,3 +66,55 @@ Tested manually via Swagger UI at `http://127.0.0.1:8000/docs`. Sample input con
 - Add custom PII recognizers (e.g. Pakistani CNIC format)
 - Write unit tests for `detector.py`
 - Begin architecture proposal in `docs/proposal.md`
+
+
+## Week 3
+
+**Branch:** `hashim-week-03`
+**PR link:** _[Add link after opening PR]_
+
+### Completed this week
+
+- [x] Fixed `text_slice` bug in `src/detector.py` — entity output was
+      echoing raw PII back to the caller; replaced with `length` field only
+- [x] Fixed risk logic — 3 low-confidence entities no longer blindly
+      escalate to HIGH without a score threshold
+- [x] Added custom `PatternRecognizer` for Pakistani CNIC (`PK_CNIC`,
+      format `XXXXX-XXXXXXX-X`) with context keywords
+- [x] Added `PK_CNIC` to `_HIGH_RISK_TYPES`
+- [x] Added language validation — unsupported language now raises `ValueError`
+      instead of silently passing to Presidio
+- [x] Created `src/tests/__init__.py`
+- [x] Created `src/tests/test_detector.py` — 27 pytest unit tests across
+      5 categories: edge cases, leaking inputs, non-leaking inputs,
+      risk levels, sanitisation
+- [x] Created `src/tests/eval_suite.py` — 18-case labelled evaluation
+      suite (10 leaking, 8 clean) measuring text-level precision, recall,
+      F1, and accuracy; exits non-zero if recall < 0.80
+- [x] Pinned all versions in `requirements.txt`; added `pytest` and `httpx`
+- [x] Completed `docs/proposal.md` — architecture design document
+
+### Implementation Notes
+
+The eval suite is the key new piece this week (supervisor's PR feedback).
+It runs the detector against 18 ground-truth labelled inputs and reports
+a confusion matrix plus precision/recall/F1. The 0.80 recall floor in
+the exit code means CI can gate on this automatically once a pipeline
+is set up.
+
+The `text_slice` removal was a correctness fix — a leakage-prevention
+tool that echoes the raw PII value in its own response payload defeats
+its own purpose.
+
+### Problems / Blockers
+
+None this week. All tests pass locally.
+
+### Next week plan
+
+- Generate synthetic evaluation dataset using Faker (1000+ samples)
+  to get statistically meaningful precision/recall numbers
+- Document Enron corpus setup in `datasets/enron-emails.md`
+- Begin investigating false negatives in the current eval suite —
+  especially inference-based and association-based leakage
+  (Paper 5 and Paper 8 from literature review)
