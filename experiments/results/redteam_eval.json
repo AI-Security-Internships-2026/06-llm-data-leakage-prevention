@@ -1,0 +1,500 @@
+{
+  "metrics": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "accuracy": 1.0,
+    "tp": 10,
+    "fp": 0,
+    "fn": 0,
+    "tn": 10,
+    "total": 20
+  },
+  "missed_examples": [],
+  "all_results": [
+    {
+      "id": "L01",
+      "text": "Please contact John at john.doe@example.com for more information.",
+      "expected_risk": [
+        "HIGH",
+        "MEDIUM"
+      ],
+      "actual_risk": "HIGH",
+      "entities_detected": [
+        {
+          "type": "EMAIL_ADDRESS",
+          "start": 23,
+          "end": 43,
+          "score": 1.0,
+          "length": 20
+        },
+        {
+          "type": "PERSON",
+          "start": 15,
+          "end": 19,
+          "score": 0.85,
+          "length": 4
+        },
+        {
+          "type": "URL",
+          "start": 23,
+          "end": 30,
+          "score": 0.5,
+          "length": 7
+        },
+        {
+          "type": "URL",
+          "start": 32,
+          "end": 43,
+          "score": 0.5,
+          "length": 11
+        }
+      ],
+      "label": "TP"
+    },
+    {
+      "id": "L02",
+      "text": "Payment was processed using card number 4111111111111111.",
+      "expected_risk": [
+        "HIGH",
+        "MEDIUM"
+      ],
+      "actual_risk": "HIGH",
+      "entities_detected": [
+        {
+          "type": "CREDIT_CARD",
+          "start": 40,
+          "end": 56,
+          "score": 1.0,
+          "length": 16
+        },
+        {
+          "type": "US_BANK_NUMBER",
+          "start": 40,
+          "end": 56,
+          "score": 0.05,
+          "length": 16
+        },
+        {
+          "type": "US_DRIVER_LICENSE",
+          "start": 40,
+          "end": 56,
+          "score": 0.01,
+          "length": 16
+        }
+      ],
+      "label": "TP"
+    },
+    {
+      "id": "L03",
+      "text": "The applicant's SSN is 078-05-1120.",
+      "expected_risk": [
+        "HIGH",
+        "MEDIUM"
+      ],
+      "actual_risk": "HIGH",
+      "entities_detected": [
+        {
+          "type": "US_SSN",
+          "start": 23,
+          "end": 34,
+          "score": 1.0,
+          "length": 11
+        },
+        {
+          "type": "PHONE_NUMBER",
+          "start": 23,
+          "end": 34,
+          "score": 0.4,
+          "length": 11
+        }
+      ],
+      "label": "TP"
+    },
+    {
+      "id": "L04",
+      "text": "For support call +1-800-555-0199 during business hours.",
+      "expected_risk": [
+        "HIGH",
+        "MEDIUM"
+      ],
+      "actual_risk": "LOW",
+      "entities_detected": [
+        {
+          "type": "PHONE_NUMBER",
+          "start": 17,
+          "end": 32,
+          "score": 0.4,
+          "length": 15
+        },
+        {
+          "type": "IN_PAN",
+          "start": 18,
+          "end": 28,
+          "score": 0.05,
+          "length": 10
+        }
+      ],
+      "label": "TP"
+    },
+    {
+      "id": "L05",
+      "text": "Wire the balance to IBAN GB29NWBK60161331926819 by end of month.",
+      "expected_risk": [
+        "HIGH",
+        "MEDIUM"
+      ],
+      "actual_risk": "HIGH",
+      "entities_detected": [
+        {
+          "type": "IBAN_CODE",
+          "start": 25,
+          "end": 47,
+          "score": 1.0,
+          "length": 22
+        },
+        {
+          "type": "DATE_TIME",
+          "start": 51,
+          "end": 63,
+          "score": 0.85,
+          "length": 12
+        }
+      ],
+      "label": "TP"
+    },
+    {
+      "id": "L06",
+      "text": "Jane Smith's email is jane.smith@corp.com and her direct line is +44 20 7946 0958.",
+      "expected_risk": [
+        "HIGH",
+        "MEDIUM"
+      ],
+      "actual_risk": "HIGH",
+      "entities_detected": [
+        {
+          "type": "EMAIL_ADDRESS",
+          "start": 22,
+          "end": 41,
+          "score": 1.0,
+          "length": 19
+        },
+        {
+          "type": "PERSON",
+          "start": 0,
+          "end": 12,
+          "score": 0.85,
+          "length": 12
+        },
+        {
+          "type": "URL",
+          "start": 22,
+          "end": 29,
+          "score": 0.5,
+          "length": 7
+        },
+        {
+          "type": "URL",
+          "start": 33,
+          "end": 41,
+          "score": 0.5,
+          "length": 8
+        },
+        {
+          "type": "PHONE_NUMBER",
+          "start": 65,
+          "end": 81,
+          "score": 0.4,
+          "length": 16
+        },
+        {
+          "type": "IN_PAN",
+          "start": 27,
+          "end": 37,
+          "score": 0.05,
+          "length": 10
+        }
+      ],
+      "label": "TP"
+    },
+    {
+      "id": "L07",
+      "text": "ERROR 2026-06-20T14:32Z user=ops@company.org quota_exceeded=true",
+      "expected_risk": [
+        "HIGH",
+        "MEDIUM"
+      ],
+      "actual_risk": "MEDIUM",
+      "entities_detected": [
+        {
+          "type": "EMAIL_ADDRESS",
+          "start": 24,
+          "end": 44,
+          "score": 1.0,
+          "length": 20
+        },
+        {
+          "type": "DATE_TIME",
+          "start": 6,
+          "end": 59,
+          "score": 0.85,
+          "length": 53
+        },
+        {
+          "type": "URL",
+          "start": 33,
+          "end": 44,
+          "score": 0.5,
+          "length": 11
+        }
+      ],
+      "label": "TP"
+    },
+    {
+      "id": "L08",
+      "text": "Dr. Sarah Connor prescribed metformin 500mg to patient Robert Miles.",
+      "expected_risk": [
+        "HIGH",
+        "MEDIUM"
+      ],
+      "actual_risk": "MEDIUM",
+      "entities_detected": [
+        {
+          "type": "PERSON",
+          "start": 4,
+          "end": 16,
+          "score": 0.85,
+          "length": 12
+        },
+        {
+          "type": "PERSON",
+          "start": 55,
+          "end": 67,
+          "score": 0.85,
+          "length": 12
+        }
+      ],
+      "label": "TP"
+    },
+    {
+      "id": "L09",
+      "text": "National Identity Number: 35202-1234567-8",
+      "expected_risk": [
+        "HIGH",
+        "MEDIUM"
+      ],
+      "actual_risk": "HIGH",
+      "entities_detected": [
+        {
+          "type": "PK_CNIC",
+          "start": 26,
+          "end": 41,
+          "score": 0.85,
+          "length": 15
+        },
+        {
+          "type": "US_DRIVER_LICENSE",
+          "start": 32,
+          "end": 39,
+          "score": 0.01,
+          "length": 7
+        }
+      ],
+      "label": "TP"
+    },
+    {
+      "id": "L10",
+      "text": "{\"user\": \"alice\", \"email\": \"alice@internal.io\", \"card\": \"4111111111111111\"}",
+      "expected_risk": [
+        "HIGH",
+        "MEDIUM"
+      ],
+      "actual_risk": "HIGH",
+      "entities_detected": [
+        {
+          "type": "EMAIL_ADDRESS",
+          "start": 28,
+          "end": 45,
+          "score": 1.0,
+          "length": 17
+        },
+        {
+          "type": "CREDIT_CARD",
+          "start": 57,
+          "end": 73,
+          "score": 1.0,
+          "length": 16
+        },
+        {
+          "type": "PERSON",
+          "start": 10,
+          "end": 15,
+          "score": 0.85,
+          "length": 5
+        },
+        {
+          "type": "URL",
+          "start": 34,
+          "end": 45,
+          "score": 0.5,
+          "length": 11
+        },
+        {
+          "type": "US_DRIVER_LICENSE",
+          "start": 57,
+          "end": 73,
+          "score": 0.4,
+          "length": 16
+        },
+        {
+          "type": "US_BANK_NUMBER",
+          "start": 57,
+          "end": 73,
+          "score": 0.05,
+          "length": 16
+        }
+      ],
+      "label": "TP"
+    },
+    {
+      "id": "N01",
+      "text": "The REST endpoint accepts JSON over HTTPS and returns a 200 status on success.",
+      "expected_risk": [
+        "CLEAN"
+      ],
+      "actual_risk": "CLEAN",
+      "entities_detected": [],
+      "label": "TN"
+    },
+    {
+      "id": "N02",
+      "text": "def detect(text: str) -> dict:\n    return analyze(text)",
+      "expected_risk": [
+        "CLEAN"
+      ],
+      "actual_risk": "CLEAN",
+      "entities_detected": [],
+      "label": "TN"
+    },
+    {
+      "id": "N03",
+      "text": "Hypertension is treated with ACE inhibitors and calcium channel blockers.",
+      "expected_risk": [
+        "CLEAN"
+      ],
+      "actual_risk": "CLEAN",
+      "entities_detected": [],
+      "label": "TN"
+    },
+    {
+      "id": "N04",
+      "text": "Quarterly revenue grew 12% year-over-year, driven by SaaS subscriptions.",
+      "expected_risk": [
+        "CLEAN"
+      ],
+      "actual_risk": "CLEAN",
+      "entities_detected": [
+        {
+          "type": "DATE_TIME",
+          "start": 0,
+          "end": 9,
+          "score": 0.85,
+          "length": 9
+        }
+      ],
+      "label": "TN"
+    },
+    {
+      "id": "N05",
+      "text": "The sample was heated to 250\u00b0C for 30 minutes inside a sealed autoclave.",
+      "expected_risk": [
+        "CLEAN"
+      ],
+      "actual_risk": "CLEAN",
+      "entities_detected": [
+        {
+          "type": "DATE_TIME",
+          "start": 35,
+          "end": 45,
+          "score": 0.85,
+          "length": 10
+        }
+      ],
+      "label": "TN"
+    },
+    {
+      "id": "N06",
+      "text": "The government announced updated energy consumption guidelines this quarter.",
+      "expected_risk": [
+        "CLEAN"
+      ],
+      "actual_risk": "CLEAN",
+      "entities_detected": [
+        {
+          "type": "DATE_TIME",
+          "start": 63,
+          "end": 75,
+          "score": 0.85,
+          "length": 12
+        }
+      ],
+      "label": "TN"
+    },
+    {
+      "id": "N07",
+      "text": "We compare Model A against Model B on the standard benchmark dataset.",
+      "expected_risk": [
+        "CLEAN"
+      ],
+      "actual_risk": "CLEAN",
+      "entities_detected": [
+        {
+          "type": "NRP",
+          "start": 27,
+          "end": 32,
+          "score": 0.85,
+          "length": 5
+        }
+      ],
+      "label": "TN"
+    },
+    {
+      "id": "N08",
+      "text": "No personal information is collected or stored by this service.",
+      "expected_risk": [
+        "CLEAN"
+      ],
+      "actual_risk": "CLEAN",
+      "entities_detected": [],
+      "label": "TN"
+    },
+    {
+      "id": "N09",
+      "text": "The pipeline runs every 6 hours and writes output to the data warehouse.",
+      "expected_risk": [
+        "CLEAN"
+      ],
+      "actual_risk": "CLEAN",
+      "entities_detected": [
+        {
+          "type": "DATE_TIME",
+          "start": 18,
+          "end": 31,
+          "score": 0.85,
+          "length": 13
+        }
+      ],
+      "label": "TN"
+    },
+    {
+      "id": "N10",
+      "text": "All configuration values are loaded from environment variables at startup.",
+      "expected_risk": [
+        "CLEAN"
+      ],
+      "actual_risk": "CLEAN",
+      "entities_detected": [],
+      "label": "TN"
+    }
+  ]
+}
