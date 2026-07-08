@@ -36,17 +36,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from detector import detect_pii
 
 
-# ---------------------------------------------------------------------------
-# Labeled dataset
-# ---------------------------------------------------------------------------
-# Each entry:
-#   id          — unique case ID (L = leaking, N = non-leaking)
-#   description — human-readable label for the report
-#   text        — the input string
-#   expected    — set of PII entity types expected (empty set = no PII)
 
 EVAL_CASES = [
-    # ── LEAKING ─────────────────────────────────────────────────────────────
     {
         "id": "L01",
         "description": "Email address in plain prose",
@@ -171,9 +162,6 @@ EVAL_CASES = [
 ]
 
 
-# ---------------------------------------------------------------------------
-# Evaluation logic
-# ---------------------------------------------------------------------------
 
 def run_evaluation(cases: list = None, verbose: bool = True) -> dict:
     """
@@ -291,9 +279,6 @@ def _print_report(details, tp, tn, fp, fn, precision, recall, f1, accuracy):
         print()
 
 
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     metrics = run_evaluation()

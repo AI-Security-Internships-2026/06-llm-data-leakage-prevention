@@ -18,7 +18,6 @@ from presidio_anonymizer.entities import OperatorConfig
 analyzer = AnalyzerEngine()
 anonymizer = AnonymizerEngine()
 
-# --- Custom recognizer: Pakistani CNIC (format: XXXXX-XXXXXXX-X) ---
 _cnic_recognizer = PatternRecognizer(
     supported_entity="PK_CNIC",
     patterns=[
@@ -28,9 +27,7 @@ _cnic_recognizer = PatternRecognizer(
 )
 analyzer.registry.add_recognizer(_cnic_recognizer)
 
-# --- Custom recognizer: US SSN with strong context boost ---
-# Presidio's built-in SSN recognizer can lose to PHONE_NUMBER on XXX-XX-XXXX patterns.
-# This recognizer scores high when SSN context words are nearby.
+
 _ssn_recognizer = PatternRecognizer(
     supported_entity="US_SSN",
     patterns=[
@@ -44,20 +41,17 @@ _ssn_recognizer = PatternRecognizer(
 )
 analyzer.registry.add_recognizer(_ssn_recognizer)
 
-# Entity types that are HIGH risk regardless of count
 _HIGH_RISK_TYPES = {
     "CREDIT_CARD", "IBAN_CODE", "MEDICAL_LICENSE",
     "US_SSN", "UK_NHS", "PK_CNIC",
 }
 
-# Entity types excluded from risk scoring — too noisy / not personal identifiers
 _NOISE_TYPES = {"DATE_TIME", "NRP"}
 
 _SUPPORTED_LANGUAGES = {"en"}
 
 
 def _compute_risk(results) -> str:
-    # Filter out noise types before any risk assessment
     signal = [r for r in results if r.entity_type not in _NOISE_TYPES]
 
     if not signal:

@@ -3,32 +3,21 @@ test_detector.py — Unit tests for the PII leakage detection probe
 CNIT/PNTLab Pisa — AI Security Internship 2026
 Student: Muhammad Hashim Mughal | Week: 03
 
-Run:
-    cd 06-llm-data-leakage-prevention
-    pytest src/tests/test_detector.py -v
 """
 
 import sys
 import os
 
-# Allow running from any working directory
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import pytest
 from detector import detect_pii
 
 
-# ---------------------------------------------------------------------------
-# Helper
-# ---------------------------------------------------------------------------
-
 def detected_types(result: dict) -> set:
     return {e["type"] for e in result["entities"]}
 
 
-# ---------------------------------------------------------------------------
-# 1. Edge cases — empty / whitespace / structure
-# ---------------------------------------------------------------------------
 
 class TestEdgeCases:
     def test_empty_string_is_clean(self):
@@ -62,9 +51,6 @@ class TestEdgeCases:
             detect_pii("Bonjour", language="fr")
 
 
-# ---------------------------------------------------------------------------
-# 2. Known-leaking inputs — detection correctness
-# ---------------------------------------------------------------------------
 
 class TestLeakingInputs:
     def test_email_detected(self):
@@ -100,10 +86,6 @@ class TestLeakingInputs:
         assert "EMAIL_ADDRESS" in detected_types(r)
 
 
-# ---------------------------------------------------------------------------
-# 3. Known-non-leaking inputs — no false positives
-# ---------------------------------------------------------------------------
-
 class TestNonLeakingInputs:
     def test_technical_documentation(self):
         r = detect_pii("The REST API uses JSON over HTTPS with OAuth2 bearer tokens.")
@@ -125,10 +107,6 @@ class TestNonLeakingInputs:
         r = detect_pii("The sample was heated to 250°C for 30 minutes in a sealed vessel.")
         assert r["risk_level"] == "CLEAN", f"False positive: {r['entities']}"
 
-
-# ---------------------------------------------------------------------------
-# 4. Risk level correctness
-# ---------------------------------------------------------------------------
 
 class TestRiskLevels:
     def test_credit_card_is_high_risk(self):
@@ -167,9 +145,6 @@ class TestRiskLevels:
             ), f"Got HIGH risk with no justification — scores={scores}, types={types}"
 
 
-# ---------------------------------------------------------------------------
-# 5. Sanitization correctness
-# ---------------------------------------------------------------------------
 
 class TestSanitization:
     def test_email_redacted_in_sanitized(self):
