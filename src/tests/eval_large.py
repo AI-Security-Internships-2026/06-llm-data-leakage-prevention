@@ -43,14 +43,6 @@ def load_dataset(path: str) -> list[dict[str, Any]]:
 
 
 def run_detector(text: str) -> tuple[str, float]:
-    """
-    Run the PII detector on a single text.
-
-    Returns
-    -------
-    predicted_label : "LEAKING" or "CLEAN"
-    latency_ms      : wall-clock time in milliseconds
-    """
     t0 = time.perf_counter()
     result = DETECTOR.analyze(text)
     latency_ms = (time.perf_counter() - t0) * 1000
@@ -59,14 +51,86 @@ def run_detector(text: str) -> tuple[str, float]:
     return predicted, latency_ms
 
 
+
+def binary_classification(dataset: list[dict[str, Any]]) -> tuple[dict, list[dict]]:
+  
+    TP = FP = TN = FN = 0
+    sample_results = []
+    latencies = []
+
+    print(f"\nRunning binary classification on {len(dataset)} samples...")
+
+    for i, sample in enumerate(dataset):
+        if (i + 1) % 100 == 0:
+            print(f"  Progress: {i + 1}/{len(dataset)}")
+
+        true_label = sample["label"]           # "LEAKING" or "CLEAN"
+        pred_label, latency_ms = run_detector(sample["text"])
+        latencies.append(latency_ms)
+
+        if true_label == "LEAKING" and pred_label == "LEAKING":
+            TP += 1
+        elif true_label == "CLEAN" and pred_label == "LEAKING":
+            FP += 1
+        elif true_label == "CLEAN" and pred_label == "CLEAN":
+            TN += 1
+        else:
+            FN += 1
+
+        sample_results.append({
+            "id": sample["id"],
+            "true_label": true_label,
+            "pred_label": pred_label,
+            "entity_types": sample.get("entity_types", []),
+            "latency_ms": round(latency_ms, 3),
+            "correct": true_label == pred_label,
+        })
+
+    precision = TP / (TP + FP) if (TP + FP) > 0 else 0.0
+    recall    = TP / (TP + FN) if (TP + FN) > 0 else 0.0
+    f1        = (2 * precision * recall / (precision + recall)
+                 if (precision + recall) > 0 else 0.0)
+    accuracy  = (TP + TN) / len(dataset) if dataset else 0.0
+
+    metrics = {
+        "TP": TP, "FP": FP, "TN": TN, "FN": FN,
+        "precision": round(precision, 4),
+        "recall":    round(recall, 4),
+        "f1":        round(f1, 4),
+        "accuracy":  round(accuracy, 4),
+    }
+
+    return metrics, sample_results, latencies
+
+
+def print_confusion_matrix(metrics: dict) -> None:
+    TP, FP = metrics["TP"], metrics["FP"]
+    FN, TN = metrics["FN"], metrics["TN"]
+    print("\n  Confusion Matrix")
+    print("  ─────────────────────────────────")
+    print("                Pred LEAKING  Pred CLEAN")
+    print(f"  True LEAKING     {TP:>6}        {FN:>6}")
+    print(f"  True CLEAN       {FP:>6}        {TN:>6}")
+    print("  ─────────────────────────────────")
+    print(f"  Precision : {metrics['precision']:.4f}")
+    print(f"  Recall    : {metrics['recall']:.4f}")
+    print(f"  F1        : {metrics['f1']:.4f}")
+    print(f"  Accuracy  : {metrics['accuracy']:.4f}")
+
+
+
+
 def evaluate(dataset: list[dict[str, Any]]) -> dict[str, Any]:
     """Run full evaluation pipeline. Returns results dict."""
+    metrics, sample_results, latencies = binary_classification(dataset)
+    print_confusion_matrix(metrics)
+
     results: dict[str, Any] = {
         "total": len(dataset),
-        "binary_classification": {},
-        "per_entity_metrics": {},
-        "latency": {},
-        "samples": [],
+        "binary_classification": metrics,
+        "per_entity_metrics": {},   
+        "latency": {},            
+        "samples": sample_results,
     }
     return results
 
