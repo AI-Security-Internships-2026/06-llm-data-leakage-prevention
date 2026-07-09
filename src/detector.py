@@ -48,11 +48,13 @@ _SUPPORTED_LANGUAGES = {"en"}
 
 _SPACED_CARD_RE = re.compile(r"\b(\d{4})[ ](\d{4})[ ](\d{4})[ ](\d{4})\b")
 _HYPHEN_CARD_RE = re.compile(r"\b(\d{4})-(\d{4})-(\d{4})-(\d{4})\b")
+_DOT_PHONE_RE   = re.compile(r"\b(\d{3})\.(\d{3})\.(\d{4})\b")
 
 
 def normalize_text(text: str) -> str:
     text = _SPACED_CARD_RE.sub(r"\1\2\3\4", text)
     text = _HYPHEN_CARD_RE.sub(r"\1\2\3\4", text)
+    text = _DOT_PHONE_RE.sub(r"\1-\2-\3", text)
     return text
 
 
