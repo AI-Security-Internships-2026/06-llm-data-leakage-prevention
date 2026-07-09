@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import time
+from collections import defaultdict
 from typing import Any
 
 
@@ -24,16 +25,14 @@ DEFAULT_DATASET = os.path.join(ROOT, "experiments", "results", "synthetic_datase
 
 
 
+
 def load_dataset(path: str) -> list[dict[str, Any]]:
-    """Load the synthetic dataset JSON produced by synthetic_gen.py."""
     if not os.path.exists(path):
         print(f"[ERROR] Dataset not found: {path}")
         print("  Run: python src/synthetic_gen.py")
         sys.exit(1)
-
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
-
     print(f"Loaded {len(data)} samples from {path}")
     leaking = sum(1 for s in data if s["label"] == "LEAKING")
     clean   = sum(1 for s in data if s["label"] == "CLEAN")
@@ -42,29 +41,29 @@ def load_dataset(path: str) -> list[dict[str, Any]]:
     return data
 
 
+
+
 def run_detector(text: str) -> tuple[str, float]:
     t0 = time.perf_counter()
     result = DETECTOR.analyze(text)
     latency_ms = (time.perf_counter() - t0) * 1000
-
     predicted = "CLEAN" if result["risk_level"] == "CLEAN" else "LEAKING"
     return predicted, latency_ms
 
 
 
-def binary_classification(dataset: list[dict[str, Any]]) -> tuple[dict, list[dict]]:
-  
+
+def binary_classification(dataset: list[dict[str, Any]]) -> tuple[dict, list[dict], list[float]]:
     TP = FP = TN = FN = 0
     sample_results = []
     latencies = []
 
     print(f"\nRunning binary classification on {len(dataset)} samples...")
-
     for i, sample in enumerate(dataset):
         if (i + 1) % 100 == 0:
             print(f"  Progress: {i + 1}/{len(dataset)}")
 
-        true_label = sample["label"]           # "LEAKING" or "CLEAN"
+        true_label = sample["label"]
         pred_label, latency_ms = run_detector(sample["text"])
         latencies.append(latency_ms)
 
@@ -99,8 +98,48 @@ def binary_classification(dataset: list[dict[str, Any]]) -> tuple[dict, list[dic
         "f1":        round(f1, 4),
         "accuracy":  round(accuracy, 4),
     }
-
     return metrics, sample_results, latencies
+
+
+def per_entity_metrics(sample_results: list[dict]) -> dict[str, dict]:
+    """
+    For each entity type, compute:
+      - total   : number of samples containing that entity type
+      - detected: number correctly predicted as LEAKING
+      - missed  : number incorrectly predicted as CLEAN (false negatives)
+      - recall  : detected / total
+    """
+    entity_total: dict[str, int]    = defaultdict(int)
+    entity_detected: dict[str, int] = defaultdict(int)
+
+    for s in sample_results:
+        for etype in s.get("entity_types", []):
+            entity_total[etype] += 1
+            if s["pred_label"] == "LEAKING":
+                entity_detected[etype] += 1
+
+    metrics: dict[str, dict] = {}
+    for etype, total in sorted(entity_total.items()):
+        detected = entity_detected.get(etype, 0)
+        missed   = total - detected
+        recall   = round(detected / total, 4) if total > 0 else 0.0
+        metrics[etype] = {
+            "total":    total,
+            "detected": detected,
+            "missed":   missed,
+            "recall":   recall,
+        }
+
+    print("\n  Per-Entity-Type Recall")
+    print("  ─────────────────────────────────────────────────────")
+    print(f"  {'Entity Type':<20} {'Total':>6} {'Detected':>9} {'Missed':>7} {'Recall':>8}")
+    print("  ─────────────────────────────────────────────────────")
+    for etype, m in metrics.items():
+        print(f"  {etype:<20} {m['total']:>6} {m['detected']:>9} {m['missed']:>7} {m['recall']:>8.4f}")
+    print("  ─────────────────────────────────────────────────────")
+
+    return metrics
+
 
 
 def print_confusion_matrix(metrics: dict) -> None:
@@ -119,17 +158,16 @@ def print_confusion_matrix(metrics: dict) -> None:
 
 
 
-
 def evaluate(dataset: list[dict[str, Any]]) -> dict[str, Any]:
-    """Run full evaluation pipeline. Returns results dict."""
     metrics, sample_results, latencies = binary_classification(dataset)
     print_confusion_matrix(metrics)
+    entity_metrics = per_entity_metrics(sample_results)
 
     results: dict[str, Any] = {
         "total": len(dataset),
         "binary_classification": metrics,
-        "per_entity_metrics": {},   
-        "latency": {},            
+        "per_entity_metrics": entity_metrics,
+        "latency": {},          # populated in next commit
         "samples": sample_results,
     }
     return results
@@ -137,18 +175,9 @@ def evaluate(dataset: list[dict[str, Any]]) -> dict[str, Any]:
 
 def main():
     parser = argparse.ArgumentParser(description="Large-scale PII detector evaluation")
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        default=DEFAULT_DATASET,
-        help="Path to synthetic_dataset.json",
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=str,
-        default=os.path.join(ROOT, "experiments", "results"),
-        help="Directory to write evaluation results",
-    )
+    parser.add_argument("--dataset", type=str, default=DEFAULT_DATASET)
+    parser.add_argument("--output-dir", type=str,
+                        default=os.path.join(ROOT, "experiments", "results"))
     args = parser.parse_args()
 
     dataset = load_dataset(args.dataset)
@@ -158,7 +187,6 @@ def main():
     out_path = os.path.join(args.output_dir, "synthetic_eval.json")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
-
     print(f"\nResults saved to: {out_path}")
 
 
