@@ -1,7 +1,7 @@
 """
 main.py — LLM Data Leakage Prevention: FastAPI Entry Point
 CNIT/PNTLab Pisa — AI Security Internship 2026
-Author: Muhammad Hashim Mughal | Week: 02
+Student : Muhammad Hashim Mughal | Week: 02
 """
 
 from fastapi import FastAPI, HTTPException
