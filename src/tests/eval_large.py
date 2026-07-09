@@ -13,16 +13,13 @@ import time
 from collections import defaultdict
 from typing import Any
 
-
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
 
 from src.detector import PIIDetector  # noqa: E402
 
 DETECTOR = PIIDetector()
-
 DEFAULT_DATASET = os.path.join(ROOT, "experiments", "results", "synthetic_dataset.json")
-
 
 
 
@@ -42,14 +39,12 @@ def load_dataset(path: str) -> list[dict[str, Any]]:
 
 
 
-
 def run_detector(text: str) -> tuple[str, float]:
     t0 = time.perf_counter()
     result = DETECTOR.analyze(text)
     latency_ms = (time.perf_counter() - t0) * 1000
     predicted = "CLEAN" if result["risk_level"] == "CLEAN" else "LEAKING"
     return predicted, latency_ms
-
 
 
 
@@ -101,14 +96,8 @@ def binary_classification(dataset: list[dict[str, Any]]) -> tuple[dict, list[dic
     return metrics, sample_results, latencies
 
 
+
 def per_entity_metrics(sample_results: list[dict]) -> dict[str, dict]:
-    """
-    For each entity type, compute:
-      - total   : number of samples containing that entity type
-      - detected: number correctly predicted as LEAKING
-      - missed  : number incorrectly predicted as CLEAN (false negatives)
-      - recall  : detected / total
-    """
     entity_total: dict[str, int]    = defaultdict(int)
     entity_detected: dict[str, int] = defaultdict(int)
 
@@ -124,10 +113,8 @@ def per_entity_metrics(sample_results: list[dict]) -> dict[str, dict]:
         missed   = total - detected
         recall   = round(detected / total, 4) if total > 0 else 0.0
         metrics[etype] = {
-            "total":    total,
-            "detected": detected,
-            "missed":   missed,
-            "recall":   recall,
+            "total": total, "detected": detected,
+            "missed": missed, "recall": recall,
         }
 
     print("\n  Per-Entity-Type Recall")
@@ -137,8 +124,42 @@ def per_entity_metrics(sample_results: list[dict]) -> dict[str, dict]:
     for etype, m in metrics.items():
         print(f"  {etype:<20} {m['total']:>6} {m['detected']:>9} {m['missed']:>7} {m['recall']:>8.4f}")
     print("  ─────────────────────────────────────────────────────")
-
     return metrics
+
+
+def latency_stats(latencies: list[float]) -> dict:
+
+    if not latencies:
+        return {}
+
+    sorted_lat = sorted(latencies)
+    n = len(sorted_lat)
+
+    def percentile(p: float) -> float:
+        idx = int(n * p / 100)
+        idx = min(idx, n - 1)
+        return round(sorted_lat[idx], 3)
+
+    stats = {
+        "n_samples": n,
+        "mean_ms":   round(sum(latencies) / n, 3),
+        "min_ms":    round(sorted_lat[0], 3),
+        "max_ms":    round(sorted_lat[-1], 3),
+        "p50_ms":    percentile(50),
+        "p95_ms":    percentile(95),
+    }
+
+    print("\n  Latency Benchmarks")
+    print("  ─────────────────────────────────")
+    print(f"  Samples : {stats['n_samples']}")
+    print(f"  Mean    : {stats['mean_ms']:.3f} ms")
+    print(f"  Min     : {stats['min_ms']:.3f} ms")
+    print(f"  Max     : {stats['max_ms']:.3f} ms")
+    print(f"  p50     : {stats['p50_ms']:.3f} ms")
+    print(f"  p95     : {stats['p95_ms']:.3f} ms")
+    print("  ─────────────────────────────────")
+
+    return stats
 
 
 
@@ -162,12 +183,13 @@ def evaluate(dataset: list[dict[str, Any]]) -> dict[str, Any]:
     metrics, sample_results, latencies = binary_classification(dataset)
     print_confusion_matrix(metrics)
     entity_metrics = per_entity_metrics(sample_results)
+    lat_stats      = latency_stats(latencies)
 
     results: dict[str, Any] = {
         "total": len(dataset),
         "binary_classification": metrics,
         "per_entity_metrics": entity_metrics,
-        "latency": {},          # populated in next commit
+        "latency": lat_stats,
         "samples": sample_results,
     }
     return results
