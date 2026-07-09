@@ -156,7 +156,6 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
 # Quick lookup
 _ENTITY_MAP = {t.entity_type: t for t in ENTITY_TEMPLATES}
 
-
 CLEAN_TEMPLATES = [
     "The REST endpoint accepts JSON over HTTPS and returns a 200 status on success.",
     "def detect(text: str) -> dict:\n    return analyze(text)",
@@ -226,7 +225,6 @@ MULTI_PII_TEMPLATES = [
 ]
 
 
-
 @dataclass
 class Sample:
     id: str
@@ -279,20 +277,7 @@ def generate_dataset(
     multi_pii_ratio: float = 0.20,
     seed: int = 42,
 ) -> list[Sample]:
-    """
-    Generate a labelled dataset of text samples.
-
-    Parameters
-    ----------
-    n_samples       : total number of samples
-    leaking_ratio   : fraction of samples that contain PII
-    multi_pii_ratio : fraction of leaking samples that have multiple PII types
-    seed            : random seed for reproducibility
-
-    Returns
-    -------
-    list of Sample objects, shuffled
-    """
+  
     rng = random.Random(seed)
     Faker.seed(seed)
 
@@ -314,6 +299,7 @@ def generate_dataset(
 
     rng.shuffle(samples)
     return samples
+
 
 
 def compute_stats(samples: list[Sample]) -> dict:
@@ -339,8 +325,6 @@ def compute_stats(samples: list[Sample]) -> dict:
     }
 
 
-
-
 def main():
     parser = argparse.ArgumentParser(description="Synthetic PII dataset generator")
     parser.add_argument("--samples", type=int, default=1200,
@@ -349,10 +333,13 @@ def main():
                         help="Random seed (default: 42)")
     parser.add_argument("--leaking-ratio", type=float, default=0.55,
                         help="Fraction of samples that are leaking (default: 0.55)")
+    parser.add_argument("--output-dir", type=str, default="experiments/results",
+                        help="Directory to write output files (default: experiments/results)")
     args = parser.parse_args()
 
     print(f"Generating {args.samples} samples (seed={args.seed}, "
           f"leaking_ratio={args.leaking_ratio})...")
+    print(f"Output directory  : {args.output_dir}")
 
     samples = generate_dataset(
         n_samples=args.samples,
@@ -370,13 +357,13 @@ def main():
     for etype, count in stats["entity_type_distribution"].items():
         print(f"  {count:>4}  {etype}")
 
-    os.makedirs("experiments/results", exist_ok=True)
+    os.makedirs(args.output_dir, exist_ok=True)
 
-    dataset_path = "experiments/results/synthetic_dataset.json"
+    dataset_path = os.path.join(args.output_dir, "synthetic_dataset.json")
     with open(dataset_path, "w", encoding="utf-8") as f:
         json.dump([asdict(s) for s in samples], f, indent=2, ensure_ascii=False)
 
-    stats_path = "experiments/results/synthetic_dataset_stats.json"
+    stats_path = os.path.join(args.output_dir, "synthetic_dataset_stats.json")
     with open(stats_path, "w", encoding="utf-8") as f:
         json.dump(stats, f, indent=2)
 
