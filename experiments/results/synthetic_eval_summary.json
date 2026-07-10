@@ -1,27 +1,27 @@
 {
   "meta": {
-    "run_at": "2026-07-09T09:55:11.030319Z",
+    "run_at": "2026-07-10T07:01:14.662759Z",
     "dataset": "C:\\Users\\MUGHAL\\Desktop\\ont lab internship\\New folder\\06-llm-data-leakage-prevention\\experiments\\results\\synthetic_dataset.json",
     "total_samples": 1200,
     "detector": "PIIDetector (Presidio + custom recognisers)"
   },
   "summary": {
-    "precision": 0.9341,
-    "recall": 0.9667,
-    "f1": 0.9501,
-    "accuracy": 0.9442,
-    "p50_latency_ms": 14.108,
-    "p95_latency_ms": 19.826
+    "precision": 0.9342,
+    "recall": 0.9682,
+    "f1": 0.9509,
+    "accuracy": 0.945,
+    "p50_latency_ms": 14.018,
+    "p95_latency_ms": 23.903
   },
   "binary_classification": {
-    "TP": 638,
+    "TP": 639,
     "FP": 45,
     "TN": 495,
-    "FN": 22,
-    "precision": 0.9341,
-    "recall": 0.9667,
-    "f1": 0.9501,
-    "accuracy": 0.9442
+    "FN": 21,
+    "precision": 0.9342,
+    "recall": 0.9682,
+    "f1": 0.9509,
+    "accuracy": 0.945
   },
   "per_entity_metrics": {
     "CREDIT_CARD": {
@@ -56,9 +56,9 @@
     },
     "PHONE_NUMBER": {
       "total": 73,
-      "detected": 70,
-      "missed": 3,
-      "recall": 0.9589
+      "detected": 71,
+      "missed": 2,
+      "recall": 0.9726
     },
     "PK_CNIC": {
       "total": 95,
@@ -75,10 +75,10 @@
   },
   "latency": {
     "n_samples": 1200,
-    "mean_ms": 14.988,
-    "min_ms": 8.832,
-    "max_ms": 295.163,
-    "p50_ms": 14.108,
-    "p95_ms": 19.826
+    "mean_ms": 16.495,
+    "min_ms": 8.773,
+    "max_ms": 1023.695,
+    "p50_ms": 14.018,
+    "p95_ms": 23.903
   }
 }
