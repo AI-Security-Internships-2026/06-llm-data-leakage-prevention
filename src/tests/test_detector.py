@@ -266,3 +266,31 @@ class TestAdversarialPhoneVariants:
     def test_phone_international_format(self):
         r = detect_pii("Dial +44 20 7946 0958 for the London office.")
         assert "PHONE_NUMBER" in detected_types(r)
+
+
+class TestAdversarialMarkdownTables:
+    def test_email_in_markdown_table(self):
+        r = detect_pii("| Name | Email | Role |\n| Alice | alice@example.com | Admin |")
+        assert "EMAIL_ADDRESS" in detected_types(r)
+
+    def test_phone_in_markdown_table(self):
+        r = detect_pii("| Department | Contact |\n| Support | +1-800-555-0199 |")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_ssn_in_markdown_table(self):
+        r = detect_pii("| Employee | SSN |\n| John Doe | 078-05-1120 |")
+        assert "US_SSN" in detected_types(r)
+
+    def test_cnic_in_markdown_table(self):
+        r = detect_pii("| Applicant | CNIC |\n| Test User | 35202-1234567-8 |")
+        assert "PK_CNIC" in detected_types(r)
+
+    def test_credit_card_in_markdown_table(self):
+        r = detect_pii("| Customer | Card |\n| Alice | 4111111111111111 |")
+        assert "CREDIT_CARD" in detected_types(r)
+
+    def test_multiple_pii_in_markdown_table(self):
+        r = detect_pii("| Name | Email | Phone |\n| Alice | alice@example.com | +1-800-555-0199 |")
+        types = detected_types(r)
+        assert "EMAIL_ADDRESS" in types
+        assert "PHONE_NUMBER" in types
