@@ -239,3 +239,30 @@ class TestAdversarialEmbedded:
     def test_iban_in_markdown_table(self):
         r = detect_pii("| Beneficiary | GB29NWBK60161331926819 | GBP | Active |")
         assert "IBAN_CODE" in detected_types(r)
+
+
+class TestAdversarialPhoneVariants:
+    def test_phone_us_standard(self):
+        r = detect_pii("Call us at +1-800-555-0199.")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_phone_parenthesis_format(self):
+        r = detect_pii("Reach us at (800) 555-0199 anytime.")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_phone_dot_format(self):
+        r = detect_pii("Support line: 800.555.0199")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_phone_no_country_code(self):
+        r = detect_pii("Call 800-555-0199 for assistance.")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_phone_spaces_format(self):
+        r = detect_pii("Contact number: (800) 555 0199")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    @pytest.mark.xfail(reason="International format with country code is a known gap")
+    def test_phone_international_format(self):
+        r = detect_pii("Dial +44 20 7946 0958 for the London office.")
+        assert "PHONE_NUMBER" in detected_types(r)
