@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT)
 
-from src.detector import detect_pii
+from detector import detect_pii
 
 ADVERSARIAL_CASES = [
     {"id": "ADV-CC-01", "text": "Card: 4111111111111111",              "expected": "LEAKING", "category": "credit_card", "variant": "plain"},
