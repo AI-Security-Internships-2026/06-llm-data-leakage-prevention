@@ -2,6 +2,7 @@
 test_detector.py — Unit tests for the PII leakage detection probe
 CNIT/PNTLab Pisa — AI Security Internship 2026
 Student: Muhammad Hashim Mughal | Week: 04
+
 """
 
 import sys
@@ -10,7 +11,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import pytest
-from detector import detect_pii
+from detector import detect_pii, normalize_text
 
 
 def detected_types(result: dict) -> set:
@@ -151,6 +152,32 @@ class TestSanitization:
         assert "<REDACTED>" in r["sanitized"]
 
 
+class TestNormalizeText:
+    def test_spaced_card_collapsed(self):
+        assert "4111111111111111" in normalize_text("4111 1111 1111 1111")
+
+    def test_hyphen_card_collapsed(self):
+        assert "4111111111111111" in normalize_text("4111-1111-1111-1111")
+
+    def test_dot_card_collapsed(self):
+        assert "4111111111111111" in normalize_text("4111.1111.1111.1111")
+
+    def test_dot_phone_normalized(self):
+        assert "800-555-0199" in normalize_text("800.555.0199")
+
+    def test_bracket_at_email_normalized(self):
+        out = normalize_text("alice [at] example [dot] com")
+        assert "@" in out and "." in out
+
+    def test_paren_at_email_normalized(self):
+        out = normalize_text("alice(at)example.com")
+        assert "alice@example.com" in out
+
+    def test_caps_at_dot_email_normalized(self):
+        out = normalize_text("alice AT example DOT com")
+        assert "@" in out
+
+
 class TestAdversarialCreditCard:
     def test_card_no_delimiter_detected(self):
         r = detect_pii("Card: 4111111111111111")
@@ -164,8 +191,7 @@ class TestAdversarialCreditCard:
         r = detect_pii("Declined card: 4111-1111-1111-1111")
         assert "CREDIT_CARD" in detected_types(r)
 
-    @pytest.mark.xfail(reason="Dot-delimited card is a known false negative")
-    def test_card_dot_groups_known_gap(self):
+    def test_card_dot_groups_detected(self):
         r = detect_pii("Export row: 4111.1111.1111.1111")
         assert "CREDIT_CARD" in detected_types(r)
 
@@ -183,17 +209,14 @@ class TestAdversarialEmail:
         r = detect_pii("Contact: alice@example.com")
         assert "EMAIL_ADDRESS" in detected_types(r)
 
-    @pytest.mark.xfail(reason="[at] obfuscation is a known false negative")
     def test_email_at_bracket_obfuscated(self):
         r = detect_pii("Reach me at alice [at] example [dot] com")
         assert "EMAIL_ADDRESS" in detected_types(r)
 
-    @pytest.mark.xfail(reason="(at) obfuscation is a known false negative")
     def test_email_at_paren_obfuscated(self):
         r = detect_pii("Email: alice(at)example.com")
         assert "EMAIL_ADDRESS" in detected_types(r)
 
-    @pytest.mark.xfail(reason="ALL CAPS AT obfuscation is a known false negative")
     def test_email_caps_at_obfuscated(self):
         r = detect_pii("Send to alice AT example DOT com")
         assert "EMAIL_ADDRESS" in detected_types(r)
@@ -233,7 +256,7 @@ class TestAdversarialEmbedded:
         assert "PHONE_NUMBER" in detected_types(r)
 
     def test_cnic_in_xml(self):
-        r = detect_pii("<citizen><cnic>35202-1234567-8</cnic><name>Test</name></citizen>")
+        r = detect_pii("<citizen><cnic>35202-1234567-8</cnic><n>Test</n></citizen>")
         assert "PK_CNIC" in detected_types(r)
 
     def test_iban_in_markdown_table(self):
@@ -262,7 +285,6 @@ class TestAdversarialPhoneVariants:
         r = detect_pii("Contact number: (800) 555 0199")
         assert "PHONE_NUMBER" in detected_types(r)
 
-    @pytest.mark.xfail(reason="International format with country code is a known gap")
     def test_phone_international_format(self):
         r = detect_pii("Dial +44 20 7946 0958 for the London office.")
         assert "PHONE_NUMBER" in detected_types(r)
