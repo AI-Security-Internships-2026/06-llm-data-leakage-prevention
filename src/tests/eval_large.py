@@ -3,14 +3,6 @@ eval_large.py — Large-Scale Evaluation Suite
 CNIT/PNTLab Pisa — AI Security Internship 2026
 Student: Muhammad Hashim Mughal | Week: 04
 
-Evaluates the PII detector on the 1,200-sample synthetic dataset produced
-by src/synthetic_gen.py. Measures text-level binary classification
-(LEAKING vs CLEAN), per-entity-type precision/recall, and p50/p95 latency.
-
-Usage
------
-    python src/tests/eval_large.py
-    python src/tests/eval_large.py --dataset experiments/results/synthetic_dataset.json
 """
 
 import argparse
@@ -19,13 +11,14 @@ import os
 import sys
 import time
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
 
 from src.detector import detect_pii  # noqa: E402
+
 
 
 DEFAULT_DATASET = os.path.join(ROOT, "experiments", "results", "synthetic_dataset.json")
@@ -222,7 +215,7 @@ def build_results(
 
     return {
         "meta": {
-            "run_at": datetime.utcnow().isoformat() + "Z",
+"run_at": datetime.now(timezone.utc).isoformat(),
             "dataset": dataset_path,
             "total_samples": len(dataset),
             "detector": "PIIDetector (Presidio + custom recognisers)",
