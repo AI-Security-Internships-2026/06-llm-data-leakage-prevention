@@ -18,12 +18,11 @@ fake = Faker("en_US")
 Faker.seed(42)
 
 
-
 @dataclass
 class EntityTemplate:
     entity_type: str
-    generator: Callable[[], str]          # returns raw PII value
-    templates: list[str]                  # use {pii} as placeholder
+    generator: Callable[[], str]
+    templates: list[str]
     is_high_risk: bool = False
 
 
@@ -39,10 +38,19 @@ _IBAN_POOL = [
     "FR7614508711002120144503422",
     "NL91ABNA0417164300",
     "ES9121000418450200051332",
+    "IT60X0542811101000000123456",
+    "PL61109010140000071219812874",
+    "SE4550000000058398257466",
+    "CH9300762011623852957",
+    "AT611904300234573201",
+    "BE68539007547034",
+    "DK5000400440116243",
+    "NO9386011117947",
+    "PT50000201231234567890154",
+    "IE29AIBK93115212345678",
 ]
 
 ENTITY_TEMPLATES: list[EntityTemplate] = [
-    # ── EMAIL_ADDRESS ────────────────────────────────────────────────────────
     EntityTemplate(
         entity_type="EMAIL_ADDRESS",
         generator=fake.email,
@@ -58,7 +66,6 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
         ],
         is_high_risk=False,
     ),
-    # ── CREDIT_CARD ──────────────────────────────────────────────────────────
     EntityTemplate(
         entity_type="CREDIT_CARD",
         generator=fake.credit_card_number,
@@ -72,7 +79,6 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
         ],
         is_high_risk=True,
     ),
-    # ── PHONE_NUMBER ─────────────────────────────────────────────────────────
     EntityTemplate(
         entity_type="PHONE_NUMBER",
         generator=fake.phone_number,
@@ -86,7 +92,6 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
         ],
         is_high_risk=False,
     ),
-    # ── PERSON ───────────────────────────────────────────────────────────────
     EntityTemplate(
         entity_type="PERSON",
         generator=fake.name,
@@ -101,7 +106,6 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
         ],
         is_high_risk=False,
     ),
-    # ── US_SSN ───────────────────────────────────────────────────────────────
     EntityTemplate(
         entity_type="US_SSN",
         generator=fake.ssn,
@@ -114,7 +118,6 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
         ],
         is_high_risk=True,
     ),
-    # ── IBAN_CODE ────────────────────────────────────────────────────────────
     EntityTemplate(
         entity_type="IBAN_CODE",
         generator=lambda: random.choice(_IBAN_POOL),
@@ -127,7 +130,6 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
         ],
         is_high_risk=True,
     ),
-    # ── PK_CNIC ──────────────────────────────────────────────────────────────
     EntityTemplate(
         entity_type="PK_CNIC",
         generator=_CNIC_DIGITS,
@@ -140,7 +142,6 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
         ],
         is_high_risk=True,
     ),
-    # ── LOCATION (ADDRESS) ───────────────────────────────────────────────────
     EntityTemplate(
         entity_type="LOCATION",
         generator=fake.address,
@@ -153,7 +154,6 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
     ),
 ]
 
-# Quick lookup
 _ENTITY_MAP = {t.entity_type: t for t in ENTITY_TEMPLATES}
 
 CLEAN_TEMPLATES = [
@@ -189,38 +189,46 @@ CLEAN_TEMPLATES = [
     "The firewall blocks all inbound traffic on port 22 except from the VPN range.",
 ]
 
-
-
 MULTI_PII_TEMPLATES = [
-    # email + person
     lambda: (
         f"{fake.name()}'s email is {fake.email()} and her direct line is {fake.phone_number()}.",
         ["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER"],
     ),
-    # credit card + email in JSON
     lambda: (
         f'{{"user": "{fake.user_name()}", "email": "{fake.email()}", "card": "{fake.credit_card_number()}"}}',
         ["EMAIL_ADDRESS", "CREDIT_CARD"],
     ),
-    # SSN + person
     lambda: (
         f"The applicant {fake.name()} has SSN {fake.ssn()} on file.",
         ["PERSON", "US_SSN"],
     ),
-    # PII in error log
     lambda: (
         f"ERROR [user={fake.email()}]: quota_exceeded=true at endpoint /api/v1/export",
         ["EMAIL_ADDRESS"],
     ),
-    # medical context
     lambda: (
         f"Dr. {fake.name()} prescribed metformin 500mg to patient {fake.name()}.",
         ["PERSON"],
     ),
-    # CNIC + person
     lambda: (
         f"Applicant: {fake.name()}, CNIC: {_CNIC_DIGITS()}",
         ["PERSON", "PK_CNIC"],
+    ),
+    lambda: (
+        f"Please wire funds to IBAN {random.choice(_IBAN_POOL)} and cc {fake.email()} on the confirmation.",
+        ["IBAN_CODE", "EMAIL_ADDRESS"],
+    ),
+    lambda: (
+        f"US SSN: {fake.ssn()}  |  PK CNIC: {_CNIC_DIGITS()}  |  Submitted by {fake.name()}.",
+        ["US_SSN", "PK_CNIC", "PERSON"],
+    ),
+    lambda: (
+        f"Customer called from {fake.phone_number()} to dispute charge on card {fake.credit_card_number()}.",
+        ["PHONE_NUMBER", "CREDIT_CARD"],
+    ),
+    lambda: (
+        f"Delivery for {fake.name()} to be sent to {fake.address()}.",
+        ["PERSON", "LOCATION"],
     ),
 ]
 
@@ -229,9 +237,9 @@ MULTI_PII_TEMPLATES = [
 class Sample:
     id: str
     text: str
-    label: str                    # "LEAKING" or "CLEAN"
+    label: str
     entity_types: list[str] = field(default_factory=list)
-    context: str = ""             # prose / json / log / medical / code
+    context: str = ""
 
 
 def _generate_single_pii_sample(idx: int, rng: random.Random) -> Sample:
@@ -277,7 +285,6 @@ def generate_dataset(
     multi_pii_ratio: float = 0.20,
     seed: int = 42,
 ) -> list[Sample]:
-  
     rng = random.Random(seed)
     Faker.seed(seed)
 
@@ -299,7 +306,6 @@ def generate_dataset(
 
     rng.shuffle(samples)
     return samples
-
 
 
 def compute_stats(samples: list[Sample]) -> dict:
@@ -327,48 +333,33 @@ def compute_stats(samples: list[Sample]) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(description="Synthetic PII dataset generator")
-    parser.add_argument("--samples", type=int, default=1200,
-                        help="Total number of samples (default: 1200)")
-    parser.add_argument("--seed", type=int, default=42,
-                        help="Random seed (default: 42)")
-    parser.add_argument("--leaking-ratio", type=float, default=0.55,
-                        help="Fraction of samples that are leaking (default: 0.55)")
-    parser.add_argument("--output-dir", type=str, default="experiments/results",
-                        help="Directory to write output files (default: experiments/results)")
+    parser.add_argument("--samples", type=int, default=1200)
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--leaking-ratio", type=float, default=0.55)
+    parser.add_argument("--multi-pii-ratio", type=float, default=0.20)
+    parser.add_argument("--output-dir", type=str, default="experiments/results")
     args = parser.parse_args()
-
-    print(f"Generating {args.samples} samples (seed={args.seed}, "
-          f"leaking_ratio={args.leaking_ratio})...")
-    print(f"Output directory  : {args.output_dir}")
 
     samples = generate_dataset(
         n_samples=args.samples,
         leaking_ratio=args.leaking_ratio,
+        multi_pii_ratio=args.multi_pii_ratio,
         seed=args.seed,
     )
 
     stats = compute_stats(samples)
 
-    print(f"  Total    : {stats['total']}")
-    print(f"  Leaking  : {stats['leaking']}")
-    print(f"  Clean    : {stats['clean']}")
-    print(f"  Avg len  : {stats['avg_text_length_chars']} chars")
-    print(f"\nEntity type distribution:")
+    print(f"Total: {stats['total']}  |  Leaking: {stats['leaking']}  |  Clean: {stats['clean']}")
     for etype, count in stats["entity_type_distribution"].items():
         print(f"  {count:>4}  {etype}")
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    dataset_path = os.path.join(args.output_dir, "synthetic_dataset.json")
-    with open(dataset_path, "w", encoding="utf-8") as f:
+    with open(os.path.join(args.output_dir, "synthetic_dataset.json"), "w", encoding="utf-8") as f:
         json.dump([asdict(s) for s in samples], f, indent=2, ensure_ascii=False)
 
-    stats_path = os.path.join(args.output_dir, "synthetic_dataset_stats.json")
-    with open(stats_path, "w", encoding="utf-8") as f:
+    with open(os.path.join(args.output_dir, "synthetic_dataset_stats.json"), "w") as f:
         json.dump(stats, f, indent=2)
-
-    print(f"\nDataset saved to  : {dataset_path}")
-    print(f"Stats saved to    : {stats_path}")
 
 
 if __name__ == "__main__":
