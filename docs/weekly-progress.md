@@ -71,7 +71,7 @@ Tested manually via Swagger UI at `http://127.0.0.1:8000/docs`. Sample input con
 ## Week 3
 
 **Branch:** `hashim-week-03`
-**PR link:** _[Add link after opening PR]_
+**PR link:** (https://github.com/AI-Security-Internships-2026/06-llm-data-leakage-prevention/pull/4)
 
 ### Completed this week
 
@@ -124,7 +124,7 @@ None this week. All tests pass locally.
 ## Week 4
 
 **Branch:** `hashim-week-04`
-**PR link:** _[Add link after opening PR]_
+**PR link:** (https://github.com/AI-Security-Internships-2026/06-llm-data-leakage-prevention/pull/5)
 
 ### Completed this week
 
