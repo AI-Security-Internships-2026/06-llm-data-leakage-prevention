@@ -1,15 +1,11 @@
 """
 detector.py — PII Leakage Detection Probe
 CNIT/PNTLab Pisa — AI Security Internship 2026
-Student: Muhammad Hashim Mughal | Week: 03
-Changes (Week 03):
-  - Added custom PatternRecognizer for Pakistani CNIC (PK_CNIC)
-  - Removed text_slice from entity output (was echoing raw PII back to caller)
-  - Fixed risk logic: count-based HIGH now also requires a score threshold
-Changes (Week 03 patch):
-  - Added custom US_SSN recognizer with stronger context to beat PHONE_NUMBER overlap
-  - Excluded DATE_TIME and NRP from risk scoring (too noisy, not personal identifiers)
+Student: Muhammad Hashim Mughal | Week: 04
+
 """
+
+import re
 
 from presidio_analyzer import AnalyzerEngine, Pattern, PatternRecognizer
 from presidio_anonymizer import AnonymizerEngine
@@ -18,7 +14,6 @@ from presidio_anonymizer.entities import OperatorConfig
 analyzer = AnalyzerEngine()
 anonymizer = AnonymizerEngine()
 
-# --- Custom recognizer: Pakistani CNIC (format: XXXXX-XXXXXXX-X) ---
 _cnic_recognizer = PatternRecognizer(
     supported_entity="PK_CNIC",
     patterns=[
@@ -28,9 +23,6 @@ _cnic_recognizer = PatternRecognizer(
 )
 analyzer.registry.add_recognizer(_cnic_recognizer)
 
-# --- Custom recognizer: US SSN with strong context boost ---
-# Presidio's built-in SSN recognizer can lose to PHONE_NUMBER on XXX-XX-XXXX patterns.
-# This recognizer scores high when SSN context words are nearby.
 _ssn_recognizer = PatternRecognizer(
     supported_entity="US_SSN",
     patterns=[
@@ -44,20 +36,82 @@ _ssn_recognizer = PatternRecognizer(
 )
 analyzer.registry.add_recognizer(_ssn_recognizer)
 
-# Entity types that are HIGH risk regardless of count
+_iban_recognizer = PatternRecognizer(
+    supported_entity="IBAN_CODE",
+    patterns=[
+        Pattern(
+            name="iban_context_boosted",
+            regex=r"\b[A-Z]{2}\d{2}[A-Z0-9]{4,30}\b",
+            score=0.75,
+        )
+    ],
+    context=[
+        "iban", "bank account", "account number", "wire", "transfer",
+        "beneficiary", "swift", "payment", "remittance", "credit",
+    ],
+)
+analyzer.registry.add_recognizer(_iban_recognizer)
+
 _HIGH_RISK_TYPES = {
     "CREDIT_CARD", "IBAN_CODE", "MEDICAL_LICENSE",
     "US_SSN", "UK_NHS", "PK_CNIC",
 }
 
-# Entity types excluded from risk scoring — too noisy / not personal identifiers
 _NOISE_TYPES = {"DATE_TIME", "NRP"}
 
 _SUPPORTED_LANGUAGES = {"en"}
 
+SUPPORTED_ENTITIES = [
+    "EMAIL_ADDRESS", "CREDIT_CARD", "PHONE_NUMBER", "PERSON",
+    "US_SSN", "IBAN_CODE", "PK_CNIC", "LOCATION",
+    "MEDICAL_LICENSE", "UK_NHS",
+]
+
+_SPACED_CARD_RE  = re.compile(r"\b(\d{4})[ ](\d{4})[ ](\d{4})[ ](\d{4})\b")
+_HYPHEN_CARD_RE  = re.compile(r"\b(\d{4})-(\d{4})-(\d{4})-(\d{4})\b")
+_DOT_CARD_RE     = re.compile(r"\b(\d{4})\.(\d{4})\.(\d{4})\.(\d{4})\b")
+
+_DOT_PHONE_RE    = re.compile(r"\b(\d{3})\.(\d{3})\.(\d{4})\b")
+
+_OBFUSC_EMAIL_RE = re.compile(
+    r"([\w.+\-]+?)"
+    r"\s*(?:\[at\]|\(at\)|\bAT\b)\s*"
+    r"([\w\-]+)"
+    r"(?:\s*(?:\[dot\]|\bDOT\b)\s*|\.)"
+    r"(\w{2,6})",
+    re.IGNORECASE,
+)
+
+
+def normalize_text(text: str) -> str:
+    """
+    Pre-process text to expose PII that is obscured by formatting or obfuscation
+    before passing it to Presidio.
+
+    Transformations applied (in order):
+      1. Spaced credit card  → raw digits   4111 1111 1111 1111 → 4111111111111111
+      2. Hyphen credit card  → raw digits   4111-1111-1111-1111 → 4111111111111111
+      3. Dot credit card     → raw digits   4111.1111.1111.1111 → 4111111111111111
+      4. Dot phone           → hyphen phone 800.555.0199        → 800-555-0199
+      5. Obfuscated email    → standard     alice [at] example [dot] com
+                                            alice(at)example.com
+                                            alice AT example DOT com
+                                                         → alice@example.com
+    """
+    text = _SPACED_CARD_RE.sub(r"\1\2\3\4", text)
+    text = _HYPHEN_CARD_RE.sub(r"\1\2\3\4", text)
+    text = _DOT_CARD_RE.sub(r"\1\2\3\4", text)
+
+    text = _DOT_PHONE_RE.sub(r"\1-\2-\3", text)
+
+    text = _OBFUSC_EMAIL_RE.sub(
+        lambda m: f"{m.group(1)}@{m.group(2)}.{m.group(3)}", text
+    )
+
+    return text
+
 
 def _compute_risk(results) -> str:
-    # Filter out noise types before any risk assessment
     signal = [r for r in results if r.entity_type not in _NOISE_TYPES]
 
     if not signal:
@@ -73,6 +127,17 @@ def _compute_risk(results) -> str:
 
 
 def detect_pii(text: str, language: str = "en") -> dict:
+    """
+    Detect PII in *text* and return a structured result.
+
+    Returns
+    -------
+    dict with keys:
+      text        – original input text
+      entities    – list of detected entities (type, start, end, score, length)
+      risk_level  – CLEAN | LOW | MEDIUM | HIGH
+      sanitized   – text with all PII replaced by <REDACTED>
+    """
     if not text or not text.strip():
         return {"text": text, "entities": [], "risk_level": "CLEAN", "sanitized": text}
 
@@ -81,7 +146,8 @@ def detect_pii(text: str, language: str = "en") -> dict:
             f"Unsupported language '{language}'. Supported: {sorted(_SUPPORTED_LANGUAGES)}"
         )
 
-    results = analyzer.analyze(text=text, language=language)
+    normalized = normalize_text(text)
+    results = analyzer.analyze(text=normalized, language=language)
 
     entities = [
         {
@@ -94,10 +160,10 @@ def detect_pii(text: str, language: str = "en") -> dict:
         for r in results
     ]
 
-    sanitized_text = text
+    sanitized_text = normalized
     if results:
         anonymized = anonymizer.anonymize(
-            text=text,
+            text=normalized,
             analyzer_results=results,
             operators={"DEFAULT": OperatorConfig("replace", {"new_value": "<REDACTED>"})},
         )

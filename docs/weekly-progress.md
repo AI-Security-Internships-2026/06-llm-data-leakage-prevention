@@ -71,7 +71,7 @@ Tested manually via Swagger UI at `http://127.0.0.1:8000/docs`. Sample input con
 ## Week 3
 
 **Branch:** `hashim-week-03`
-**PR link:** _[Add link after opening PR]_
+**PR link:** (https://github.com/AI-Security-Internships-2026/06-llm-data-leakage-prevention/pull/4)
 
 ### Completed this week
 
@@ -118,3 +118,96 @@ None this week. All tests pass locally.
 - Begin investigating false negatives in the current eval suite —
   especially inference-based and association-based leakage
   (Paper 5 and Paper 8 from literature review)
+
+---
+
+## Week 4
+
+**Branch:** `hashim-week-04`
+**PR link:** (https://github.com/AI-Security-Internships-2026/06-llm-data-leakage-prevention/pull/5)
+
+### Completed this week
+
+- [x] Implemented `src/synthetic_gen.py` — Faker-based synthetic PII dataset
+      generator producing 1,200 labelled samples across 8 entity types
+      (EMAIL_ADDRESS, CREDIT_CARD, PHONE_NUMBER, PERSON, US_SSN, IBAN_CODE,
+      PK_CNIC, LOCATION) with CLI arguments `--samples`, `--seed`,
+      `--leaking-ratio`, `--output-dir`
+- [x] Generated `experiments/results/synthetic_dataset.json` (1,200 samples,
+      660 leaking / 540 clean) and `synthetic_dataset_stats.json`
+- [x] Documented synthetic dataset in `datasets/synthetic-pii.md` — schema,
+      generation parameters, entity distribution, limitations
+- [x] Documented Enron email corpus in `datasets/enron-emails.md` — download
+      instructions, preprocessing steps, privacy notes, citation
+- [x] Pinned `faker==40.28.1` in `requirements.txt`
+- [x] Implemented `src/tests/eval_large.py` — large-scale evaluation suite
+      with text-level binary classification, per-entity-type recall breakdown,
+      p50/p95 latency benchmarking, confusion matrix printer, and JSON output
+- [x] Added adversarial test classes to `src/tests/test_detector.py`:
+      spaced/hyphen credit cards, obfuscated emails, PII in JSON/SQL/code,
+      phone number variants, PII in markdown tables (48 tests: 44 passed,
+      4 xfailed)
+- [x] Patched `src/detector.py` with pre-processing `normalize_text()`
+      pipeline: strips spaces and hyphens from 16-digit card numbers,
+      converts dot-formatted phones to hyphen format before Presidio analysis
+- [x] Implemented `src/tests/adversarial_eval.py` — 21-case adversarial
+      evaluation script covering credit card formats, email obfuscation,
+      phone variants, and PII embedded in structured text
+
+### Evaluation Results (1,200-sample synthetic dataset)
+
+| Metric | Value |
+|---|---|
+| Precision | 0.9341 |
+| Recall | 0.9667 |
+| F1 | 0.9501 |
+| Accuracy | 0.9442 |
+| p50 latency | 14 ms |
+| p95 latency | 19 ms |
+
+### Per-Entity Recall
+
+| Entity Type | Recall |
+|---|---|
+| EMAIL_ADDRESS | 1.0000 |
+| PERSON | 1.0000 |
+| US_SSN | 1.0000 |
+| PK_CNIC | 1.0000 |
+| CREDIT_CARD | 0.9655 |
+| PHONE_NUMBER | 0.9589 |
+| LOCATION | 0.9130 |
+| IBAN_CODE | 0.8246 |
+
+### Implementation Notes
+
+The biggest deliverable this week was scaling the evaluation from 18 hand-labelled
+cases (Week 3) to 1,200 synthetic samples, giving statistically meaningful P/R/F1
+numbers. The per-entity breakdown revealed IBAN_CODE as the weakest entity at 0.82
+recall — caused by a limited pool of 5 IBAN patterns in the generator rather than
+a detector gap. This is documented as a known limitation in `datasets/synthetic-pii.md`.
+
+The `normalize_text()` pre-processing step in `detector.py` directly addresses
+adversarial false negatives found during testing: spaced card numbers
+(`4111 1111 1111 1111`) and hyphen-delimited cards (`4111-1111-1111-1111`) are
+now stripped to raw digits before Presidio analysis. Dot-formatted phones
+(`800.555.0199`) are normalized to `800-555-0199`.
+
+Known remaining false negatives (marked `xfail` in the test suite):
+- Obfuscated emails: `[at]`, `(at)`, `AT` variants
+- Dot-delimited credit cards: `4111.1111.1111.1111`
+- UK international phone format
+
+These require semantic understanding beyond regex normalization and are planned
+for Stage 2 (LLM-as-judge) in Week 5–6.
+
+### Problems / Blockers
+
+- `datetime.utcnow()` deprecation warning in Python 3.13 — fixed by switching
+  to `datetime.now(timezone.utc)` in `adversarial_eval.py`
+
+### Next week plan
+
+- Implement Stage 2: LLM-as-judge using a HuggingFace model to catch
+  inference-based and obfuscated PII that Presidio misses
+- Run evaluation comparing Stage 1 alone vs Stage 1 + Stage 2 on recall
+- Begin Enron corpus evaluation on a 500-email sample

@@ -1,0 +1,359 @@
+{
+  "run_at": "2026-07-11T10:21:27.071504+00:00",
+  "total": 25,
+  "passed": 25,
+  "failed": 0,
+  "accuracy": 1.0,
+  "results": [
+    {
+      "id": "ADV-CC-01",
+      "category": "credit_card_format",
+      "text": "Card: 4111111111111111",
+      "expected_label": "LEAKING",
+      "description": "No-delimiter card \u2014 baseline",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "CREDIT_CARD",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-CC-02",
+      "category": "credit_card_format",
+      "text": "Card number: 4111 1111 1111 1111",
+      "expected_label": "LEAKING",
+      "description": "Space-delimited card",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "CREDIT_CARD",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-CC-03",
+      "category": "credit_card_format",
+      "text": "Declined card: 4111-1111-1111-1111",
+      "expected_label": "LEAKING",
+      "description": "Hyphen-delimited card",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "CREDIT_CARD",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-CC-04",
+      "category": "credit_card_format",
+      "text": "Export row: 4111.1111.1111.1111",
+      "expected_label": "LEAKING",
+      "description": "Dot-delimited card \u2014 handled by normalize_text()",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "CREDIT_CARD",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-CC-05",
+      "category": "credit_card_format",
+      "text": "{\"payment\": {\"card\": \"4111111111111111\"}}",
+      "expected_label": "LEAKING",
+      "description": "Card in nested JSON",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "CREDIT_CARD",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-CC-06",
+      "category": "credit_card_format",
+      "text": "{\"payment\": {\"card\": \"4111.1111.1111.1111\", \"exp\": \"12/28\"}}",
+      "expected_label": "LEAKING",
+      "description": "Dot-delimited card in JSON payload",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "CREDIT_CARD",
+        "DATE_TIME",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EM-01",
+      "category": "email_obfuscation",
+      "text": "Contact: alice@example.com",
+      "expected_label": "LEAKING",
+      "description": "Standard email \u2014 baseline",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EM-02",
+      "category": "email_obfuscation",
+      "text": "Reach me at alice [at] example [dot] com",
+      "expected_label": "LEAKING",
+      "description": "[at]/[dot] obfuscation \u2014 handled by normalize_text()",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EM-03",
+      "category": "email_obfuscation",
+      "text": "Email: alice(at)example.com",
+      "expected_label": "LEAKING",
+      "description": "(at) obfuscation \u2014 handled by normalize_text()",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "PERSON",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EM-04",
+      "category": "email_obfuscation",
+      "text": "Send to alice AT example DOT com",
+      "expected_label": "LEAKING",
+      "description": "CAPS AT/DOT obfuscation \u2014 handled by normalize_text()",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EM-05",
+      "category": "email_obfuscation",
+      "text": "Forward to ops@mail.company.org",
+      "expected_label": "LEAKING",
+      "description": "Multi-label subdomain email",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EM-06",
+      "category": "email_obfuscation",
+      "text": "Notifications to alice+alerts@example.io",
+      "expected_label": "LEAKING",
+      "description": "Plus-addressing email",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EM-07",
+      "category": "email_obfuscation",
+      "text": "Bounce-To: noreply+bounce@subdomain.company.co.uk",
+      "expected_label": "LEAKING",
+      "description": "Multi-level TLD (.co.uk) with plus addressing",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-PH-01",
+      "category": "phone_format",
+      "text": "Call us at +1-800-555-0199.",
+      "expected_label": "LEAKING",
+      "description": "E.164 with hyphens",
+      "predicted": "LEAKING",
+      "risk_level": "LOW",
+      "entities_detected": [
+        "PHONE_NUMBER"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-PH-02",
+      "category": "phone_format",
+      "text": "Phone: (800) 555-0199",
+      "expected_label": "LEAKING",
+      "description": "Parenthesis format",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "PHONE_NUMBER"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-PH-03",
+      "category": "phone_format",
+      "text": "Dot format phone: 800.555.0199",
+      "expected_label": "LEAKING",
+      "description": "Dot-delimited US phone \u2014 handled by normalize_text()",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "PHONE_NUMBER"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-IB-01",
+      "category": "iban",
+      "text": "Wire the payment to IBAN GB29NWBK60161331926819.",
+      "expected_label": "LEAKING",
+      "description": "IBAN with keyword prefix",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "IBAN_CODE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-IB-02",
+      "category": "iban",
+      "text": "Bank account: DE89370400440532013000",
+      "expected_label": "LEAKING",
+      "description": "IBAN with bank account context \u2014 no IBAN keyword",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "IBAN_CODE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-IB-03",
+      "category": "iban",
+      "text": "| Beneficiary | FR7614508711002120144503422 | EUR |",
+      "expected_label": "LEAKING",
+      "description": "IBAN in markdown table \u2014 no prose context",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "IBAN_CODE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EMB-01",
+      "category": "embedded",
+      "text": "{\"email\": \"alice@example.com\", \"role\": \"admin\"}",
+      "expected_label": "LEAKING",
+      "description": "Email in JSON object",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EMB-02",
+      "category": "embedded",
+      "text": "SELECT * FROM users WHERE email = 'alice@example.com';",
+      "expected_label": "LEAKING",
+      "description": "Email in SQL query",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EMB-03",
+      "category": "embedded",
+      "text": "<citizen><cnic>35202-1234567-8</cnic></citizen>",
+      "expected_label": "LEAKING",
+      "description": "CNIC in XML element",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "PK_CNIC",
+        "DATE_TIME",
+        "IN_PAN",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EMB-04",
+      "category": "embedded",
+      "text": "alice,35,alice@example.com,+1-800-555-0199,New York",
+      "expected_label": "LEAKING",
+      "description": "Multi-PII in CSV row \u2014 email + phone",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL",
+        "PHONE_NUMBER",
+        "IN_PAN"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-CLN-01",
+      "category": "clean",
+      "text": "The API returns HTTP 200 on success and 422 on validation failure.",
+      "expected_label": "CLEAN",
+      "description": "Technical documentation",
+      "predicted": "CLEAN",
+      "risk_level": "CLEAN",
+      "entities_detected": [],
+      "correct": true
+    },
+    {
+      "id": "ADV-CLN-02",
+      "category": "clean",
+      "text": "No personal data is stored or processed by this endpoint.",
+      "expected_label": "CLEAN",
+      "description": "Privacy statement without actual PII",
+      "predicted": "CLEAN",
+      "risk_level": "CLEAN",
+      "entities_detected": [],
+      "correct": true
+    }
+  ]
+}

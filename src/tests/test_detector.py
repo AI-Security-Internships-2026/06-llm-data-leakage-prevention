@@ -1,34 +1,22 @@
 """
 test_detector.py — Unit tests for the PII leakage detection probe
 CNIT/PNTLab Pisa — AI Security Internship 2026
-Student: Muhammad Hashim Mughal | Week: 03
+Student: Muhammad Hashim Mughal | Week: 04
 
-Run:
-    cd 06-llm-data-leakage-prevention
-    pytest src/tests/test_detector.py -v
 """
 
 import sys
 import os
 
-# Allow running from any working directory
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import pytest
-from detector import detect_pii
+from detector import detect_pii, normalize_text
 
-
-# ---------------------------------------------------------------------------
-# Helper
-# ---------------------------------------------------------------------------
 
 def detected_types(result: dict) -> set:
     return {e["type"] for e in result["entities"]}
 
-
-# ---------------------------------------------------------------------------
-# 1. Edge cases — empty / whitespace / structure
-# ---------------------------------------------------------------------------
 
 class TestEdgeCases:
     def test_empty_string_is_clean(self):
@@ -50,21 +38,14 @@ class TestEdgeCases:
             assert r["risk_level"] in {"CLEAN", "LOW", "MEDIUM", "HIGH"}
 
     def test_no_pii_in_entity_output(self):
-        """text_slice must NOT appear in entity dicts — we removed it in Week 03."""
         r = detect_pii("Pay with card 4111111111111111")
         for entity in r["entities"]:
-            assert "text_slice" not in entity, (
-                "text_slice was found in entity output — this re-leaks PII. Remove it."
-            )
+            assert "text_slice" not in entity
 
     def test_unsupported_language_raises(self):
         with pytest.raises(ValueError, match="Unsupported language"):
             detect_pii("Bonjour", language="fr")
 
-
-# ---------------------------------------------------------------------------
-# 2. Known-leaking inputs — detection correctness
-# ---------------------------------------------------------------------------
 
 class TestLeakingInputs:
     def test_email_detected(self):
@@ -89,20 +70,12 @@ class TestLeakingInputs:
 
     def test_pk_cnic_detected(self):
         r = detect_pii("National ID: 35202-1234567-8")
-        assert "PK_CNIC" in detected_types(r), (
-            "Pakistani CNIC not detected — check that the custom recognizer is registered."
-        )
+        assert "PK_CNIC" in detected_types(r)
 
     def test_pii_embedded_in_technical_text(self):
-        r = detect_pii(
-            "ERROR [2026-06-20]: user_email=ops@company.org exceeded quota limit."
-        )
+        r = detect_pii("ERROR [2026-06-20]: user_email=ops@company.org exceeded quota limit.")
         assert "EMAIL_ADDRESS" in detected_types(r)
 
-
-# ---------------------------------------------------------------------------
-# 3. Known-non-leaking inputs — no false positives
-# ---------------------------------------------------------------------------
 
 class TestNonLeakingInputs:
     def test_technical_documentation(self):
@@ -126,10 +99,6 @@ class TestNonLeakingInputs:
         assert r["risk_level"] == "CLEAN", f"False positive: {r['entities']}"
 
 
-# ---------------------------------------------------------------------------
-# 4. Risk level correctness
-# ---------------------------------------------------------------------------
-
 class TestRiskLevels:
     def test_credit_card_is_high_risk(self):
         r = detect_pii("Card: 4111111111111111")
@@ -152,12 +121,7 @@ class TestRiskLevels:
         assert r["risk_level"] == "CLEAN"
 
     def test_multiple_low_entities_without_high_score_not_auto_high(self):
-        """3 low-confidence entities must not blindly become HIGH (Week 03 fix)."""
-        # This is tested implicitly by the precision/recall suite; here we just
-        # verify the risk function doesn't escalate 3 low-confidence generic names.
         r = detect_pii("Alice, Bob, and Carol attended the meeting.")
-        # Risk may be LOW or MEDIUM depending on confidence, but must NOT be
-        # HIGH if no entity score is >= 0.7 and no high-risk type is present.
         if r["risk_level"] == "HIGH":
             scores = [e["score"] for e in r["entities"]]
             types = {e["type"] for e in r["entities"]}
@@ -166,10 +130,6 @@ class TestRiskLevels:
                 any(s >= 0.7 for s in scores) or bool(types & high_risk_types)
             ), f"Got HIGH risk with no justification — scores={scores}, types={types}"
 
-
-# ---------------------------------------------------------------------------
-# 5. Sanitization correctness
-# ---------------------------------------------------------------------------
 
 class TestSanitization:
     def test_email_redacted_in_sanitized(self):
@@ -190,3 +150,169 @@ class TestSanitization:
         r = detect_pii("ID: 35202-1234567-8 is my CNIC.")
         assert "35202-1234567-8" not in r["sanitized"]
         assert "<REDACTED>" in r["sanitized"]
+
+
+class TestNormalizeText:
+    def test_spaced_card_collapsed(self):
+        assert "4111111111111111" in normalize_text("4111 1111 1111 1111")
+
+    def test_hyphen_card_collapsed(self):
+        assert "4111111111111111" in normalize_text("4111-1111-1111-1111")
+
+    def test_dot_card_collapsed(self):
+        assert "4111111111111111" in normalize_text("4111.1111.1111.1111")
+
+    def test_dot_phone_normalized(self):
+        assert "800-555-0199" in normalize_text("800.555.0199")
+
+    def test_bracket_at_email_normalized(self):
+        out = normalize_text("alice [at] example [dot] com")
+        assert "@" in out and "." in out
+
+    def test_paren_at_email_normalized(self):
+        out = normalize_text("alice(at)example.com")
+        assert "alice@example.com" in out
+
+    def test_caps_at_dot_email_normalized(self):
+        out = normalize_text("alice AT example DOT com")
+        assert "@" in out
+
+
+class TestAdversarialCreditCard:
+    def test_card_no_delimiter_detected(self):
+        r = detect_pii("Card: 4111111111111111")
+        assert "CREDIT_CARD" in detected_types(r)
+
+    def test_card_spaced_groups_detected(self):
+        r = detect_pii("Card number: 4111 1111 1111 1111")
+        assert "CREDIT_CARD" in detected_types(r)
+
+    def test_card_hyphen_groups_detected(self):
+        r = detect_pii("Declined card: 4111-1111-1111-1111")
+        assert "CREDIT_CARD" in detected_types(r)
+
+    def test_card_dot_groups_detected(self):
+        r = detect_pii("Export row: 4111.1111.1111.1111")
+        assert "CREDIT_CARD" in detected_types(r)
+
+    def test_card_in_json_payload_detected(self):
+        r = detect_pii('{"user": "alice", "card": "4111111111111111", "exp": "12/28"}')
+        assert "CREDIT_CARD" in detected_types(r)
+
+    def test_card_risk_is_not_clean(self):
+        r = detect_pii("Billing card 4111 1111 1111 1111 on file.")
+        assert r["risk_level"] != "CLEAN"
+
+
+class TestAdversarialEmail:
+    def test_standard_email_detected(self):
+        r = detect_pii("Contact: alice@example.com")
+        assert "EMAIL_ADDRESS" in detected_types(r)
+
+    def test_email_at_bracket_obfuscated(self):
+        r = detect_pii("Reach me at alice [at] example [dot] com")
+        assert "EMAIL_ADDRESS" in detected_types(r)
+
+    def test_email_at_paren_obfuscated(self):
+        r = detect_pii("Email: alice(at)example.com")
+        assert "EMAIL_ADDRESS" in detected_types(r)
+
+    def test_email_caps_at_obfuscated(self):
+        r = detect_pii("Send to alice AT example DOT com")
+        assert "EMAIL_ADDRESS" in detected_types(r)
+
+    def test_email_subdomain_detected(self):
+        r = detect_pii("Forward to ops@mail.company.org")
+        assert "EMAIL_ADDRESS" in detected_types(r)
+
+    def test_email_plus_addressing_detected(self):
+        r = detect_pii("Notifications go to alice+alerts@example.com")
+        assert "EMAIL_ADDRESS" in detected_types(r)
+
+
+class TestAdversarialEmbedded:
+    def test_email_in_json_string(self):
+        r = detect_pii('{"email": "alice@example.com", "role": "admin"}')
+        assert "EMAIL_ADDRESS" in detected_types(r)
+
+    def test_credit_card_in_json(self):
+        r = detect_pii('{"payment": {"card": "4111111111111111", "exp": "12/28"}}')
+        assert "CREDIT_CARD" in detected_types(r)
+
+    def test_ssn_in_json(self):
+        r = detect_pii('{"applicant": {"ssn": "078-05-1120", "name": "John"}}')
+        assert "US_SSN" in detected_types(r)
+
+    def test_email_in_python_fstring(self):
+        r = detect_pii('send_email(to="alice@example.com", subject="Welcome")')
+        assert "EMAIL_ADDRESS" in detected_types(r)
+
+    def test_email_in_sql_query(self):
+        r = detect_pii("SELECT * FROM users WHERE email = 'alice@example.com';")
+        assert "EMAIL_ADDRESS" in detected_types(r)
+
+    def test_phone_in_log_line(self):
+        r = detect_pii("INFO [2026-07-01 10:22:31] sms_sent to=+1-800-555-0199 status=delivered")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_cnic_in_xml(self):
+        r = detect_pii("<citizen><cnic>35202-1234567-8</cnic><n>Test</n></citizen>")
+        assert "PK_CNIC" in detected_types(r)
+
+    def test_iban_in_markdown_table(self):
+        r = detect_pii("| Beneficiary | GB29NWBK60161331926819 | GBP | Active |")
+        assert "IBAN_CODE" in detected_types(r)
+
+
+class TestAdversarialPhoneVariants:
+    def test_phone_us_standard(self):
+        r = detect_pii("Call us at +1-800-555-0199.")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_phone_parenthesis_format(self):
+        r = detect_pii("Reach us at (800) 555-0199 anytime.")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_phone_dot_format(self):
+        r = detect_pii("Support line: 800.555.0199")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_phone_no_country_code(self):
+        r = detect_pii("Call 800-555-0199 for assistance.")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_phone_spaces_format(self):
+        r = detect_pii("Contact number: (800) 555 0199")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_phone_international_format(self):
+        r = detect_pii("Dial +44 20 7946 0958 for the London office.")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+
+class TestAdversarialMarkdownTables:
+    def test_email_in_markdown_table(self):
+        r = detect_pii("| Name | Email | Role |\n| Alice | alice@example.com | Admin |")
+        assert "EMAIL_ADDRESS" in detected_types(r)
+
+    def test_phone_in_markdown_table(self):
+        r = detect_pii("| Department | Contact |\n| Support | +1-800-555-0199 |")
+        assert "PHONE_NUMBER" in detected_types(r)
+
+    def test_ssn_in_markdown_table(self):
+        r = detect_pii("| Employee | SSN |\n| John Doe | 078-05-1120 |")
+        assert "US_SSN" in detected_types(r)
+
+    def test_cnic_in_markdown_table(self):
+        r = detect_pii("| Applicant | CNIC |\n| Test User | 35202-1234567-8 |")
+        assert "PK_CNIC" in detected_types(r)
+
+    def test_credit_card_in_markdown_table(self):
+        r = detect_pii("| Customer | Card |\n| Alice | 4111111111111111 |")
+        assert "CREDIT_CARD" in detected_types(r)
+
+    def test_multiple_pii_in_markdown_table(self):
+        r = detect_pii("| Name | Email | Phone |\n| Alice | alice@example.com | +1-800-555-0199 |")
+        types = detected_types(r)
+        assert "EMAIL_ADDRESS" in types
+        assert "PHONE_NUMBER" in types
