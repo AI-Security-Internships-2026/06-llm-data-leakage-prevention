@@ -1,7 +1,7 @@
 """
 detector.py — PII Leakage Detection Probe
 CNIT/PNTLab Pisa — AI Security Internship 2026
-Student: Muhammad Hashim Mughal | Week: 04
+Student: Muhammad Hashim Mughal | Week: 05
 
 """
 
@@ -13,6 +13,8 @@ from presidio_anonymizer.entities import OperatorConfig
 
 analyzer = AnalyzerEngine()
 anonymizer = AnonymizerEngine()
+
+# ── Custom recognizers ────────────────────────────────────────────────────────
 
 _cnic_recognizer = PatternRecognizer(
     supported_entity="PK_CNIC",
@@ -36,21 +38,28 @@ _ssn_recognizer = PatternRecognizer(
 )
 analyzer.registry.add_recognizer(_ssn_recognizer)
 
+# Week 05: threshold 0.75 → 0.65 and significantly expanded context list
+# Addresses supervisor feedback: IBAN recall was 0.825 (weakest entity)
 _iban_recognizer = PatternRecognizer(
     supported_entity="IBAN_CODE",
     patterns=[
         Pattern(
             name="iban_context_boosted",
             regex=r"\b[A-Z]{2}\d{2}[A-Z0-9]{4,30}\b",
-            score=0.75,
+            score=0.65,
         )
     ],
     context=[
         "iban", "bank account", "account number", "wire", "transfer",
         "beneficiary", "swift", "payment", "remittance", "credit",
+        "account", "sort code", "routing", "recipient", "payee",
+        "credit transfer", "bic", "sepa", "direct debit", "deposit",
+        "bank", "financial", "transaction", "funds", "balance",
     ],
 )
 analyzer.registry.add_recognizer(_iban_recognizer)
+
+# ── Risk classification sets ──────────────────────────────────────────────────
 
 _HIGH_RISK_TYPES = {
     "CREDIT_CARD", "IBAN_CODE", "MEDICAL_LICENSE",
@@ -67,12 +76,18 @@ SUPPORTED_ENTITIES = [
     "MEDICAL_LICENSE", "UK_NHS",
 ]
 
-_SPACED_CARD_RE  = re.compile(r"\b(\d{4})[ ](\d{4})[ ](\d{4})[ ](\d{4})\b")
-_HYPHEN_CARD_RE  = re.compile(r"\b(\d{4})-(\d{4})-(\d{4})-(\d{4})\b")
-_DOT_CARD_RE     = re.compile(r"\b(\d{4})\.(\d{4})\.(\d{4})\.(\d{4})\b")
+# ── Normalization regexes ─────────────────────────────────────────────────────
 
-_DOT_PHONE_RE    = re.compile(r"\b(\d{3})\.(\d{3})\.(\d{4})\b")
+_SPACED_CARD_RE = re.compile(r"\b(\d{4})[ ](\d{4})[ ](\d{4})[ ](\d{4})\b")
+_HYPHEN_CARD_RE = re.compile(r"\b(\d{4})-(\d{4})-(\d{4})-(\d{4})\b")
+_DOT_CARD_RE    = re.compile(r"\b(\d{4})\.(\d{4})\.(\d{4})\.(\d{4})\b")
 
+_DOT_PHONE_RE   = re.compile(r"\b(\d{3})\.(\d{3})\.(\d{4})\b")
+
+# Week 05 fix: also handle +44 20 7946 0958 → +442079460958 for Presidio
+_UK_PHONE_RE    = re.compile(r"(\+44)\s+(\d{2})\s+(\d{4})\s+(\d{4})\b")
+
+# Week 05 fix: improved to handle alice AT example.com (real dot, no DOT keyword)
 _OBFUSC_EMAIL_RE = re.compile(
     r"([\w.+\-]+?)"
     r"\s*(?:\[at\]|\(at\)|\bAT\b)\s*"
@@ -85,7 +100,7 @@ _OBFUSC_EMAIL_RE = re.compile(
 
 def normalize_text(text: str) -> str:
     """
-    Pre-process text to expose PII that is obscured by formatting or obfuscation
+    Pre-process text to expose PII obscured by formatting or obfuscation
     before passing it to Presidio.
 
     Transformations applied (in order):
@@ -93,9 +108,11 @@ def normalize_text(text: str) -> str:
       2. Hyphen credit card  → raw digits   4111-1111-1111-1111 → 4111111111111111
       3. Dot credit card     → raw digits   4111.1111.1111.1111 → 4111111111111111
       4. Dot phone           → hyphen phone 800.555.0199        → 800-555-0199
-      5. Obfuscated email    → standard     alice [at] example [dot] com
+      5. UK spaced phone     → compact      +44 20 7946 0958    → +442079460958
+      6. Obfuscated email    → standard     alice [at] example [dot] com
                                             alice(at)example.com
                                             alice AT example DOT com
+                                            alice AT example.com
                                                          → alice@example.com
     """
     text = _SPACED_CARD_RE.sub(r"\1\2\3\4", text)
@@ -103,6 +120,7 @@ def normalize_text(text: str) -> str:
     text = _DOT_CARD_RE.sub(r"\1\2\3\4", text)
 
     text = _DOT_PHONE_RE.sub(r"\1-\2-\3", text)
+    text = _UK_PHONE_RE.sub(r"\1\2\3\4", text)
 
     text = _OBFUSC_EMAIL_RE.sub(
         lambda m: f"{m.group(1)}@{m.group(2)}.{m.group(3)}", text
@@ -126,17 +144,27 @@ def _compute_risk(results) -> str:
     return "LOW"
 
 
-def detect_pii(text: str, language: str = "en") -> dict:
+def detect_pii(text: str, language: str = "en", use_stage2: bool = False) -> dict:
     """
     Detect PII in *text* and return a structured result.
+
+    Parameters
+    ----------
+    text       : input string to analyse
+    language   : ISO 639-1 language code (only "en" supported)
+    use_stage2 : if True, pass MEDIUM/LOW outputs to the LLM-as-judge
+                 Stage 2 layer (llm_judge.py) for a second opinion.
+                 HIGH outputs skip Stage 2 — already caught by Stage 1.
 
     Returns
     -------
     dict with keys:
-      text        – original input text
-      entities    – list of detected entities (type, start, end, score, length)
-      risk_level  – CLEAN | LOW | MEDIUM | HIGH
-      sanitized   – text with all PII replaced by <REDACTED>
+      text           – original input text
+      entities       – list of detected entities (type, start, end, score, length)
+      risk_level     – CLEAN | LOW | MEDIUM | HIGH
+      sanitized      – text with all PII replaced by <REDACTED>
+      stage2_used    – bool (only present when use_stage2=True)
+      stage2_flagged – bool (only present when use_stage2=True)
     """
     if not text or not text.strip():
         return {"text": text, "entities": [], "risk_level": "CLEAN", "sanitized": text}
@@ -169,9 +197,25 @@ def detect_pii(text: str, language: str = "en") -> dict:
         )
         sanitized_text = anonymized.text
 
-    return {
+    risk = _compute_risk(results)
+    output = {
         "text": text,
         "entities": entities,
-        "risk_level": _compute_risk(results),
+        "risk_level": risk,
         "sanitized": sanitized_text,
     }
+
+    # Stage 2: LLM-as-judge — only for MEDIUM/LOW outputs from Stage 1
+    if use_stage2:
+        stage2_flagged = False
+        if risk in ("MEDIUM", "LOW", "CLEAN"):
+            from llm_judge import judge_text  # lazy import — keeps Stage 1 fast
+            judge = judge_text(text)
+            if judge.is_pii:
+                risk = "HIGH"
+                output["risk_level"] = "HIGH"
+                stage2_flagged = True
+        output["stage2_used"] = True
+        output["stage2_flagged"] = stage2_flagged
+
+    return output
