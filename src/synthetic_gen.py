@@ -1,7 +1,7 @@
 """
 synthetic_gen.py — Synthetic PII Dataset Generator
 CNIT/PNTLab Pisa — AI Security Internship 2026
-Student: Muhammad Hashim Mughal | Week: 04
+Student: Muhammad Hashim Mughal | Week: 05
 
 """
 
@@ -32,7 +32,10 @@ _CNIC_DIGITS = lambda: (
     f"{random.randint(0,9)}"
 )
 
+# Week 05: expanded from 15 → 30 IBANs covering all major SEPA country prefixes
+# Directly addresses supervisor feedback: IBAN recall was 0.825 (weakest entity)
 _IBAN_POOL = [
+    # Original 15
     "GB29NWBK60161331926819",
     "DE89370400440532013000",
     "FR7614508711002120144503422",
@@ -48,6 +51,22 @@ _IBAN_POOL = [
     "NO9386011117947",
     "PT50000201231234567890154",
     "IE29AIBK93115212345678",
+    # New 15 (Week 05)
+    "LU280019400644750000",
+    "FI2112345600000785",
+    "HU42117730161111101800000000",
+    "CZ6508000000192000145399",
+    "RO49AAAA1B31007593840000",
+    "HR1210010051863000160",
+    "BG80BNBG96611020345678",
+    "SK3112000000198742637541",
+    "SI56263300012039086",
+    "LT121000011101001000",
+    "LV80BANK0000435195001",
+    "EE382200221020145685",
+    "MT84MALT011000012345MTLCAST001S",
+    "CY17002001280000001200527600",
+    "GR1601101250000000012300695",
 ]
 
 ENTITY_TEMPLATES: list[EntityTemplate] = [
@@ -124,9 +143,12 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
         templates=[
             "Wire the payment to IBAN {pii}.",
             "Bank account: {pii}",
-            "Transfer {pii} by end of day.",
+            "Transfer funds to {pii} by end of day.",
             "Beneficiary IBAN: {pii}",
             "Please credit IBAN {pii} for the refund.",
+            "The recipient account number is {pii}.",
+            "SEPA credit transfer to {pii} authorised.",
+            "Sort code / IBAN: {pii}",
         ],
         is_high_risk=True,
     ),
@@ -157,6 +179,7 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
 _ENTITY_MAP = {t.entity_type: t for t in ENTITY_TEMPLATES}
 
 CLEAN_TEMPLATES = [
+    # Original 30
     "The REST endpoint accepts JSON over HTTPS and returns a 200 status on success.",
     "def detect(text: str) -> dict:\n    return analyze(text)",
     "Hypertension is treated with ACE inhibitors and calcium channel blockers.",
@@ -187,6 +210,12 @@ CLEAN_TEMPLATES = [
     "The autoclave cycle maintains 121°C at 15 PSI for 30 minutes.",
     "git rebase -i HEAD~5 squashes the last five commits into one.",
     "The firewall blocks all inbound traffic on port 22 except from the VPN range.",
+    # New 5 (Week 05) — finance/GDPR/networking topics
+    "GDPR Article 17 grants data subjects the right to erasure of their personal data.",
+    "The BGP route was withdrawn after a peer session reset on AS64512.",
+    "PCI-DSS requires all cardholder data environments to be segmented from corporate networks.",
+    "The load balancer distributes requests across three availability zones using round-robin.",
+    "Differential privacy adds calibrated noise to query results to protect individual records.",
 ]
 
 MULTI_PII_TEMPLATES = [
@@ -229,6 +258,23 @@ MULTI_PII_TEMPLATES = [
     lambda: (
         f"Delivery for {fake.name()} to be sent to {fake.address()}.",
         ["PERSON", "LOCATION"],
+    ),
+    # New Week 05: IBAN-focused multi-PII templates
+    lambda: (
+        f"Payee: {fake.name()}, IBAN: {random.choice(_IBAN_POOL)}, BIC: DEUTDEDB.",
+        ["PERSON", "IBAN_CODE"],
+    ),
+    lambda: (
+        f"SEPA transfer to {random.choice(_IBAN_POOL)} initiated by {fake.email()}.",
+        ["IBAN_CODE", "EMAIL_ADDRESS"],
+    ),
+    lambda: (
+        f"Bank account {random.choice(_IBAN_POOL)} belongs to {fake.name()}.",
+        ["IBAN_CODE", "PERSON"],
+    ),
+    lambda: (
+        f"Sort code / IBAN: {random.choice(_IBAN_POOL)} — contact {fake.phone_number()} for queries.",
+        ["IBAN_CODE", "PHONE_NUMBER"],
     ),
 ]
 
@@ -360,6 +406,8 @@ def main():
 
     with open(os.path.join(args.output_dir, "synthetic_dataset_stats.json"), "w") as f:
         json.dump(stats, f, indent=2)
+
+    print(f"\nDataset saved to {args.output_dir}/synthetic_dataset.json")
 
 
 if __name__ == "__main__":
