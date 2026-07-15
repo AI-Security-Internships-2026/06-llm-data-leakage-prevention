@@ -3,18 +3,6 @@ test_llm_judge.py — Unit tests for the Stage 2 LLM-as-judge
 CNIT/PNTLab Pisa — AI Security Internship 2026
 Student: Muhammad Hashim Mughal | Week: 05
 
-Strategy
---------
-The HuggingFace model (bart-large-mnli) may not be available in all
-test environments (no internet, first-run download, CI without model cache).
-Tests are therefore split into two groups:
-
-  1. Always-run tests — patch _load_pipeline to return None so the fallback
-     keyword heuristic is exercised. These run in all environments.
-
-  2. Model tests — marked xfail(strict=False) — run the real model if present,
-     skip gracefully if it cannot be loaded. These pass in environments with
-     the model cached and are treated as informational otherwise.
 """
 
 import sys
@@ -156,14 +144,16 @@ class TestJudgeBatch:
 
 
 # ── Integration with detect_pii (Stage 2 flag) ───────────────────────────────
+# Patch target is "llm_judge.judge_text" — NOT "detector.judge_text".
+# detector.py does a lazy import inside detect_pii(), so judge_text is never
+# a module-level attribute on detector. Patching llm_judge.judge_text replaces
+# the function at its source, which the lazy import then resolves to correctly.
 
 class TestPipelineIntegration:
     def test_use_stage2_adds_keys(self):
         with _no_model():
-            # Patch at detector level too so it uses our no-model version
-            with patch("detector.judge_text", side_effect=lj.judge_text):
-                from detector import detect_pii
-                r = detect_pii("hello world", use_stage2=True)
+            from detector import detect_pii
+            r = detect_pii("hello world", use_stage2=True)
         assert "stage2_used" in r
         assert "stage2_flagged" in r
 
@@ -176,7 +166,7 @@ class TestPipelineIntegration:
             return JudgeResult(is_pii=True, confidence=0.99,
                                reasoning="zero-shot", model="fake")
 
-        with patch("detector.judge_text", side_effect=fake_judge):
+        with patch("llm_judge.judge_text", side_effect=fake_judge):
             from detector import detect_pii
             r = detect_pii("Card: 4111111111111111", use_stage2=True)
 
@@ -194,7 +184,7 @@ class TestPipelineIntegration:
             return JudgeResult(is_pii=False, confidence=0.40,
                                reasoning="zero-shot", model="fake")
 
-        with patch("detector.judge_text", side_effect=fake_judge):
+        with patch("llm_judge.judge_text", side_effect=fake_judge):
             from detector import detect_pii
             detect_pii("The pipeline runs every 6 hours.", use_stage2=True)
 
@@ -206,7 +196,7 @@ class TestPipelineIntegration:
             return JudgeResult(is_pii=True, confidence=0.92,
                                reasoning="zero-shot", model="fake")
 
-        with patch("detector.judge_text", side_effect=fake_judge):
+        with patch("llm_judge.judge_text", side_effect=fake_judge):
             from detector import detect_pii
             r = detect_pii("contact me at home phone", use_stage2=True)
 
