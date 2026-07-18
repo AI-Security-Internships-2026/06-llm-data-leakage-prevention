@@ -1,0 +1,17 @@
+{
+  "total": 1200,
+  "leaking": 660,
+  "clean": 540,
+  "leaking_ratio": 0.55,
+  "entity_type_distribution": {
+    "PERSON": 155,
+    "EMAIL_ADDRESS": 113,
+    "IBAN_CODE": 105,
+    "US_SSN": 92,
+    "CREDIT_CARD": 91,
+    "PK_CNIC": 85,
+    "PHONE_NUMBER": 79,
+    "LOCATION": 74
+  },
+  "avg_text_length_chars": 60.5
+}

@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "run_at": "2026-07-18T09:04:28.925050+00:00",
+    "dataset": "C:\\Users\\MUGHAL\\Desktop\\ont lab internship\\New folder\\06-llm-data-leakage-prevention\\experiments\\results\\synthetic_dataset.json",
+    "total_samples": 1200,
+    "detector": "PIIDetector (Presidio + custom recognisers)"
+  },
+  "summary": {
+    "precision": 0.9174,
+    "recall": 0.9758,
+    "f1": 0.9457,
+    "accuracy": 0.9383,
+    "p50_latency_ms": 13.351,
+    "p95_latency_ms": 18.988
+  },
+  "binary_classification": {
+    "TP": 644,
+    "FP": 58,
+    "TN": 482,
+    "FN": 16,
+    "precision": 0.9174,
+    "recall": 0.9758,
+    "f1": 0.9457,
+    "accuracy": 0.9383
+  },
+  "per_entity_metrics": {
+    "CREDIT_CARD": {
+      "total": 91,
+      "detected": 86,
+      "missed": 5,
+      "recall": 0.9451
+    },
+    "EMAIL_ADDRESS": {
+      "total": 113,
+      "detected": 113,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "IBAN_CODE": {
+      "total": 105,
+      "detected": 105,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "LOCATION": {
+      "total": 74,
+      "detected": 67,
+      "missed": 7,
+      "recall": 0.9054
+    },
+    "PERSON": {
+      "total": 155,
+      "detected": 155,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "PHONE_NUMBER": {
+      "total": 79,
+      "detected": 75,
+      "missed": 4,
+      "recall": 0.9494
+    },
+    "PK_CNIC": {
+      "total": 85,
+      "detected": 85,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "US_SSN": {
+      "total": 92,
+      "detected": 92,
+      "missed": 0,
+      "recall": 1.0
+    }
+  },
+  "latency": {
+    "n_samples": 1200,
+    "mean_ms": 14.299,
+    "min_ms": 8.92,
+    "max_ms": 335.418,
+    "p50_ms": 13.351,
+    "p95_ms": 18.988
+  }
+}

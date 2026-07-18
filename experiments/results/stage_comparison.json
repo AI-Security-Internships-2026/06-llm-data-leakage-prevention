@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "run_at": "2026-07-18T09:05:37.016572+00:00",
+    "dataset": "adversarial (25 cases)",
+    "samples": 25
+  },
+  "stage1": {
+    "precision": 1.0,
+    "recall": 0.85,
+    "f1": 0.9189,
+    "accuracy": 0.88,
+    "tp": 17,
+    "fp": 0,
+    "fn": 3,
+    "tn": 5,
+    "total": 25,
+    "latency": {
+      "mean_ms": 30.798,
+      "p50_ms": 13.737,
+      "p95_ms": 58.17
+    }
+  },
+  "stage1_plus_stage2": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "accuracy": 1.0,
+    "tp": 20,
+    "fp": 0,
+    "fn": 0,
+    "tn": 5,
+    "total": 25,
+    "latency": {
+      "mean_ms": 46.617,
+      "p50_ms": 17.09,
+      "p95_ms": 24.638
+    }
+  },
+  "delta": {
+    "precision": 0.0,
+    "recall": 0.15,
+    "f1": 0.0811,
+    "accuracy": 0.12
+  }
+}

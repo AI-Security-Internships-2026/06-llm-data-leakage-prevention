@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "run_at": "2026-07-18T09:06:39.350855+00:00",
+    "source": "synthetic",
+    "samples_requested": 500,
+    "samples_processed": 500,
+    "seed": 42,
+    "detector": "PIIDetector Stage 1 (Presidio + custom recognisers)"
+  },
+  "summary": {
+    "total_emails": 500,
+    "leaking": 500,
+    "clean": 0,
+    "leaking_ratio": 1.0,
+    "risk_distribution": {
+      "HIGH": 500
+    },
+    "entity_type_distribution": {
+      "URL": 1054,
+      "EMAIL_ADDRESS": 1043,
+      "IN_PAN": 245,
+      "DATE_TIME": 138,
+      "US_DRIVER_LICENSE": 87,
+      "PERSON": 84,
+      "IBAN_CODE": 47,
+      "US_BANK_NUMBER": 43,
+      "US_SSN": 39,
+      "CREDIT_CARD": 35,
+      "LOCATION": 34,
+      "PHONE_NUMBER": 32,
+      "PK_CNIC": 28,
+      "NRP": 5,
+      "MEDICAL_LICENSE": 3,
+      "UK_NHS": 2
+    },
+    "latency": {
+      "mean_ms": 21.521,
+      "p50_ms": 17.761,
+      "p95_ms": 30.275
+    },
+    "synthetic_metrics": {
+      "TP": 275,
+      "FP": 225,
+      "FN": 0,
+      "TN": 0,
+      "precision": 0.55,
+      "recall": 1.0,
+      "f1": 0.7097,
+      "accuracy": 0.55
+    }
+  }
+}
