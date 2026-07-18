@@ -257,12 +257,12 @@ for Stage 2 (LLM-as-judge) in Week 5–6.
 
 | Metric | Week 4 | Week 5 | Delta |
 |---|---|---|---|
-| Precision | 0.9342 | 0.9318 | -0.0024 |
-| Recall | 0.9682 | 0.9712 | +0.0030 |
-| F1 | 0.9509 | 0.9512 | +0.0003 |
-| Accuracy | 0.9450 | 0.9458 | +0.0008 |
+| Precision | 0.9342 | 0.9174 | -0.0168 |
+| Recall | 0.9682 | 0.9758 | +0.0076 |
+| F1 | 0.9509 | 0.9457 | -0.0052 |
+| Accuracy | 0.9450 | 0.9383 | -0.0067 |
 | IBAN recall | 0.825 | **1.000** | +0.175 |
-| p50 latency | 14 ms | 14 ms | — |
+| p50 latency | 14 ms | 13 ms | — |
 
 #### Stage 1 vs Stage 1+2 (adversarial set, 25 cases)
 
@@ -281,6 +281,28 @@ for Stage 2 (LLM-as-judge) in Week 5–6.
 | Stage 1 + Stage 2 | 1.000 | **1.000** | **1.000** | **1.000** | PASSED ✓ |
 
 Stage 2 escalated all 7 inference-based cases (E19–E25) with zero false positives.
+
+#### Enron Corpus Evaluation (500-sample synthetic fallback)
+
+| Metric | Value |
+|---|---|
+| Samples processed | 500 |
+| Recall | 1.000 |
+| Precision | 0.550 |
+| F1 | 0.710 |
+| p50 latency | 17.8 ms |
+| p95 latency | 30.3 ms |
+
+**Note on 0.55 precision:** This is an artifact of the synthetic fallback's
+labelling scheme, not a detector regression. The fallback generates 500 emails
+where 275 contain injected high-risk PII (credit cards, SSNs, IBANs, etc.) and
+225 contain only natural email-body content. The detector correctly flags all 500
+— including the 225 that contain email addresses and URLs — but the ground-truth
+labels treat those 225 as "clean", producing the apparent 45% false-positive rate.
+Since email addresses are genuine PII, this is a labelling ambiguity in the
+synthetic fallback rather than a detector error. Evaluation on the real Enron
+maildir corpus (planned Week 6) will use proper ground-truth labels and is
+expected to resolve this figure.
 
 ### Problems / Blockers
 
