@@ -217,7 +217,7 @@ for Stage 2 (LLM-as-judge) in Week 5–6.
 ## Week 5
 
 **Branch:** `hashim-week-05`
-**PR link:** (https://github.com/AI-Security-Internships-2026/06-llm-data-leakage-prevention/pull/6)
+**PR link:** (https://github.com/AI-Security-Internships-2026/06-llm-data-leakage-prevention/pull/7)
 
 ### Completed this week
 
