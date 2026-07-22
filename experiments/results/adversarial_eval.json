@@ -1,250 +1,359 @@
 {
-  "meta": {
-    "run_at": "2026-07-10T06:59:30.915331+00:00",
-    "total_cases": 21,
-    "detector": "PIIDetector (Presidio + custom recognisers + Week 04 normalizer)"
-  },
-  "summary": {
-    "TP": 17,
-    "FP": 0,
-    "TN": 3,
-    "FN": 1,
-    "precision": 1.0,
-    "recall": 0.9444,
-    "f1": 0.9714,
-    "accuracy": 0.9524
-  },
+  "run_at": "2026-07-18T09:05:13.457506+00:00",
+  "total": 25,
+  "passed": 25,
+  "failed": 0,
+  "accuracy": 1.0,
   "results": [
     {
       "id": "ADV-CC-01",
-      "category": "credit_card",
-      "variant": "plain",
+      "category": "credit_card_format",
       "text": "Card: 4111111111111111",
-      "expected": "LEAKING",
+      "expected_label": "LEAKING",
+      "description": "No-delimiter card \u2014 baseline",
       "predicted": "LEAKING",
       "risk_level": "HIGH",
-      "correct": true,
-      "latency_ms": 673.746
+      "entities_detected": [
+        "CREDIT_CARD",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-CC-02",
-      "category": "credit_card",
-      "variant": "spaced",
+      "category": "credit_card_format",
       "text": "Card number: 4111 1111 1111 1111",
-      "expected": "LEAKING",
+      "expected_label": "LEAKING",
+      "description": "Space-delimited card",
       "predicted": "LEAKING",
       "risk_level": "HIGH",
-      "correct": true,
-      "latency_ms": 21.157
+      "entities_detected": [
+        "CREDIT_CARD",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-CC-03",
-      "category": "credit_card",
-      "variant": "hyphen",
+      "category": "credit_card_format",
       "text": "Declined card: 4111-1111-1111-1111",
-      "expected": "LEAKING",
+      "expected_label": "LEAKING",
+      "description": "Hyphen-delimited card",
       "predicted": "LEAKING",
       "risk_level": "HIGH",
-      "correct": true,
-      "latency_ms": 24.098
+      "entities_detected": [
+        "CREDIT_CARD",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-CC-04",
-      "category": "credit_card",
-      "variant": "dot",
+      "category": "credit_card_format",
       "text": "Export row: 4111.1111.1111.1111",
-      "expected": "LEAKING",
-      "predicted": "CLEAN",
-      "risk_level": "CLEAN",
-      "correct": false,
-      "latency_ms": 47.425
+      "expected_label": "LEAKING",
+      "description": "Dot-delimited card \u2014 handled by normalize_text()",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "CREDIT_CARD",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-CC-05",
-      "category": "credit_card",
-      "variant": "json",
-      "text": "{\"card\": \"4111111111111111\"}",
-      "expected": "LEAKING",
+      "category": "credit_card_format",
+      "text": "{\"payment\": {\"card\": \"4111111111111111\"}}",
+      "expected_label": "LEAKING",
+      "description": "Card in nested JSON",
       "predicted": "LEAKING",
       "risk_level": "HIGH",
-      "correct": true,
-      "latency_ms": 28.892
+      "entities_detected": [
+        "CREDIT_CARD",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-CC-06",
+      "category": "credit_card_format",
+      "text": "{\"payment\": {\"card\": \"4111.1111.1111.1111\", \"exp\": \"12/28\"}}",
+      "expected_label": "LEAKING",
+      "description": "Dot-delimited card in JSON payload",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "CREDIT_CARD",
+        "DATE_TIME",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-EM-01",
-      "category": "email",
-      "variant": "standard",
+      "category": "email_obfuscation",
       "text": "Contact: alice@example.com",
-      "expected": "LEAKING",
+      "expected_label": "LEAKING",
+      "description": "Standard email \u2014 baseline",
       "predicted": "LEAKING",
       "risk_level": "MEDIUM",
-      "correct": true,
-      "latency_ms": 559.328
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-EM-02",
-      "category": "email",
-      "variant": "bracket_at",
+      "category": "email_obfuscation",
       "text": "Reach me at alice [at] example [dot] com",
-      "expected": "LEAKING",
+      "expected_label": "LEAKING",
+      "description": "[at]/[dot] obfuscation \u2014 handled by normalize_text()",
       "predicted": "LEAKING",
       "risk_level": "MEDIUM",
-      "correct": true,
-      "latency_ms": 83.677
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-EM-03",
-      "category": "email",
-      "variant": "paren_at",
+      "category": "email_obfuscation",
       "text": "Email: alice(at)example.com",
-      "expected": "LEAKING",
+      "expected_label": "LEAKING",
+      "description": "(at) obfuscation \u2014 handled by normalize_text()",
       "predicted": "LEAKING",
-      "risk_level": "MEDIUM",
-      "correct": true,
-      "latency_ms": 107.607
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "PERSON",
+        "URL"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-EM-04",
-      "category": "email",
-      "variant": "caps_at",
+      "category": "email_obfuscation",
       "text": "Send to alice AT example DOT com",
-      "expected": "LEAKING",
+      "expected_label": "LEAKING",
+      "description": "CAPS AT/DOT obfuscation \u2014 handled by normalize_text()",
       "predicted": "LEAKING",
       "risk_level": "MEDIUM",
-      "correct": true,
-      "latency_ms": 44.546
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-EM-05",
-      "category": "email",
-      "variant": "subdomain",
+      "category": "email_obfuscation",
       "text": "Forward to ops@mail.company.org",
-      "expected": "LEAKING",
+      "expected_label": "LEAKING",
+      "description": "Multi-label subdomain email",
       "predicted": "LEAKING",
       "risk_level": "MEDIUM",
-      "correct": true,
-      "latency_ms": 20.871
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EM-06",
+      "category": "email_obfuscation",
+      "text": "Notifications to alice+alerts@example.io",
+      "expected_label": "LEAKING",
+      "description": "Plus-addressing email",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EM-07",
+      "category": "email_obfuscation",
+      "text": "Bounce-To: noreply+bounce@subdomain.company.co.uk",
+      "expected_label": "LEAKING",
+      "description": "Multi-level TLD (.co.uk) with plus addressing",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-PH-01",
-      "category": "phone",
-      "variant": "e164",
+      "category": "phone_format",
       "text": "Call us at +1-800-555-0199.",
-      "expected": "LEAKING",
+      "expected_label": "LEAKING",
+      "description": "E.164 with hyphens",
       "predicted": "LEAKING",
       "risk_level": "LOW",
-      "correct": true,
-      "latency_ms": 31.093
+      "entities_detected": [
+        "PHONE_NUMBER"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-PH-02",
-      "category": "phone",
-      "variant": "parenthesis",
-      "text": "Reach us at (800) 555-0199.",
-      "expected": "LEAKING",
+      "category": "phone_format",
+      "text": "Phone: (800) 555-0199",
+      "expected_label": "LEAKING",
+      "description": "Parenthesis format",
       "predicted": "LEAKING",
-      "risk_level": "LOW",
-      "correct": true,
-      "latency_ms": 73.48
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "PHONE_NUMBER"
+      ],
+      "correct": true
     },
     {
       "id": "ADV-PH-03",
-      "category": "phone",
-      "variant": "dot",
-      "text": "Support line: 800.555.0199",
-      "expected": "LEAKING",
-      "predicted": "LEAKING",
-      "risk_level": "LOW",
-      "correct": true,
-      "latency_ms": 21.351
-    },
-    {
-      "id": "ADV-PH-04",
-      "category": "phone",
-      "variant": "plain",
-      "text": "Call 800-555-0199 for assistance.",
-      "expected": "LEAKING",
-      "predicted": "LEAKING",
-      "risk_level": "LOW",
-      "correct": true,
-      "latency_ms": 22.934
-    },
-    {
-      "id": "ADV-EB-01",
-      "category": "embedded",
-      "variant": "email_json",
-      "text": "{\"email\": \"alice@example.com\"}",
-      "expected": "LEAKING",
+      "category": "phone_format",
+      "text": "Dot format phone: 800.555.0199",
+      "expected_label": "LEAKING",
+      "description": "Dot-delimited US phone \u2014 handled by normalize_text()",
       "predicted": "LEAKING",
       "risk_level": "MEDIUM",
-      "correct": true,
-      "latency_ms": 22.935
+      "entities_detected": [
+        "PHONE_NUMBER"
+      ],
+      "correct": true
     },
     {
-      "id": "ADV-EB-02",
+      "id": "ADV-IB-01",
+      "category": "iban",
+      "text": "Wire the payment to IBAN GB29NWBK60161331926819.",
+      "expected_label": "LEAKING",
+      "description": "IBAN with keyword prefix",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "IBAN_CODE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-IB-02",
+      "category": "iban",
+      "text": "Bank account: DE89370400440532013000",
+      "expected_label": "LEAKING",
+      "description": "IBAN with bank account context \u2014 no IBAN keyword",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "IBAN_CODE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-IB-03",
+      "category": "iban",
+      "text": "| Beneficiary | FR7614508711002120144503422 | EUR |",
+      "expected_label": "LEAKING",
+      "description": "IBAN in markdown table \u2014 no prose context",
+      "predicted": "LEAKING",
+      "risk_level": "HIGH",
+      "entities_detected": [
+        "IBAN_CODE"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EMB-01",
       "category": "embedded",
-      "variant": "email_sql",
+      "text": "{\"email\": \"alice@example.com\", \"role\": \"admin\"}",
+      "expected_label": "LEAKING",
+      "description": "Email in JSON object",
+      "predicted": "LEAKING",
+      "risk_level": "MEDIUM",
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
+    },
+    {
+      "id": "ADV-EMB-02",
+      "category": "embedded",
       "text": "SELECT * FROM users WHERE email = 'alice@example.com';",
-      "expected": "LEAKING",
+      "expected_label": "LEAKING",
+      "description": "Email in SQL query",
       "predicted": "LEAKING",
       "risk_level": "MEDIUM",
-      "correct": true,
-      "latency_ms": 37.202
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "correct": true
     },
     {
-      "id": "ADV-EB-03",
+      "id": "ADV-EMB-03",
       "category": "embedded",
-      "variant": "ssn_json",
-      "text": "{\"applicant\": {\"ssn\": \"078-05-1120\"}}",
-      "expected": "LEAKING",
+      "text": "<citizen><cnic>35202-1234567-8</cnic></citizen>",
+      "expected_label": "LEAKING",
+      "description": "CNIC in XML element",
       "predicted": "LEAKING",
       "risk_level": "HIGH",
-      "correct": true,
-      "latency_ms": 26.555
+      "entities_detected": [
+        "PK_CNIC",
+        "DATE_TIME",
+        "IN_PAN",
+        "US_DRIVER_LICENSE"
+      ],
+      "correct": true
     },
     {
-      "id": "ADV-EB-04",
+      "id": "ADV-EMB-04",
       "category": "embedded",
-      "variant": "email_markdown",
-      "text": "| Name | Email |\n| Alice | alice@example.com |",
-      "expected": "LEAKING",
+      "text": "alice,35,alice@example.com,+1-800-555-0199,New York",
+      "expected_label": "LEAKING",
+      "description": "Multi-PII in CSV row \u2014 email + phone",
       "predicted": "LEAKING",
       "risk_level": "HIGH",
-      "correct": true,
-      "latency_ms": 29.751
+      "entities_detected": [
+        "EMAIL_ADDRESS",
+        "URL",
+        "PHONE_NUMBER",
+        "IN_PAN"
+      ],
+      "correct": true
     },
     {
-      "id": "ADV-CL-01",
+      "id": "ADV-CLN-01",
       "category": "clean",
-      "variant": "prose",
-      "text": "No personal information here.",
-      "expected": "CLEAN",
+      "text": "The API returns HTTP 200 on success and 422 on validation failure.",
+      "expected_label": "CLEAN",
+      "description": "Technical documentation",
       "predicted": "CLEAN",
       "risk_level": "CLEAN",
-      "correct": true,
-      "latency_ms": 16.93
+      "entities_detected": [],
+      "correct": true
     },
     {
-      "id": "ADV-CL-02",
+      "id": "ADV-CLN-02",
       "category": "clean",
-      "variant": "code",
-      "text": "def add(x, y): return x + y",
-      "expected": "CLEAN",
+      "text": "No personal data is stored or processed by this endpoint.",
+      "expected_label": "CLEAN",
+      "description": "Privacy statement without actual PII",
       "predicted": "CLEAN",
       "risk_level": "CLEAN",
-      "correct": true,
-      "latency_ms": 26.496
-    },
-    {
-      "id": "ADV-CL-03",
-      "category": "clean",
-      "variant": "business",
-      "text": "Revenue grew 12% year-over-year.",
-      "expected": "CLEAN",
-      "predicted": "CLEAN",
-      "risk_level": "CLEAN",
-      "correct": true,
-      "latency_ms": 23.883
+      "entities_detected": [],
+      "correct": true
     }
   ]
 }

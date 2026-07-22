@@ -1,0 +1,427 @@
+{
+  "metrics": {
+    "precision": 1.0,
+    "recall": 0.5882352941176471,
+    "f1": 0.7407407407407407,
+    "accuracy": 0.72,
+    "tp": 10,
+    "fp": 0,
+    "fn": 7,
+    "tn": 8
+  },
+  "details": [
+    {
+      "id": "E01",
+      "description": "Email address in plain prose",
+      "label": "TP",
+      "risk_level": "HIGH",
+      "expected": [
+        "EMAIL_ADDRESS"
+      ],
+      "detected": [
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "missed": [],
+      "extra": [
+        "URL"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E02",
+      "description": "Visa credit card number",
+      "label": "TP",
+      "risk_level": "HIGH",
+      "expected": [
+        "CREDIT_CARD"
+      ],
+      "detected": [
+        "CREDIT_CARD",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "missed": [],
+      "extra": [
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E03",
+      "description": "US Social Security Number",
+      "label": "TP",
+      "risk_level": "HIGH",
+      "expected": [
+        "US_SSN"
+      ],
+      "detected": [
+        "PHONE_NUMBER",
+        "US_SSN"
+      ],
+      "missed": [],
+      "extra": [
+        "PHONE_NUMBER"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E04",
+      "description": "International phone number",
+      "label": "TP",
+      "risk_level": "LOW",
+      "expected": [
+        "PHONE_NUMBER"
+      ],
+      "detected": [
+        "IN_PAN",
+        "PHONE_NUMBER"
+      ],
+      "missed": [],
+      "extra": [
+        "IN_PAN"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E05",
+      "description": "IBAN bank account number",
+      "label": "TP",
+      "risk_level": "HIGH",
+      "expected": [
+        "IBAN_CODE"
+      ],
+      "detected": [
+        "DATE_TIME",
+        "IBAN_CODE"
+      ],
+      "missed": [],
+      "extra": [
+        "DATE_TIME"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E06",
+      "description": "Multiple PII types (name + email + phone)",
+      "label": "TP",
+      "risk_level": "HIGH",
+      "expected": [
+        "EMAIL_ADDRESS",
+        "PERSON",
+        "PHONE_NUMBER"
+      ],
+      "detected": [
+        "EMAIL_ADDRESS",
+        "IN_PAN",
+        "PERSON",
+        "PHONE_NUMBER",
+        "URL",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "missed": [],
+      "extra": [
+        "IN_PAN",
+        "URL",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E07",
+      "description": "PII embedded inside error log line",
+      "label": "TP",
+      "risk_level": "MEDIUM",
+      "expected": [
+        "EMAIL_ADDRESS"
+      ],
+      "detected": [
+        "DATE_TIME",
+        "EMAIL_ADDRESS",
+        "URL"
+      ],
+      "missed": [],
+      "extra": [
+        "DATE_TIME",
+        "URL"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E08",
+      "description": "Medical context with patient name",
+      "label": "TP",
+      "risk_level": "MEDIUM",
+      "expected": [
+        "PERSON"
+      ],
+      "detected": [
+        "PERSON"
+      ],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E09",
+      "description": "Pakistani CNIC number",
+      "label": "TP",
+      "risk_level": "HIGH",
+      "expected": [
+        "PK_CNIC"
+      ],
+      "detected": [
+        "PK_CNIC",
+        "US_DRIVER_LICENSE"
+      ],
+      "missed": [],
+      "extra": [
+        "US_DRIVER_LICENSE"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E10",
+      "description": "PII in JSON-like payload",
+      "label": "TP",
+      "risk_level": "HIGH",
+      "expected": [
+        "CREDIT_CARD",
+        "EMAIL_ADDRESS"
+      ],
+      "detected": [
+        "CREDIT_CARD",
+        "EMAIL_ADDRESS",
+        "PERSON",
+        "URL",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "missed": [],
+      "extra": [
+        "PERSON",
+        "URL",
+        "US_BANK_NUMBER",
+        "US_DRIVER_LICENSE"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E11",
+      "description": "Technical API documentation",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E12",
+      "description": "Python code snippet",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E13",
+      "description": "Medical terminology without personal info",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E14",
+      "description": "Generic quarterly report sentence",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [
+        "DATE_TIME"
+      ],
+      "missed": [],
+      "extra": [
+        "DATE_TIME"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E15",
+      "description": "Scientific experiment description",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [
+        "DATE_TIME"
+      ],
+      "missed": [],
+      "extra": [
+        "DATE_TIME"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E16",
+      "description": "Neutral news-style sentence",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [
+        "DATE_TIME"
+      ],
+      "missed": [],
+      "extra": [
+        "DATE_TIME"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E17",
+      "description": "Placeholder variable names (not real people)",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [
+        "NRP"
+      ],
+      "missed": [],
+      "extra": [
+        "NRP"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E18",
+      "description": "Policy statement with no personal data",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": false,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E19",
+      "description": "Implicit IBAN reference (no literal IBAN present)",
+      "label": "FN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": true,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E20",
+      "description": "Implicit credit card reference",
+      "label": "FN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": true,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E21",
+      "description": "Implicit email reference",
+      "label": "FN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": true,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E22",
+      "description": "Implicit SSN reference",
+      "label": "FN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [
+        "DATE_TIME"
+      ],
+      "missed": [],
+      "extra": [
+        "DATE_TIME"
+      ],
+      "expected_stage2": true,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E23",
+      "description": "Implicit bank account reference",
+      "label": "FN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": true,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E24",
+      "description": "Implicit phone reference",
+      "label": "FN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [
+        "DATE_TIME"
+      ],
+      "missed": [],
+      "extra": [
+        "DATE_TIME"
+      ],
+      "expected_stage2": true,
+      "stage2_flagged": null
+    },
+    {
+      "id": "E25",
+      "description": "Implicit CNIC/passport reference",
+      "label": "FN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": true,
+      "stage2_flagged": null
+    }
+  ]
+}

@@ -4,14 +4,14 @@
   "clean": 540,
   "leaking_ratio": 0.55,
   "entity_type_distribution": {
-    "PERSON": 170,
-    "EMAIL_ADDRESS": 122,
-    "US_SSN": 102,
-    "PK_CNIC": 95,
-    "CREDIT_CARD": 87,
-    "PHONE_NUMBER": 73,
-    "LOCATION": 69,
-    "IBAN_CODE": 57
+    "PERSON": 155,
+    "EMAIL_ADDRESS": 113,
+    "IBAN_CODE": 105,
+    "US_SSN": 92,
+    "CREDIT_CARD": 91,
+    "PK_CNIC": 85,
+    "PHONE_NUMBER": 79,
+    "LOCATION": 74
   },
-  "avg_text_length_chars": 58.6
+  "avg_text_length_chars": 60.5
 }
