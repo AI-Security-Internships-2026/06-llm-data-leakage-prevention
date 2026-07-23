@@ -1,7 +1,7 @@
 """
 eval_suite.py — Hand-labelled Precision / Recall Evaluation Suite
 CNIT/PNTLab Pisa — AI Security Internship 2026
-Student: Muhammad Hashim Mughal | Week: 05
+Student: Muhammad Hashim Mughal | Week: 06
 
 """
 
@@ -203,6 +203,45 @@ EVAL_CASES = [
         "label": "LEAKING",
         "expected": set(),
         "expected_stage2": True,
+    },
+    # ── CLEAN — FP regression cases (Week 06) ────────────────────────────
+    # These texts triggered IN_PAN, US_DRIVER_LICENSE, or low-confidence
+    # US_BANK_NUMBER false positives in the Week 05 Enron synthetic eval.
+    # All must return CLEAN after the Week 06 entity allow-list + score gate.
+    {
+        "id": "E26",
+        "description": "Alphanumeric reference code (previously FP: IN_PAN)",
+        "text": "The experiment reference code ABCDE1234F has been logged in the system.",
+        "label": "CLEAN",
+        "expected": set(),
+    },
+    {
+        "id": "E27",
+        "description": "Order number with letter prefix (previously FP: US_DRIVER_LICENSE)",
+        "text": "Your order number is D12345678. Expected delivery in 3-5 business days.",
+        "label": "CLEAN",
+        "expected": set(),
+    },
+    {
+        "id": "E28",
+        "description": "Long numeric order ID (previously FP: US_BANK_NUMBER)",
+        "text": "Your order ID is ORD-2024-001. Please keep this for your records.",
+        "label": "CLEAN",
+        "expected": set(),
+    },
+    {
+        "id": "E29",
+        "description": "Shipment tracking number (previously FP: US_BANK_NUMBER)",
+        "text": "Track your parcel using tracking number 9876543210123.",
+        "label": "CLEAN",
+        "expected": set(),
+    },
+    {
+        "id": "E30",
+        "description": "Support ticket ID with PAN-shaped code (previously FP: IN_PAN)",
+        "text": "Please quote ticket ID XKCD5678A when contacting support.",
+        "label": "CLEAN",
+        "expected": set(),
     },
 ]
 
