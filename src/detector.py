@@ -1,8 +1,17 @@
 """
 detector.py — PII Leakage Detection Probe
 CNIT/PNTLab Pisa — AI Security Internship 2026
-Student: Muhammad Hashim Mughal | Week: 05
+Student: Muhammad Hashim Mughal | Week: 06
 
+Week 06 — Commit 1
+-------------------
+Suppress IN_PAN and US_DRIVER_LICENSE from the default entity list.
+Presidio's built-in recognisers for these two types produce a high
+false-positive rate on generic alphanumeric strings found in real
+email bodies (confirmed in Week 05 Enron synthetic eval: 245 IN_PAN
+hits, 87 US_DRIVER_LICENSE hits on clean text).
+Fix: pass the explicit SUPPORTED_ENTITIES allow-list to
+analyzer.analyze() so Presidio only runs the recognisers we trust.
 """
 
 import re
@@ -70,6 +79,10 @@ _NOISE_TYPES = {"DATE_TIME", "NRP"}
 
 _SUPPORTED_LANGUAGES = {"en"}
 
+# Week 06 Commit 1: explicit entity allow-list passed to analyzer.analyze().
+# IN_PAN and US_DRIVER_LICENSE are intentionally excluded — their Presidio
+# built-in recognisers fire too often on generic text (ref codes, model IDs,
+# employee numbers). Presidio will only run recognisers for types listed here.
 SUPPORTED_ENTITIES = [
     "EMAIL_ADDRESS", "CREDIT_CARD", "PHONE_NUMBER", "PERSON",
     "US_SSN", "IBAN_CODE", "PK_CNIC", "LOCATION",
@@ -175,7 +188,13 @@ def detect_pii(text: str, language: str = "en", use_stage2: bool = False) -> dic
         )
 
     normalized = normalize_text(text)
-    results = analyzer.analyze(text=normalized, language=language)
+    # Week 06 Commit 1: pass entities= so Presidio only runs allowed recognisers.
+    # This is the single line that suppresses IN_PAN and US_DRIVER_LICENSE.
+    results = analyzer.analyze(
+        text=normalized,
+        language=language,
+        entities=SUPPORTED_ENTITIES,
+    )
 
     entities = [
         {
