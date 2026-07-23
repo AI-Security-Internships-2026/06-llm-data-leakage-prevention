@@ -3,15 +3,6 @@ detector.py — PII Leakage Detection Probe
 CNIT/PNTLab Pisa — AI Security Internship 2026
 Student: Muhammad Hashim Mughal | Week: 06
 
-Week 06 — Commit 1
--------------------
-Suppress IN_PAN and US_DRIVER_LICENSE from the default entity list.
-Presidio's built-in recognisers for these two types produce a high
-false-positive rate on generic alphanumeric strings found in real
-email bodies (confirmed in Week 05 Enron synthetic eval: 245 IN_PAN
-hits, 87 US_DRIVER_LICENSE hits on clean text).
-Fix: pass the explicit SUPPORTED_ENTITIES allow-list to
-analyzer.analyze() so Presidio only runs the recognisers we trust.
 """
 
 import re
@@ -70,9 +61,10 @@ analyzer.registry.add_recognizer(_iban_recognizer)
 
 # ── Risk classification sets ──────────────────────────────────────────────────
 
+# Week 06 Commit 2: added US_BANK_NUMBER — confirmed hits are high-risk
 _HIGH_RISK_TYPES = {
     "CREDIT_CARD", "IBAN_CODE", "MEDICAL_LICENSE",
-    "US_SSN", "UK_NHS", "PK_CNIC",
+    "US_SSN", "UK_NHS", "PK_CNIC", "US_BANK_NUMBER",
 }
 
 _NOISE_TYPES = {"DATE_TIME", "NRP"}
@@ -83,11 +75,27 @@ _SUPPORTED_LANGUAGES = {"en"}
 # IN_PAN and US_DRIVER_LICENSE are intentionally excluded — their Presidio
 # built-in recognisers fire too often on generic text (ref codes, model IDs,
 # employee numbers). Presidio will only run recognisers for types listed here.
+# Week 06 Commit 2: US_BANK_NUMBER added — gated at score >= 0.80 below.
 SUPPORTED_ENTITIES = [
     "EMAIL_ADDRESS", "CREDIT_CARD", "PHONE_NUMBER", "PERSON",
     "US_SSN", "IBAN_CODE", "PK_CNIC", "LOCATION",
-    "MEDICAL_LICENSE", "UK_NHS",
+    "MEDICAL_LICENSE", "UK_NHS", "US_BANK_NUMBER",
 ]
+
+# Week 06 Commit 2: per-entity minimum confidence thresholds.
+# Results below these scores are dropped before risk scoring and output.
+_SCORE_GATES: dict[str, float] = {
+    "US_BANK_NUMBER": 0.80,
+}
+
+
+def _apply_score_gates(results: list) -> list:
+    """Drop any result that falls below its entity-specific score gate."""
+    return [
+        r for r in results
+        if r.score >= _SCORE_GATES.get(r.entity_type, 0.0)
+    ]
+
 
 # ── Normalization regexes ─────────────────────────────────────────────────────
 
@@ -195,6 +203,8 @@ def detect_pii(text: str, language: str = "en", use_stage2: bool = False) -> dic
         language=language,
         entities=SUPPORTED_ENTITIES,
     )
+    # Week 06 Commit 2: drop US_BANK_NUMBER results below the 0.80 score gate.
+    results = _apply_score_gates(results)
 
     entities = [
         {
