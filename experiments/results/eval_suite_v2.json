@@ -1,31 +1,28 @@
 {
   "metrics": {
-    "precision": 1.0,
+    "precision": 0.9444444444444444,
     "recall": 1.0,
-    "f1": 1.0,
-    "accuracy": 1.0,
+    "f1": 0.9714285714285714,
+    "accuracy": 0.9666666666666667,
     "tp": 17,
-    "fp": 0,
+    "fp": 1,
     "fn": 0,
-    "tn": 8
+    "tn": 12
   },
   "details": [
     {
       "id": "E01",
       "description": "Email address in plain prose",
       "label": "TP",
-      "risk_level": "HIGH",
+      "risk_level": "MEDIUM",
       "expected": [
         "EMAIL_ADDRESS"
       ],
       "detected": [
-        "EMAIL_ADDRESS",
-        "URL"
+        "EMAIL_ADDRESS"
       ],
       "missed": [],
-      "extra": [
-        "URL"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": false
     },
@@ -38,15 +35,10 @@
         "CREDIT_CARD"
       ],
       "detected": [
-        "CREDIT_CARD",
-        "US_BANK_NUMBER",
-        "US_DRIVER_LICENSE"
+        "CREDIT_CARD"
       ],
       "missed": [],
-      "extra": [
-        "US_BANK_NUMBER",
-        "US_DRIVER_LICENSE"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": false
     },
@@ -78,13 +70,10 @@
         "PHONE_NUMBER"
       ],
       "detected": [
-        "IN_PAN",
         "PHONE_NUMBER"
       ],
       "missed": [],
-      "extra": [
-        "IN_PAN"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": false
     },
@@ -97,13 +86,10 @@
         "IBAN_CODE"
       ],
       "detected": [
-        "DATE_TIME",
         "IBAN_CODE"
       ],
       "missed": [],
-      "extra": [
-        "DATE_TIME"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": false
     },
@@ -119,20 +105,11 @@
       ],
       "detected": [
         "EMAIL_ADDRESS",
-        "IN_PAN",
         "PERSON",
-        "PHONE_NUMBER",
-        "URL",
-        "US_BANK_NUMBER",
-        "US_DRIVER_LICENSE"
+        "PHONE_NUMBER"
       ],
       "missed": [],
-      "extra": [
-        "IN_PAN",
-        "URL",
-        "US_BANK_NUMBER",
-        "US_DRIVER_LICENSE"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": false
     },
@@ -145,15 +122,10 @@
         "EMAIL_ADDRESS"
       ],
       "detected": [
-        "DATE_TIME",
-        "EMAIL_ADDRESS",
-        "URL"
+        "EMAIL_ADDRESS"
       ],
       "missed": [],
-      "extra": [
-        "DATE_TIME",
-        "URL"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": false
     },
@@ -182,13 +154,10 @@
         "PK_CNIC"
       ],
       "detected": [
-        "PK_CNIC",
-        "US_DRIVER_LICENSE"
+        "PK_CNIC"
       ],
       "missed": [],
-      "extra": [
-        "US_DRIVER_LICENSE"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": false
     },
@@ -204,17 +173,11 @@
       "detected": [
         "CREDIT_CARD",
         "EMAIL_ADDRESS",
-        "PERSON",
-        "URL",
-        "US_BANK_NUMBER",
-        "US_DRIVER_LICENSE"
+        "PERSON"
       ],
       "missed": [],
       "extra": [
-        "PERSON",
-        "URL",
-        "US_BANK_NUMBER",
-        "US_DRIVER_LICENSE"
+        "PERSON"
       ],
       "expected_stage2": false,
       "stage2_flagged": false
@@ -261,13 +224,9 @@
       "label": "TN",
       "risk_level": "CLEAN",
       "expected": [],
-      "detected": [
-        "DATE_TIME"
-      ],
+      "detected": [],
       "missed": [],
-      "extra": [
-        "DATE_TIME"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": false
     },
@@ -277,13 +236,9 @@
       "label": "TN",
       "risk_level": "CLEAN",
       "expected": [],
-      "detected": [
-        "DATE_TIME"
-      ],
+      "detected": [],
       "missed": [],
-      "extra": [
-        "DATE_TIME"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": false
     },
@@ -293,13 +248,9 @@
       "label": "TN",
       "risk_level": "CLEAN",
       "expected": [],
-      "detected": [
-        "DATE_TIME"
-      ],
+      "detected": [],
       "missed": [],
-      "extra": [
-        "DATE_TIME"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": false
     },
@@ -309,13 +260,9 @@
       "label": "TN",
       "risk_level": "CLEAN",
       "expected": [],
-      "detected": [
-        "NRP"
-      ],
+      "detected": [],
       "missed": [],
-      "extra": [
-        "NRP"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": false
     },
@@ -373,13 +320,9 @@
       "label": "TP",
       "risk_level": "HIGH",
       "expected": [],
-      "detected": [
-        "DATE_TIME"
-      ],
+      "detected": [],
       "missed": [],
-      "extra": [
-        "DATE_TIME"
-      ],
+      "extra": [],
       "expected_stage2": true,
       "stage2_flagged": true
     },
@@ -401,13 +344,9 @@
       "label": "TP",
       "risk_level": "HIGH",
       "expected": [],
-      "detected": [
-        "DATE_TIME"
-      ],
+      "detected": [],
       "missed": [],
-      "extra": [
-        "DATE_TIME"
-      ],
+      "extra": [],
       "expected_stage2": true,
       "stage2_flagged": true
     },
@@ -422,6 +361,70 @@
       "extra": [],
       "expected_stage2": true,
       "stage2_flagged": true
+    },
+    {
+      "id": "E26",
+      "description": "Alphanumeric reference code (previously FP: IN_PAN)",
+      "label": "FP",
+      "risk_level": "MEDIUM",
+      "expected": [],
+      "detected": [
+        "PERSON"
+      ],
+      "missed": [],
+      "extra": [
+        "PERSON"
+      ],
+      "expected_stage2": false,
+      "stage2_flagged": false
+    },
+    {
+      "id": "E27",
+      "description": "Order number with letter prefix (previously FP: US_DRIVER_LICENSE)",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": false,
+      "stage2_flagged": false
+    },
+    {
+      "id": "E28",
+      "description": "Long numeric order ID (previously FP: US_BANK_NUMBER)",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": false,
+      "stage2_flagged": false
+    },
+    {
+      "id": "E29",
+      "description": "Shipment tracking number (previously FP: US_BANK_NUMBER)",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": false,
+      "stage2_flagged": false
+    },
+    {
+      "id": "E30",
+      "description": "Support ticket ID with PAN-shaped code (previously FP: IN_PAN)",
+      "label": "TN",
+      "risk_level": "CLEAN",
+      "expected": [],
+      "detected": [],
+      "missed": [],
+      "extra": [],
+      "expected_stage2": false,
+      "stage2_flagged": false
     }
   ]
 }
