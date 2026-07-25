@@ -324,7 +324,7 @@ expected to resolve this figure.
 ## Week 6
 
 **Branch:** `hashim-week-06`
-**PR link:** _(to be added after opening PR)_
+**PR link:** https://github.com/AI-Security-Internships-2026/06-llm-data-leakage-prevention/pull/10
 
 ### Completed this week
 
