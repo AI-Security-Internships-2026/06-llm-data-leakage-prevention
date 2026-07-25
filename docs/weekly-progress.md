@@ -318,3 +318,111 @@ expected to resolve this figure.
 - Stage 1 vs Stage 1+2 comparison on full 1,200-sample synthetic dataset
 - Investigate Presidio false positives (US_BANK_NUMBER, US_DRIVER_LICENSE,
   IN_PAN appearing on non-PII texts)
+
+---
+
+## Week 6
+
+**Branch:** `hashim-week-06`
+**PR link:** _(to be added after opening PR)_
+
+### Completed this week
+
+- [x] Ran Enron corpus evaluation on **500 real emails** (Kaggle CSV `datasets/enron/emails.csv`)
+      via `src/enron_eval.py --csv` — results written to
+      `experiments/results/enron_eval.json` and `datasets/enron-eval-results.md`
+- [x] Implemented `src/hf_pii_eval.py` — span-level evaluator against the
+      HuggingFace `ai4privacy/pii-masking-43k` dataset using IoU ≥ 0.5 matching;
+      evaluated on 1,000 English samples (seed=42)
+- [x] Documented `datasets/english-pii-43k.md` — schema, entity type coverage
+      mapping, download instructions, and evaluation commands
+- [x] Results written to `experiments/results/hf_pii_eval.json` and
+      `experiments/results/hf_pii_eval_summary.json`
+- [x] Implemented `src/guardrail_benchmark.py` — three-way comparison of
+      **Our Detector (Stage 1)** vs **scrubadub** vs **detect-secrets** on
+      the 30-case eval suite (E01–E30); results in
+      `experiments/results/guardrail_comparison.json`
+- [x] Investigated and documented false-positive patterns: `IN_PAN` and
+      `US_DRIVER_LICENSE` excluded via entity blocklist; `US_BANK_NUMBER` gated
+      at score ≥ 0.80; new FP cases E26–E30 added to eval suite and all resolved
+- [x] Expanded eval suite from 25 → 30 cases (E26–E30: FP regression cases)
+- [x] Documented installation failures for `llm-guard` (sentencepiece C++ build)
+      and `guardrails-ai` (Rust/Cargo) on Windows/Python 3.13 in benchmark JSON
+
+### Evaluation Results
+
+#### Enron Real Corpus (500 emails)
+
+| Metric | Value |
+|---|---|
+| Emails processed | 500 |
+| Flagged as leaking | 500 (100%) |
+| Risk: HIGH | 447 (89.4%) |
+| Risk: MEDIUM | 53 (10.6%) |
+| p50 latency | 80.7 ms |
+| p95 latency | 549.1 ms |
+| Top entity: EMAIL_ADDRESS | 4,238 detections |
+| Top entity: PERSON | 4,093 detections |
+
+> All 500 emails flagged is expected: every real Enron email contains at least
+> one email address or name in headers/signatures. No precision/recall reported
+> (no per-email ground-truth labels for the real corpus).
+
+#### HuggingFace english_pii_43k (1,000 samples, span-level IoU ≥ 0.5)
+
+| Entity | Precision | Recall | F1 |
+|---|---|---|---|
+| EMAIL_ADDRESS | 0.989 | 0.957 | 0.973 |
+| IBAN_CODE | 1.000 | 1.000 | 1.000 |
+| LOCATION | 0.729 | 0.463 | 0.566 |
+| PERSON | 0.676 | 0.517 | 0.586 |
+| PHONE_NUMBER | 0.638 | 0.566 | 0.600 |
+| US_SSN | 0.533 | 0.615 | 0.571 |
+| CREDIT_CARD | 1.000 | 0.050 | 0.095 |
+| **Overall (all spans)** | **0.760** | **0.254** | **0.381** |
+
+> Low overall recall is dominated by ~1,847 unsupported entity types (PASSWORD,
+> IPV4, MAC, VEHICLEVIN, crypto addresses, etc.) that Presidio has no recognisers
+> for. On supported entities only, average recall is ~0.67. Coverage gap analysis
+> added to `datasets/english-pii-43k.md`.
+
+#### Guardrail Comparison (30-case eval suite, binary LEAKING/CLEAN)
+
+| Implementation | Precision | Recall | F1 | Accuracy | p50 ms |
+|---|---|---|---|---|---|
+| **Our Detector (Stage 1)** | **0.909** | 0.588 | **0.714** | **0.733** | 23.0 |
+| scrubadub | 0.769 | 0.588 | 0.667 | 0.667 | 20.6 |
+| detect-secrets | 0.000 | 0.000 | 0.000 | 0.433 | 31.5 |
+
+> `detect-secrets` is a secret/credential scanner, not a PII detector — its 0%
+> recall on names, IBANs, phones is expected. Included per issue #6 requirements
+> (Protect AI representative). `llm-guard` and `guardrails-ai` could not be
+> installed on Windows/Python 3.13 (C++ / Rust build failures).
+
+### Implementation Notes
+
+The `hf_pii_eval.py` evaluator implements IoU-based span matching: a predicted
+span is counted as TP only if its character overlap with any ground-truth span
+satisfies `intersection / union ≥ 0.5`. This is stricter than binary
+LEAKING/CLEAN classification and reveals entity-level gaps invisible in prior
+evaluations — most notably CREDIT_CARD's near-zero recall (0.05) on the HF
+dataset despite 0.966 recall on the synthetic set. Investigation: the HF dataset
+encodes credit cards as `MASKEDNUMBER` (partially redacted strings like
+`4111 **** **** 1111`), which Presidio's regex cannot match since the full
+16-digit pattern is absent. This is a dataset characteristic, not a detector
+regression.
+
+`guardrail_benchmark.py` wraps each implementation in a common interface
+(`predict(text) -> "LEAKING"|"CLEAN"`) and times each call independently.
+The benchmark is fully reproducible with `python src/guardrail_benchmark.py`.
+
+### Problems / Blockers
+
+- `llm-guard 0.3.10` build failure: `sentencepiece==0.2.0` requires MSVC
+  C++ toolchain, unavailable on the test machine. Documented in benchmark JSON.
+- `guardrails-ai 0.10.2` failure: `litellm` dependency pulls in Rust/Cargo;
+  Cargo not on PATH. Documented in benchmark JSON.
+- Latency spike on real Enron corpus (p95 = 549 ms vs ~30 ms on synthetic):
+  caused by full email threads being passed to spaCy NLP pipeline. Truncating
+  to first 2,000 characters would reduce latency but risks missing PII in bodies.
+  Flagged as open trade-off for Week 7 investigation.
