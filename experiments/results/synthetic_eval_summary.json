@@ -1,34 +1,34 @@
 {
   "meta": {
-    "run_at": "2026-07-18T09:04:28.925050+00:00",
-    "dataset": "C:\\Users\\MUGHAL\\Desktop\\ont lab internship\\New folder\\06-llm-data-leakage-prevention\\experiments\\results\\synthetic_dataset.json",
+    "run_at": "2026-07-24T19:34:24.955596+00:00",
+    "dataset": "C:\\Users\\MUGHAL\\Desktop\\ont lab internship\\06 llm data leakage prevention\\06-llm-data-leakage-prevention\\experiments\\results\\synthetic_dataset.json",
     "total_samples": 1200,
     "detector": "PIIDetector (Presidio + custom recognisers)"
   },
   "summary": {
-    "precision": 0.9174,
-    "recall": 0.9758,
-    "f1": 0.9457,
-    "accuracy": 0.9383,
-    "p50_latency_ms": 13.351,
-    "p95_latency_ms": 18.988
+    "precision": 0.9433,
+    "recall": 0.9333,
+    "f1": 0.9383,
+    "accuracy": 0.9325,
+    "p50_latency_ms": 26.35,
+    "p95_latency_ms": 49.484
   },
   "binary_classification": {
-    "TP": 644,
-    "FP": 58,
-    "TN": 482,
-    "FN": 16,
-    "precision": 0.9174,
-    "recall": 0.9758,
-    "f1": 0.9457,
-    "accuracy": 0.9383
+    "TP": 616,
+    "FP": 37,
+    "TN": 503,
+    "FN": 44,
+    "precision": 0.9433,
+    "recall": 0.9333,
+    "f1": 0.9383,
+    "accuracy": 0.9325
   },
   "per_entity_metrics": {
     "CREDIT_CARD": {
       "total": 91,
-      "detected": 86,
-      "missed": 5,
-      "recall": 0.9451
+      "detected": 70,
+      "missed": 21,
+      "recall": 0.7692
     },
     "EMAIL_ADDRESS": {
       "total": 113,
@@ -44,9 +44,9 @@
     },
     "LOCATION": {
       "total": 74,
-      "detected": 67,
-      "missed": 7,
-      "recall": 0.9054
+      "detected": 57,
+      "missed": 17,
+      "recall": 0.7703
     },
     "PERSON": {
       "total": 155,
@@ -56,9 +56,9 @@
     },
     "PHONE_NUMBER": {
       "total": 79,
-      "detected": 75,
-      "missed": 4,
-      "recall": 0.9494
+      "detected": 72,
+      "missed": 7,
+      "recall": 0.9114
     },
     "PK_CNIC": {
       "total": 85,
@@ -75,10 +75,10 @@
   },
   "latency": {
     "n_samples": 1200,
-    "mean_ms": 14.299,
-    "min_ms": 8.92,
-    "max_ms": 335.418,
-    "p50_ms": 13.351,
-    "p95_ms": 18.988
+    "mean_ms": 29.598,
+    "min_ms": 10.342,
+    "max_ms": 449.198,
+    "p50_ms": 26.35,
+    "p95_ms": 49.484
   }
 }
