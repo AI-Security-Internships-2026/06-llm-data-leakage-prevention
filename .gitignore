@@ -65,3 +65,6 @@ credentials/
 # Results that can be reproduced
 experiments/results/*.png
 experiments/results/*.pdf
+
+
+*.jsonl

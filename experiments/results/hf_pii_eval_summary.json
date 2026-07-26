@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "run_at": "2026-07-24T08:11:50.967600+00:00",
+    "dataset": "datasets/english_pii_43k.jsonl",
+    "samples_requested": 1000,
+    "samples_processed": 1000,
+    "seed": 42,
+    "detector": "PIIDetector Stage 1 (Presidio + custom recognisers)",
+    "iou_threshold": 0.5
+  },
+  "summary": {
+    "total_samples": 1000,
+    "overall": {
+      "TP": 799,
+      "FP": 252,
+      "FN": 2346,
+      "precision": 0.7602,
+      "recall": 0.2541,
+      "f1": 0.3808
+    },
+    "latency": {
+      "mean_ms": 33.451,
+      "p50_ms": 24.169,
+      "p95_ms": 78.439
+    },
+    "supported_entity_metrics": {
+      "CREDIT_CARD": {
+        "TP": 6,
+        "FP": 0,
+        "FN": 114,
+        "precision": 1.0,
+        "recall": 0.05,
+        "f1": 0.0952
+      },
+      "EMAIL_ADDRESS": {
+        "TP": 89,
+        "FP": 1,
+        "FN": 4,
+        "precision": 0.9889,
+        "recall": 0.957,
+        "f1": 0.9727
+      },
+      "IBAN_CODE": {
+        "TP": 38,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "LOCATION": {
+        "TP": 148,
+        "FP": 55,
+        "FN": 172,
+        "precision": 0.7291,
+        "recall": 0.4625,
+        "f1": 0.566
+      },
+      "MEDICAL_LICENSE": {
+        "TP": 0,
+        "FP": 1,
+        "FN": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "PERSON": {
+        "TP": 328,
+        "FP": 157,
+        "FN": 307,
+        "precision": 0.6763,
+        "recall": 0.5165,
+        "f1": 0.5857
+      },
+      "PHONE_NUMBER": {
+        "TP": 30,
+        "FP": 17,
+        "FN": 23,
+        "precision": 0.6383,
+        "recall": 0.566,
+        "f1": 0.6
+      },
+      "US_SSN": {
+        "TP": 24,
+        "FP": 21,
+        "FN": 15,
+        "precision": 0.5333,
+        "recall": 0.6154,
+        "f1": 0.5714
+      }
+    },
+    "unsupported_entity_metrics": {
+      "UNSUPPORTED": {
+        "TP": 136,
+        "FP": 0,
+        "FN": 1711,
+        "precision": 1.0,
+        "recall": 0.0736,
+        "f1": 0.1372
+      }
+    },
+    "unsupported_label_counts": {
+      "DATE": 87,
+      "JOBTITLE": 82,
+      "AMOUNT": 77,
+      "URL": 73,
+      "ACCOUNTNUMBER": 72,
+      "CURRENCYSYMBOL": 72,
+      "TIME": 71,
+      "JOBTYPE": 68,
+      "ACCOUNTNAME": 68,
+      "IPV4": 66,
+      "AGE": 66,
+      "GENDER": 66,
+      "SEX": 61,
+      "BITCOINADDRESS": 60,
+      "SECONDARYADDRESS": 59,
+      "COMPANYNAME": 54,
+      "JOBAREA": 51,
+      "DOB": 51,
+      "PHONEIMEI": 48,
+      "IPV6": 47,
+      "USERAGENT": 46,
+      "CURRENCY": 46,
+      "PASSWORD": 45,
+      "IP": 42,
+      "CREDITCARDISSUER": 42,
+      "NEARBYGPSCOORDINATE": 36,
+      "ETHEREUMADDRESS": 33,
+      "MAC": 33,
+      "ORDINALDIRECTION": 32,
+      "VEHICLEVRM": 25,
+      "EYECOLOR": 25,
+      "BIC": 23,
+      "VEHICLEVIN": 22,
+      "HEIGHT": 20,
+      "LITECOINADDRESS": 20,
+      "CURRENCYNAME": 16,
+      "CREDITCARDCVV": 16,
+      "PIN": 13,
+      "CURRENCYCODE": 13
+    }
+  }
+}
