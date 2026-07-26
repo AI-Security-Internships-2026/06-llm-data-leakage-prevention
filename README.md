@@ -99,6 +99,24 @@ python src/main.py
 
 ---
 
+## Roadmap to September 8, 2026
+
+**Current state:** real Enron-corpus and HF-PII evaluation, benchmarked against scrubadub and detect-secrets. A Phase 2 research assignment already exists (issue #9): the KV-cache timing side-channel, flagged for "journal-track rigor" — this is the project's real novel-contribution track.
+
+**Novel contribution target:** the KV-cache timing side-channel in issue #9 — showing that PII can leak through inference *timing* even when the text-level detector catches everything, would be a genuinely publishable-quality result.
+
+| Date | Milestone |
+|---|---|
+| Aug 2 | Finalize the week-6 guardrail comparison and false-positive fixes already in progress |
+| Aug 9 | Phase 2 start (issue #9): reproduce the KV-cache timing side-channel PII leakage |
+| Aug 16 | Build a detection/mitigation approach for the timing side-channel |
+| Aug 23 | Benchmark mitigation overhead vs. security improvement |
+| Aug 30 | Full journal-track write-up of the timing side-channel finding |
+| Sep 6 | Paper draft |
+| **Sep 8** | **Final submission** |
+
+---
+
 ## Supervisor Note
 
 This repository is managed by **CNIT/PNTLab Pisa, TECIP, Scuola Superiore Sant'Anna**.
