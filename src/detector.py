@@ -117,6 +117,18 @@ def _apply_score_gates(results: list) -> list:
     ]
 
 
+def _drop_person_with_digits(results: list, text: str) -> list:
+    """Drop PERSON entities whose span contains any digit.
+    Real person names never contain digits — these are ref codes, order
+    numbers, model IDs etc. that spaCy NER mis-classifies as names.
+    """
+    filtered = []
+    for r in results:
+        if r.entity_type == "PERSON" and any(c.isdigit() for c in text[r.start:r.end]):
+            continue
+        filtered.append(r)
+    return filtered
+
 # ── Normalization regexes ─────────────────────────────────────────────────────
 
 _SPACED_CARD_RE = re.compile(r"\b(\d{4})[ ](\d{4})[ ](\d{4})[ ](\d{4})\b")
@@ -223,9 +235,8 @@ def detect_pii(text: str, language: str = "en", use_stage2: bool = False) -> dic
         language=language,
         entities=SUPPORTED_ENTITIES,
     )
-    # Week 06 Commit 2: drop US_BANK_NUMBER results below the 0.80 score gate.
     results = _apply_score_gates(results)
-
+    results = _drop_person_with_digits(results, normalized)
     entities = [
         {
             "type": r.entity_type,
