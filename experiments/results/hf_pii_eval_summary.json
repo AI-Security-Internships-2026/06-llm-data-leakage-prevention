@@ -1,6 +1,6 @@
 {
   "meta": {
-    "run_at": "2026-07-24T08:11:50.967600+00:00",
+    "run_at": "2026-07-30T09:58:51.490189+00:00",
     "dataset": "datasets/english_pii_43k.jsonl",
     "samples_requested": 1000,
     "samples_processed": 1000,
@@ -11,26 +11,26 @@
   "summary": {
     "total_samples": 1000,
     "overall": {
-      "TP": 799,
-      "FP": 252,
-      "FN": 2346,
-      "precision": 0.7602,
-      "recall": 0.2541,
-      "f1": 0.3808
+      "TP": 922,
+      "FP": 264,
+      "FN": 2223,
+      "precision": 0.7774,
+      "recall": 0.2932,
+      "f1": 0.4258
     },
     "latency": {
-      "mean_ms": 33.451,
-      "p50_ms": 24.169,
-      "p95_ms": 78.439
+      "mean_ms": 18.301,
+      "p50_ms": 17.008,
+      "p95_ms": 25.735
     },
     "supported_entity_metrics": {
       "CREDIT_CARD": {
-        "TP": 6,
+        "TP": 120,
         "FP": 0,
-        "FN": 114,
+        "FN": 0,
         "precision": 1.0,
-        "recall": 0.05,
-        "f1": 0.0952
+        "recall": 1.0,
+        "f1": 1.0
       },
       "EMAIL_ADDRESS": {
         "TP": 89,
@@ -42,19 +42,19 @@
       },
       "IBAN_CODE": {
         "TP": 38,
-        "FP": 0,
+        "FP": 1,
         "FN": 0,
-        "precision": 1.0,
+        "precision": 0.9744,
         "recall": 1.0,
-        "f1": 1.0
+        "f1": 0.987
       },
       "LOCATION": {
-        "TP": 148,
-        "FP": 55,
-        "FN": 172,
-        "precision": 0.7291,
-        "recall": 0.4625,
-        "f1": 0.566
+        "TP": 154,
+        "FP": 50,
+        "FN": 166,
+        "precision": 0.7549,
+        "recall": 0.4813,
+        "f1": 0.5878
       },
       "MEDICAL_LICENSE": {
         "TP": 0,
@@ -65,20 +65,20 @@
         "f1": 0.0
       },
       "PERSON": {
-        "TP": 328,
-        "FP": 157,
-        "FN": 307,
-        "precision": 0.6763,
-        "recall": 0.5165,
-        "f1": 0.5857
+        "TP": 321,
+        "FP": 171,
+        "FN": 314,
+        "precision": 0.6524,
+        "recall": 0.5055,
+        "f1": 0.5697
       },
       "PHONE_NUMBER": {
         "TP": 30,
-        "FP": 17,
+        "FP": 19,
         "FN": 23,
-        "precision": 0.6383,
+        "precision": 0.6122,
         "recall": 0.566,
-        "f1": 0.6
+        "f1": 0.5882
       },
       "US_SSN": {
         "TP": 24,
@@ -91,12 +91,12 @@
     },
     "unsupported_entity_metrics": {
       "UNSUPPORTED": {
-        "TP": 136,
+        "TP": 146,
         "FP": 0,
-        "FN": 1711,
+        "FN": 1701,
         "precision": 1.0,
-        "recall": 0.0736,
-        "f1": 0.1372
+        "recall": 0.079,
+        "f1": 0.1465
       }
     },
     "unsupported_label_counts": {
