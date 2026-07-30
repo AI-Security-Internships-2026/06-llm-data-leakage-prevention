@@ -262,7 +262,6 @@ def _build_detect_secrets():
     def _detect(text: str) -> bool:
         with transient_settings(config):
             secrets = SecretsCollection()
-            secrets.scan_file.__func__   # confirm method exists
             import tempfile, os
             # detect-secrets works on files; write text to a temp file
             with tempfile.NamedTemporaryFile(
@@ -274,7 +273,7 @@ def _build_detect_secrets():
                 secrets.scan_file(tmp)
             finally:
                 os.unlink(tmp)
-            return len(secrets) > 0
+            return any(secrets.data.values())
 
     return _detect
 
@@ -415,7 +414,7 @@ def main():
                         "listed in the issue requirements."
                     ),
                 },
-                "threshold": "len(SecretsCollection) > 0 → LEAKING",
+                "threshold": "any(secrets.data.values()) → LEAKING",
                 "no_external_api": True,
                 **results_ds,
             },
@@ -430,14 +429,14 @@ def main():
             "output_file": "experiments/results/guardrail_comparison.json",
             "note": (
                 "llm-guard (0.3.10) and guardrails-ai (0.10.2) were attempted "
-                "but could not be installed on Windows/Python 3.13: llm-guard "
+                "but could not be installed on Windows/Python 3.11: llm-guard "
                 "pins sentencepiece==0.2.0 which requires a C++ build toolchain "
                 "unavailable in this environment; guardrails-ai requires Rust/Cargo "
                 "via the litellm dependency. Both are marked NOT_COMPARABLE below."
             ),
             "not_comparable": {
                 "llm_guard": {
-                    "reason": "sentencepiece==0.2.0 build failure on Windows/Python 3.13 (no MSVC toolchain)",
+                    "reason": "sentencepiece==0.2.0 build failure on Windows/Python 3.11 (no MSVC toolchain)",
                     "attempted_version": "0.3.10",
                     "error": "FileNotFoundError: [WinError 2] sentencepiece wheel build failed",
                 },
