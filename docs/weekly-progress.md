@@ -430,7 +430,7 @@ The benchmark is fully reproducible with `python src/guardrail_benchmark.py`.
 ## Week 7
 
 **Branch:** `hashim-week-07`
-**PR link:** (to be added)
+**PR link:** https://github.com/AI-Security-Internships-2026/06-llm-data-leakage-prevention/pull/11
 
 ### Completed this week
 
