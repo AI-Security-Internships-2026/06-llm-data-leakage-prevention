@@ -426,3 +426,106 @@ The benchmark is fully reproducible with `python src/guardrail_benchmark.py`.
   caused by full email threads being passed to spaCy NLP pipeline. Truncating
   to first 2,000 characters would reduce latency but risks missing PII in bodies.
   Flagged as open trade-off for Week 7 investigation.
+
+## Week 7
+
+**Branch:** `hashim-week-07`
+**PR link:** (to be added)
+
+### Completed this week
+
+- [x] Added context-boosted `_credit_card_raw_recognizer` to `src/detector.py`
+      for bare 16-digit card numbers that fail Presidio's Luhn validation
+- [x] Fixed E26/E27 false positives — added `_drop_person_with_digits()` filter
+      to suppress spaCy NER mis-tagging alphanumeric tokens as PERSON
+- [x] Re-ran guardrail benchmark after fix — precision 0.769 → 0.909, F1 0.667 → 0.714
+- [x] Re-ran synthetic eval — CREDIT_CARD recall 0.769 → 0.824
+- [x] Ran HuggingFace english_pii_43k span-level evaluation (1,000 samples)
+- [x] Investigated Enron latency spike (Week 6 open trade-off) — implemented
+      zone-aware body truncation in `src/enron_eval.py`; benchmarked 5 strategies
+      on 500 real emails; recommended `--max-body-chars 2000`
+
+### Evaluation Results
+
+#### Synthetic Dataset (1,200 samples)
+
+| Metric | Value |
+|---|---|
+| Precision | 0.944 |
+| Recall | 0.944 |
+| F1 | 0.944 |
+| Accuracy | 0.938 |
+| p50 latency | 15.8 ms |
+| p95 latency | 43.0 ms |
+
+#### Per-Entity Recall
+
+| Entity | Recall |
+|---|---|
+| EMAIL_ADDRESS | 1.000 |
+| IBAN_CODE | 1.000 |
+| PK_CNIC | 1.000 |
+| US_SSN | 1.000 |
+| PERSON | 0.994 |
+| PHONE_NUMBER | 0.899 |
+| CREDIT_CARD | 0.824 |
+| LOCATION | 0.824 |
+
+#### Guardrail Comparison (30-case eval suite)
+
+| Implementation | Precision | Recall | F1 | Accuracy |
+|---|---|---|---|---|
+| **Our Detector (Stage 1)** | **0.909** | 0.588 | **0.714** | **0.733** |
+| scrubadub | 0.769 | 0.588 | 0.667 | 0.667 |
+| detect-secrets | 0.000 | 0.000 | 0.000 | 0.433 |
+
+#### HuggingFace english_pii_43k (supported entities only)
+
+| Entity | Precision | Recall | F1 |
+|---|---|---|---|
+| CREDIT_CARD | 1.000 | 1.000 | 1.000 |
+| EMAIL_ADDRESS | 0.989 | 0.957 | 0.973 |
+| IBAN_CODE | 0.974 | 1.000 | 0.987 |
+| PHONE_NUMBER | 0.612 | 0.566 | 0.588 |
+| PERSON | 0.652 | 0.506 | 0.570 |
+| US_SSN | 0.533 | 0.615 | 0.571 |
+
+> Overall recall on this dataset is 0.293 — low because ~1,847 entity types
+> (PASSWORD, IPV4, DATE, URL, etc.) are unsupported by Presidio. On supported
+> entities only, average recall is ~0.67.
+
+### Latency Investigation — Body Truncation Trade-off
+
+Root cause of the Week 6 p95 spike (549 ms): 28 emails (5.6% of the corpus)
+were newsletter/digest-style messages with 60–258 detected entities each
+(e.g. "Enron Mentions", "PowerMarketers Daily Report"). spaCy's NLP pipeline
+scales linearly with character count, so long email threads caused the spike.
+
+Implemented **zone-aware truncation** in `src/enron_eval.py`:
+- Headers (From / To / Subject) always scanned in full — guaranteed PII
+  locations and always short (<200 chars).
+- Body capped at `--max-body-chars N` characters.
+
+Benchmarked 5 strategies on the same 500 real Enron emails:
+
+| Strategy | p50 ms | p95 ms | p99 ms | max ms | mean ms | avg entities |
+|---|---|---|---|---|---|---|
+| Full (no limit) | 83.0 | 518.4 | 1819.3 | 5171.8 | 170.0 | 20.0 |
+| 4 000 chars | 63.5 | 295.2 | 471.7 | 623.0 | 95.9 | 18.1 |
+| **2 000 chars** | **61.3** | **172.9** | **319.2** | **483.5** | **76.6** | **16.2** |
+| 1 000 chars | 55.7 | 134.6 | 209.7 | 270.0 | 57.8 | 13.9 |
+| 500 chars | 36.6 | 58.7 | 146.0 | 264.5 | 38.2 | 11.1 |
+
+**Recommendation: `--max-body-chars 2000`**
+- p95: 518 ms → 172 ms (−67%)
+- mean: 170 ms → 76.6 ms (−55%)
+- Entity loss: 20.0 → 16.2 avg (−19%) — lost entities are PERSON/EMAIL hits
+  from article content in newsletter bodies, not financial or medical PII.
+  Header PII (sender name/address, recipient) is always retained.
+
+1 000 chars and below sacrifice too much recall (−30–44% entities).
+4 000 chars still leaves p95 at 295 ms with little recall benefit over 2 000.
+
+### Problems / Blockers
+
+None this week.
