@@ -2,8 +2,8 @@
   "meta": {
     "benchmark": "Issue #6 — PII and secret leakage detection comparison",
     "student": "Muhammad Hashim Mughal",
-    "run_date": "2026-07-24T07:36:41.967209+00:00",
-    "python_version": "3.13.9",
+    "run_date": "2026-07-30T09:12:49.101001+00:00",
+    "python_version": "3.11.15",
     "platform": "Windows-10-10.0.19045-SP0",
     "eval_cases_total": 30,
     "eval_cases_leaking": 17,
@@ -17,9 +17,9 @@
       "framework": "Microsoft Presidio (repo implementation)",
       "component": "src/detector.py — detect_pii(use_stage2=False)",
       "version": {
-        "presidio_analyzer": "2.2.356",
-        "presidio_anonymizer": "2.2.356",
-        "spacy": "3.8.14",
+        "presidio_analyzer": "2.2.358",
+        "presidio_anonymizer": "2.2.358",
+        "spacy": "3.7.4",
         "spacy_model": "en_core_web_lg-3.7.1"
       },
       "configuration": {
@@ -55,18 +55,18 @@
       "no_external_api": true,
       "metrics": {
         "tp": 10,
-        "fp": 1,
-        "tn": 12,
+        "fp": 3,
+        "tn": 10,
         "fn": 7,
-        "precision": 0.9091,
+        "precision": 0.7692,
         "recall": 0.5882,
-        "f1": 0.7143,
-        "accuracy": 0.7333,
-        "false_positive_rate": 0.0769,
+        "f1": 0.6667,
+        "accuracy": 0.6667,
+        "false_positive_rate": 0.2308,
         "false_negative_rate": 0.4118,
-        "latency_p50_ms": 23.01,
-        "latency_p95_ms": 42.857,
-        "throughput_samples_per_sec": 28.61
+        "latency_p50_ms": 19.934,
+        "latency_p95_ms": 56.528,
+        "throughput_samples_per_sec": 27.4
       },
       "execution_failures": 0,
       "per_case": [
@@ -76,7 +76,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 238.005,
+          "latency_ms": 383.82,
           "error": null
         },
         {
@@ -85,7 +85,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 123.51,
+          "latency_ms": 81.789,
           "error": null
         },
         {
@@ -94,7 +94,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 35.254,
+          "latency_ms": 27.969,
           "error": null
         },
         {
@@ -103,7 +103,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 25.559,
+          "latency_ms": 20.962,
           "error": null
         },
         {
@@ -112,7 +112,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 23.56,
+          "latency_ms": 18.465,
           "error": null
         },
         {
@@ -121,7 +121,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 42.857,
+          "latency_ms": 36.566,
           "error": null
         },
         {
@@ -130,7 +130,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 27.598,
+          "latency_ms": 13.962,
           "error": null
         },
         {
@@ -139,7 +139,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 22.977,
+          "latency_ms": 20.824,
           "error": null
         },
         {
@@ -148,7 +148,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 28.24,
+          "latency_ms": 19.214,
           "error": null
         },
         {
@@ -157,7 +157,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 21.949,
+          "latency_ms": 20.75,
           "error": null
         },
         {
@@ -166,16 +166,16 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 29.502,
+          "latency_ms": 18.379,
           "error": null
         },
         {
           "case_id": "E12",
           "description": "Python code snippet",
           "ground_truth": "CLEAN",
-          "predicted": "CLEAN",
-          "correct": true,
-          "latency_ms": 21.328,
+          "predicted": "LEAKING",
+          "correct": false,
+          "latency_ms": 18.883,
           "error": null
         },
         {
@@ -184,7 +184,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 23.032,
+          "latency_ms": 23.454,
           "error": null
         },
         {
@@ -193,7 +193,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 22.749,
+          "latency_ms": 19.896,
           "error": null
         },
         {
@@ -202,7 +202,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 28.394,
+          "latency_ms": 23.591,
           "error": null
         },
         {
@@ -211,7 +211,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 18.8,
+          "latency_ms": 14.632,
           "error": null
         },
         {
@@ -220,7 +220,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 19.25,
+          "latency_ms": 17.853,
           "error": null
         },
         {
@@ -229,7 +229,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 22.244,
+          "latency_ms": 14.542,
           "error": null
         },
         {
@@ -238,7 +238,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 25.071,
+          "latency_ms": 56.528,
           "error": null
         },
         {
@@ -247,7 +247,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 24.573,
+          "latency_ms": 19.973,
           "error": null
         },
         {
@@ -256,7 +256,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 18.684,
+          "latency_ms": 26.513,
           "error": null
         },
         {
@@ -265,7 +265,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 20.784,
+          "latency_ms": 44.013,
           "error": null
         },
         {
@@ -274,7 +274,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 19.744,
+          "latency_ms": 13.595,
           "error": null
         },
         {
@@ -283,7 +283,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 18.439,
+          "latency_ms": 18.494,
           "error": null
         },
         {
@@ -292,7 +292,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 21.492,
+          "latency_ms": 17.14,
           "error": null
         },
         {
@@ -301,16 +301,16 @@
           "ground_truth": "CLEAN",
           "predicted": "LEAKING",
           "correct": false,
-          "latency_ms": 21.512,
+          "latency_ms": 17.868,
           "error": null
         },
         {
           "case_id": "E27",
           "description": "Order number with letter prefix (previously FP: US_DRIVER_LICENSE)",
           "ground_truth": "CLEAN",
-          "predicted": "CLEAN",
-          "correct": true,
-          "latency_ms": 35.66,
+          "predicted": "LEAKING",
+          "correct": false,
+          "latency_ms": 18.129,
           "error": null
         },
         {
@@ -319,7 +319,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 22.988,
+          "latency_ms": 28.122,
           "error": null
         },
         {
@@ -328,7 +328,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 28.544,
+          "latency_ms": 20.539,
           "error": null
         },
         {
@@ -337,7 +337,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 16.444,
+          "latency_ms": 18.477,
           "error": null
         }
       ]
@@ -349,7 +349,7 @@
       "version": {
         "scrubadub": "2.0.1",
         "scrubadub_spacy": "2.0.0",
-        "spacy": "3.8.14",
+        "spacy": "3.7.4",
         "spacy_model": "en_core_web_lg-3.7.1"
       },
       "configuration": {
@@ -375,9 +375,9 @@
         "accuracy": 0.6667,
         "false_positive_rate": 0.2308,
         "false_negative_rate": 0.4118,
-        "latency_p50_ms": 20.633,
-        "latency_p95_ms": 70.566,
-        "throughput_samples_per_sec": 12.07
+        "latency_p50_ms": 32.081,
+        "latency_p95_ms": 85.721,
+        "throughput_samples_per_sec": 23.48
       },
       "execution_failures": 0,
       "per_case": [
@@ -387,7 +387,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 1707.891,
+          "latency_ms": 14.348,
           "error": null
         },
         {
@@ -396,7 +396,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 91.53,
+          "latency_ms": 14.164,
           "error": null
         },
         {
@@ -405,7 +405,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 35.932,
+          "latency_ms": 15.296,
           "error": null
         },
         {
@@ -414,16 +414,16 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 70.566,
+          "latency_ms": 17.031,
           "error": null
         },
         {
           "case_id": "E05",
           "description": "IBAN bank account number",
           "ground_truth": "LEAKING",
-          "predicted": "LEAKING",
-          "correct": true,
-          "latency_ms": 20.9,
+          "predicted": "CLEAN",
+          "correct": false,
+          "latency_ms": 14.911,
           "error": null
         },
         {
@@ -432,7 +432,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 25.508,
+          "latency_ms": 53.809,
           "error": null
         },
         {
@@ -441,7 +441,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 23.352,
+          "latency_ms": 109.468,
           "error": null
         },
         {
@@ -450,16 +450,16 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 24.873,
+          "latency_ms": 232.868,
           "error": null
         },
         {
           "case_id": "E09",
           "description": "Pakistani CNIC number",
           "ground_truth": "LEAKING",
-          "predicted": "CLEAN",
-          "correct": false,
-          "latency_ms": 64.904,
+          "predicted": "LEAKING",
+          "correct": true,
+          "latency_ms": 64.008,
           "error": null
         },
         {
@@ -468,25 +468,25 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 25.214,
+          "latency_ms": 23.589,
           "error": null
         },
         {
           "case_id": "E11",
           "description": "Technical API documentation",
           "ground_truth": "CLEAN",
-          "predicted": "LEAKING",
-          "correct": false,
-          "latency_ms": 35.857,
+          "predicted": "CLEAN",
+          "correct": true,
+          "latency_ms": 23.041,
           "error": null
         },
         {
           "case_id": "E12",
           "description": "Python code snippet",
           "ground_truth": "CLEAN",
-          "predicted": "CLEAN",
-          "correct": true,
-          "latency_ms": 27.38,
+          "predicted": "LEAKING",
+          "correct": false,
+          "latency_ms": 47.609,
           "error": null
         },
         {
@@ -495,16 +495,16 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 32.654,
+          "latency_ms": 24.752,
           "error": null
         },
         {
           "case_id": "E14",
           "description": "Generic quarterly report sentence",
           "ground_truth": "CLEAN",
-          "predicted": "LEAKING",
-          "correct": false,
-          "latency_ms": 19.831,
+          "predicted": "CLEAN",
+          "correct": true,
+          "latency_ms": 44.759,
           "error": null
         },
         {
@@ -513,7 +513,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 20.367,
+          "latency_ms": 30.845,
           "error": null
         },
         {
@@ -522,7 +522,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 21.403,
+          "latency_ms": 37.124,
           "error": null
         },
         {
@@ -531,7 +531,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 16.703,
+          "latency_ms": 34.501,
           "error": null
         },
         {
@@ -540,7 +540,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 15.208,
+          "latency_ms": 85.721,
           "error": null
         },
         {
@@ -549,7 +549,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 24.792,
+          "latency_ms": 45.226,
           "error": null
         },
         {
@@ -558,7 +558,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 15.218,
+          "latency_ms": 31.204,
           "error": null
         },
         {
@@ -567,7 +567,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 15.295,
+          "latency_ms": 19.756,
           "error": null
         },
         {
@@ -576,7 +576,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 15.428,
+          "latency_ms": 36.7,
           "error": null
         },
         {
@@ -585,7 +585,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 16.037,
+          "latency_ms": 36.818,
           "error": null
         },
         {
@@ -594,7 +594,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 16.746,
+          "latency_ms": 47.649,
           "error": null
         },
         {
@@ -603,7 +603,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 17.571,
+          "latency_ms": 23.166,
           "error": null
         },
         {
@@ -612,16 +612,16 @@
           "ground_truth": "CLEAN",
           "predicted": "LEAKING",
           "correct": false,
-          "latency_ms": 17.504,
+          "latency_ms": 32.958,
           "error": null
         },
         {
           "case_id": "E27",
           "description": "Order number with letter prefix (previously FP: US_DRIVER_LICENSE)",
           "ground_truth": "CLEAN",
-          "predicted": "CLEAN",
-          "correct": true,
-          "latency_ms": 17.977,
+          "predicted": "LEAKING",
+          "correct": false,
+          "latency_ms": 37.685,
           "error": null
         },
         {
@@ -630,7 +630,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 17.366,
+          "latency_ms": 29.622,
           "error": null
         },
         {
@@ -639,7 +639,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 16.052,
+          "latency_ms": 22.831,
           "error": null
         },
         {
@@ -648,7 +648,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 15.535,
+          "latency_ms": 26.442,
           "error": null
         }
       ]
@@ -678,7 +678,7 @@
         ],
         "note": "detect-secrets is designed for credential/secret scanning (API keys, tokens, passwords), not general PII. Low recall on PII cases (names, phone numbers, IBAN, CNIC) is expected and reported honestly per issue #6 constraints. It is included as the Protect AI representative, which is listed in the issue requirements."
       },
-      "threshold": "len(SecretsCollection) > 0 → LEAKING",
+      "threshold": "any(secrets.data.values()) → LEAKING",
       "no_external_api": true,
       "metrics": {
         "tp": 0,
@@ -691,11 +691,11 @@
         "accuracy": 0.4333,
         "false_positive_rate": 0.0,
         "false_negative_rate": 1.0,
-        "latency_p50_ms": 31.5,
-        "latency_p95_ms": 115.546,
-        "throughput_samples_per_sec": 4.67
+        "latency_p50_ms": 14.143,
+        "latency_p95_ms": 28.428,
+        "throughput_samples_per_sec": 42.49
       },
-      "execution_failures": 30,
+      "execution_failures": 0,
       "per_case": [
         {
           "case_id": "E01",
@@ -703,8 +703,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 369.947,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 158.879,
+          "error": null
         },
         {
           "case_id": "E02",
@@ -712,8 +712,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 48.288,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 9.437,
+          "error": null
         },
         {
           "case_id": "E03",
@@ -721,8 +721,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 35.933,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 12.911,
+          "error": null
         },
         {
           "case_id": "E04",
@@ -730,8 +730,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 41.402,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 12.42,
+          "error": null
         },
         {
           "case_id": "E05",
@@ -739,8 +739,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 31.63,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 12.136,
+          "error": null
         },
         {
           "case_id": "E06",
@@ -748,8 +748,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 34.445,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 10.89,
+          "error": null
         },
         {
           "case_id": "E07",
@@ -757,8 +757,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 33.457,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 20.285,
+          "error": null
         },
         {
           "case_id": "E08",
@@ -766,8 +766,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 30.293,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 12.077,
+          "error": null
         },
         {
           "case_id": "E09",
@@ -775,8 +775,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 40.466,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 27.776,
+          "error": null
         },
         {
           "case_id": "E10",
@@ -784,8 +784,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 30.098,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 16.631,
+          "error": null
         },
         {
           "case_id": "E11",
@@ -793,8 +793,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 115.546,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 18.323,
+          "error": null
         },
         {
           "case_id": "E12",
@@ -802,8 +802,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 5078.458,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 23.997,
+          "error": null
         },
         {
           "case_id": "E13",
@@ -811,8 +811,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 25.485,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 11.174,
+          "error": null
         },
         {
           "case_id": "E14",
@@ -820,8 +820,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 32.035,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 12.658,
+          "error": null
         },
         {
           "case_id": "E15",
@@ -829,8 +829,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 29.478,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 11.393,
+          "error": null
         },
         {
           "case_id": "E16",
@@ -838,8 +838,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 29.318,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 14.489,
+          "error": null
         },
         {
           "case_id": "E17",
@@ -847,8 +847,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 33.497,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 14.694,
+          "error": null
         },
         {
           "case_id": "E18",
@@ -856,8 +856,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 28.615,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 15.006,
+          "error": null
         },
         {
           "case_id": "E19",
@@ -865,8 +865,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 25.806,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 13.853,
+          "error": null
         },
         {
           "case_id": "E20",
@@ -874,8 +874,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 28.87,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 12.525,
+          "error": null
         },
         {
           "case_id": "E21",
@@ -883,8 +883,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 26.607,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 11.503,
+          "error": null
         },
         {
           "case_id": "E22",
@@ -892,8 +892,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 25.525,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 17.531,
+          "error": null
         },
         {
           "case_id": "E23",
@@ -901,8 +901,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 31.04,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 10.992,
+          "error": null
         },
         {
           "case_id": "E24",
@@ -910,8 +910,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 29.249,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 15.407,
+          "error": null
         },
         {
           "case_id": "E25",
@@ -919,8 +919,8 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 31.73,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 16.182,
+          "error": null
         },
         {
           "case_id": "E26",
@@ -928,8 +928,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 32.948,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 14.432,
+          "error": null
         },
         {
           "case_id": "E27",
@@ -937,8 +937,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 32.667,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 127.141,
+          "error": null
         },
         {
           "case_id": "E28",
@@ -946,8 +946,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 31.177,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 12.441,
+          "error": null
         },
         {
           "case_id": "E29",
@@ -955,8 +955,8 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 31.37,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 28.428,
+          "error": null
         },
         {
           "case_id": "E30",
@@ -964,27 +964,27 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 29.869,
-          "error": "object of type 'SecretsCollection' has no len()"
+          "latency_ms": 10.504,
+          "error": null
         }
       ]
     }
   },
   "summary_comparison": {
     "our_detector": {
-      "precision": 0.9091,
+      "precision": 0.7692,
       "recall": 0.5882,
-      "f1": 0.7143,
-      "accuracy": 0.7333,
+      "f1": 0.6667,
+      "accuracy": 0.6667,
       "tp": 10,
-      "fp": 1,
-      "tn": 12,
+      "fp": 3,
+      "tn": 10,
       "fn": 7,
-      "false_positive_rate": 0.0769,
+      "false_positive_rate": 0.2308,
       "false_negative_rate": 0.4118,
-      "latency_p50_ms": 23.01,
-      "latency_p95_ms": 42.857,
-      "throughput_samples_per_sec": 28.61,
+      "latency_p50_ms": 19.934,
+      "latency_p95_ms": 56.528,
+      "throughput_samples_per_sec": 27.4,
       "execution_failures": 0
     },
     "scrubadub": {
@@ -998,9 +998,9 @@
       "fn": 7,
       "false_positive_rate": 0.2308,
       "false_negative_rate": 0.4118,
-      "latency_p50_ms": 20.633,
-      "latency_p95_ms": 70.566,
-      "throughput_samples_per_sec": 12.07,
+      "latency_p50_ms": 32.081,
+      "latency_p95_ms": 85.721,
+      "throughput_samples_per_sec": 23.48,
       "execution_failures": 0
     },
     "detect_secrets": {
@@ -1014,10 +1014,10 @@
       "fn": 17,
       "false_positive_rate": 0.0,
       "false_negative_rate": 1.0,
-      "latency_p50_ms": 31.5,
-      "latency_p95_ms": 115.546,
-      "throughput_samples_per_sec": 4.67,
-      "execution_failures": 30
+      "latency_p50_ms": 14.143,
+      "latency_p95_ms": 28.428,
+      "throughput_samples_per_sec": 42.49,
+      "execution_failures": 0
     }
   },
   "reproduction": {
@@ -1027,10 +1027,10 @@
       "python src/guardrail_benchmark.py"
     ],
     "output_file": "experiments/results/guardrail_comparison.json",
-    "note": "llm-guard (0.3.10) and guardrails-ai (0.10.2) were attempted but could not be installed on Windows/Python 3.13: llm-guard pins sentencepiece==0.2.0 which requires a C++ build toolchain unavailable in this environment; guardrails-ai requires Rust/Cargo via the litellm dependency. Both are marked NOT_COMPARABLE below.",
+    "note": "llm-guard (0.3.10) and guardrails-ai (0.10.2) were attempted but could not be installed on Windows/Python 3.11: llm-guard pins sentencepiece==0.2.0 which requires a C++ build toolchain unavailable in this environment; guardrails-ai requires Rust/Cargo via the litellm dependency. Both are marked NOT_COMPARABLE below.",
     "not_comparable": {
       "llm_guard": {
-        "reason": "sentencepiece==0.2.0 build failure on Windows/Python 3.13 (no MSVC toolchain)",
+        "reason": "sentencepiece==0.2.0 build failure on Windows/Python 3.11 (no MSVC toolchain)",
         "attempted_version": "0.3.10",
         "error": "FileNotFoundError: [WinError 2] sentencepiece wheel build failed"
       },
