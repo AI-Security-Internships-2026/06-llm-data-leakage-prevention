@@ -1,34 +1,34 @@
 {
   "meta": {
-    "run_at": "2026-07-24T19:34:24.955596+00:00",
-    "dataset": "C:\\Users\\MUGHAL\\Desktop\\ont lab internship\\06 llm data leakage prevention\\06-llm-data-leakage-prevention\\experiments\\results\\synthetic_dataset.json",
+    "run_at": "2026-07-30T10:46:04.048132+00:00",
+    "dataset": "C:\\Users\\MUGHAL\\Desktop\\ont lab internship\\06-llm-data-leakage-prevention\\experiments\\results\\synthetic_dataset.json",
     "total_samples": 1200,
     "detector": "PIIDetector (Presidio + custom recognisers)"
   },
   "summary": {
-    "precision": 0.9433,
-    "recall": 0.9333,
-    "f1": 0.9383,
-    "accuracy": 0.9325,
-    "p50_latency_ms": 26.35,
-    "p95_latency_ms": 49.484
+    "precision": 0.9439,
+    "recall": 0.9439,
+    "f1": 0.9439,
+    "accuracy": 0.9383,
+    "p50_latency_ms": 15.823,
+    "p95_latency_ms": 43.006
   },
   "binary_classification": {
-    "TP": 616,
+    "TP": 623,
     "FP": 37,
     "TN": 503,
-    "FN": 44,
-    "precision": 0.9433,
-    "recall": 0.9333,
-    "f1": 0.9383,
-    "accuracy": 0.9325
+    "FN": 37,
+    "precision": 0.9439,
+    "recall": 0.9439,
+    "f1": 0.9439,
+    "accuracy": 0.9383
   },
   "per_entity_metrics": {
     "CREDIT_CARD": {
       "total": 91,
-      "detected": 70,
-      "missed": 21,
-      "recall": 0.7692
+      "detected": 75,
+      "missed": 16,
+      "recall": 0.8242
     },
     "EMAIL_ADDRESS": {
       "total": 113,
@@ -44,21 +44,21 @@
     },
     "LOCATION": {
       "total": 74,
-      "detected": 57,
-      "missed": 17,
-      "recall": 0.7703
+      "detected": 61,
+      "missed": 13,
+      "recall": 0.8243
     },
     "PERSON": {
       "total": 155,
-      "detected": 155,
-      "missed": 0,
-      "recall": 1.0
+      "detected": 154,
+      "missed": 1,
+      "recall": 0.9935
     },
     "PHONE_NUMBER": {
       "total": 79,
-      "detected": 72,
-      "missed": 7,
-      "recall": 0.9114
+      "detected": 71,
+      "missed": 8,
+      "recall": 0.8987
     },
     "PK_CNIC": {
       "total": 85,
@@ -75,10 +75,10 @@
   },
   "latency": {
     "n_samples": 1200,
-    "mean_ms": 29.598,
-    "min_ms": 10.342,
-    "max_ms": 449.198,
-    "p50_ms": 26.35,
-    "p95_ms": 49.484
+    "mean_ms": 20.714,
+    "min_ms": 8.808,
+    "max_ms": 474.944,
+    "p50_ms": 15.823,
+    "p95_ms": 43.006
   }
 }
