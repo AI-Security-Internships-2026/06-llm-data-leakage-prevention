@@ -2,7 +2,7 @@
   "meta": {
     "benchmark": "Issue #6 — PII and secret leakage detection comparison",
     "student": "Muhammad Hashim Mughal",
-    "run_date": "2026-07-30T09:12:49.101001+00:00",
+    "run_date": "2026-07-30T10:41:10.133192+00:00",
     "python_version": "3.11.15",
     "platform": "Windows-10-10.0.19045-SP0",
     "eval_cases_total": 30,
@@ -55,18 +55,18 @@
       "no_external_api": true,
       "metrics": {
         "tp": 10,
-        "fp": 3,
-        "tn": 10,
+        "fp": 1,
+        "tn": 12,
         "fn": 7,
-        "precision": 0.7692,
+        "precision": 0.9091,
         "recall": 0.5882,
-        "f1": 0.6667,
-        "accuracy": 0.6667,
-        "false_positive_rate": 0.2308,
+        "f1": 0.7143,
+        "accuracy": 0.7333,
+        "false_positive_rate": 0.0769,
         "false_negative_rate": 0.4118,
-        "latency_p50_ms": 19.934,
-        "latency_p95_ms": 56.528,
-        "throughput_samples_per_sec": 27.4
+        "latency_p50_ms": 26.601,
+        "latency_p95_ms": 118.015,
+        "throughput_samples_per_sec": 17.77
       },
       "execution_failures": 0,
       "per_case": [
@@ -76,7 +76,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 383.82,
+          "latency_ms": 660.652,
           "error": null
         },
         {
@@ -85,7 +85,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 81.789,
+          "latency_ms": 118.015,
           "error": null
         },
         {
@@ -94,7 +94,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 27.969,
+          "latency_ms": 37.69,
           "error": null
         },
         {
@@ -103,7 +103,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 20.962,
+          "latency_ms": 37.981,
           "error": null
         },
         {
@@ -112,7 +112,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 18.465,
+          "latency_ms": 31.222,
           "error": null
         },
         {
@@ -121,7 +121,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 36.566,
+          "latency_ms": 45.376,
           "error": null
         },
         {
@@ -130,7 +130,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 13.962,
+          "latency_ms": 18.178,
           "error": null
         },
         {
@@ -139,7 +139,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 20.824,
+          "latency_ms": 21.561,
           "error": null
         },
         {
@@ -148,7 +148,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 19.214,
+          "latency_ms": 22.051,
           "error": null
         },
         {
@@ -157,7 +157,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 20.75,
+          "latency_ms": 28.354,
           "error": null
         },
         {
@@ -166,7 +166,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 18.379,
+          "latency_ms": 24.192,
           "error": null
         },
         {
@@ -175,7 +175,7 @@
           "ground_truth": "CLEAN",
           "predicted": "LEAKING",
           "correct": false,
-          "latency_ms": 18.883,
+          "latency_ms": 23.971,
           "error": null
         },
         {
@@ -184,7 +184,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 23.454,
+          "latency_ms": 26.975,
           "error": null
         },
         {
@@ -193,7 +193,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 19.896,
+          "latency_ms": 38.303,
           "error": null
         },
         {
@@ -202,7 +202,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 23.591,
+          "latency_ms": 45.766,
           "error": null
         },
         {
@@ -211,7 +211,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 14.632,
+          "latency_ms": 21.764,
           "error": null
         },
         {
@@ -220,7 +220,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 17.853,
+          "latency_ms": 34.559,
           "error": null
         },
         {
@@ -229,7 +229,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 14.542,
+          "latency_ms": 20.587,
           "error": null
         },
         {
@@ -238,7 +238,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 56.528,
+          "latency_ms": 26.226,
           "error": null
         },
         {
@@ -247,7 +247,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 19.973,
+          "latency_ms": 18.889,
           "error": null
         },
         {
@@ -256,7 +256,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 26.513,
+          "latency_ms": 25.05,
           "error": null
         },
         {
@@ -265,7 +265,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 44.013,
+          "latency_ms": 120.35,
           "error": null
         },
         {
@@ -274,7 +274,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 13.595,
+          "latency_ms": 36.605,
           "error": null
         },
         {
@@ -283,7 +283,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 18.494,
+          "latency_ms": 48.107,
           "error": null
         },
         {
@@ -292,25 +292,25 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 17.14,
+          "latency_ms": 38.598,
           "error": null
         },
         {
           "case_id": "E26",
           "description": "Alphanumeric ref code (previously FP: IN_PAN)",
           "ground_truth": "CLEAN",
-          "predicted": "LEAKING",
-          "correct": false,
-          "latency_ms": 17.868,
+          "predicted": "CLEAN",
+          "correct": true,
+          "latency_ms": 25.439,
           "error": null
         },
         {
           "case_id": "E27",
           "description": "Order number with letter prefix (previously FP: US_DRIVER_LICENSE)",
           "ground_truth": "CLEAN",
-          "predicted": "LEAKING",
-          "correct": false,
-          "latency_ms": 18.129,
+          "predicted": "CLEAN",
+          "correct": true,
+          "latency_ms": 23.967,
           "error": null
         },
         {
@@ -319,7 +319,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 28.122,
+          "latency_ms": 23.95,
           "error": null
         },
         {
@@ -328,7 +328,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 20.539,
+          "latency_ms": 22.885,
           "error": null
         },
         {
@@ -337,7 +337,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 18.477,
+          "latency_ms": 20.587,
           "error": null
         }
       ]
@@ -375,9 +375,9 @@
         "accuracy": 0.6667,
         "false_positive_rate": 0.2308,
         "false_negative_rate": 0.4118,
-        "latency_p50_ms": 32.081,
-        "latency_p95_ms": 85.721,
-        "throughput_samples_per_sec": 23.48
+        "latency_p50_ms": 18.813,
+        "latency_p95_ms": 25.612,
+        "throughput_samples_per_sec": 52.37
       },
       "execution_failures": 0,
       "per_case": [
@@ -387,7 +387,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 14.348,
+          "latency_ms": 14.341,
           "error": null
         },
         {
@@ -396,7 +396,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 14.164,
+          "latency_ms": 21.689,
           "error": null
         },
         {
@@ -405,7 +405,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 15.296,
+          "latency_ms": 20.099,
           "error": null
         },
         {
@@ -414,7 +414,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 17.031,
+          "latency_ms": 22.326,
           "error": null
         },
         {
@@ -423,7 +423,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 14.911,
+          "latency_ms": 18.265,
           "error": null
         },
         {
@@ -432,7 +432,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 53.809,
+          "latency_ms": 20.829,
           "error": null
         },
         {
@@ -441,7 +441,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 109.468,
+          "latency_ms": 20.87,
           "error": null
         },
         {
@@ -450,7 +450,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 232.868,
+          "latency_ms": 25.612,
           "error": null
         },
         {
@@ -459,7 +459,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 64.008,
+          "latency_ms": 18.529,
           "error": null
         },
         {
@@ -468,7 +468,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 23.589,
+          "latency_ms": 20.698,
           "error": null
         },
         {
@@ -477,7 +477,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 23.041,
+          "latency_ms": 18.489,
           "error": null
         },
         {
@@ -486,7 +486,7 @@
           "ground_truth": "CLEAN",
           "predicted": "LEAKING",
           "correct": false,
-          "latency_ms": 47.609,
+          "latency_ms": 20.698,
           "error": null
         },
         {
@@ -495,7 +495,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 24.752,
+          "latency_ms": 25.252,
           "error": null
         },
         {
@@ -504,7 +504,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 44.759,
+          "latency_ms": 19.108,
           "error": null
         },
         {
@@ -513,7 +513,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 30.845,
+          "latency_ms": 27.308,
           "error": null
         },
         {
@@ -522,7 +522,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 37.124,
+          "latency_ms": 18.875,
           "error": null
         },
         {
@@ -531,7 +531,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 34.501,
+          "latency_ms": 20.196,
           "error": null
         },
         {
@@ -540,7 +540,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 85.721,
+          "latency_ms": 30.488,
           "error": null
         },
         {
@@ -549,7 +549,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 45.226,
+          "latency_ms": 19.342,
           "error": null
         },
         {
@@ -558,7 +558,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 31.204,
+          "latency_ms": 14.561,
           "error": null
         },
         {
@@ -567,7 +567,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 19.756,
+          "latency_ms": 16.802,
           "error": null
         },
         {
@@ -576,7 +576,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 36.7,
+          "latency_ms": 13.123,
           "error": null
         },
         {
@@ -585,7 +585,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 36.818,
+          "latency_ms": 18.221,
           "error": null
         },
         {
@@ -594,7 +594,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 47.649,
+          "latency_ms": 13.145,
           "error": null
         },
         {
@@ -603,7 +603,7 @@
           "ground_truth": "LEAKING",
           "predicted": "LEAKING",
           "correct": true,
-          "latency_ms": 23.166,
+          "latency_ms": 17.58,
           "error": null
         },
         {
@@ -612,7 +612,7 @@
           "ground_truth": "CLEAN",
           "predicted": "LEAKING",
           "correct": false,
-          "latency_ms": 32.958,
+          "latency_ms": 13.875,
           "error": null
         },
         {
@@ -621,7 +621,7 @@
           "ground_truth": "CLEAN",
           "predicted": "LEAKING",
           "correct": false,
-          "latency_ms": 37.685,
+          "latency_ms": 18.751,
           "error": null
         },
         {
@@ -630,7 +630,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 29.622,
+          "latency_ms": 14.571,
           "error": null
         },
         {
@@ -639,7 +639,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 22.831,
+          "latency_ms": 17.099,
           "error": null
         },
         {
@@ -648,7 +648,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 26.442,
+          "latency_ms": 12.074,
           "error": null
         }
       ]
@@ -691,9 +691,9 @@
         "accuracy": 0.4333,
         "false_positive_rate": 0.0,
         "false_negative_rate": 1.0,
-        "latency_p50_ms": 14.143,
-        "latency_p95_ms": 28.428,
-        "throughput_samples_per_sec": 42.49
+        "latency_p50_ms": 8.945,
+        "latency_p95_ms": 29.864,
+        "throughput_samples_per_sec": 66.1
       },
       "execution_failures": 0,
       "per_case": [
@@ -703,7 +703,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 158.879,
+          "latency_ms": 124.078,
           "error": null
         },
         {
@@ -712,7 +712,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 9.437,
+          "latency_ms": 6.581,
           "error": null
         },
         {
@@ -721,7 +721,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 12.911,
+          "latency_ms": 8.485,
           "error": null
         },
         {
@@ -730,7 +730,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 12.42,
+          "latency_ms": 6.756,
           "error": null
         },
         {
@@ -739,7 +739,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 12.136,
+          "latency_ms": 10.436,
           "error": null
         },
         {
@@ -748,7 +748,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 10.89,
+          "latency_ms": 9.329,
           "error": null
         },
         {
@@ -757,7 +757,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 20.285,
+          "latency_ms": 13.69,
           "error": null
         },
         {
@@ -766,7 +766,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 12.077,
+          "latency_ms": 7.328,
           "error": null
         },
         {
@@ -775,7 +775,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 27.776,
+          "latency_ms": 11.542,
           "error": null
         },
         {
@@ -784,7 +784,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 16.631,
+          "latency_ms": 7.259,
           "error": null
         },
         {
@@ -793,7 +793,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 18.323,
+          "latency_ms": 13.635,
           "error": null
         },
         {
@@ -802,7 +802,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 23.997,
+          "latency_ms": 52.715,
           "error": null
         },
         {
@@ -811,7 +811,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 11.174,
+          "latency_ms": 8.305,
           "error": null
         },
         {
@@ -820,7 +820,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 12.658,
+          "latency_ms": 8.67,
           "error": null
         },
         {
@@ -829,7 +829,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 11.393,
+          "latency_ms": 9.143,
           "error": null
         },
         {
@@ -838,7 +838,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 14.489,
+          "latency_ms": 7.743,
           "error": null
         },
         {
@@ -847,7 +847,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 14.694,
+          "latency_ms": 12.226,
           "error": null
         },
         {
@@ -856,7 +856,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 15.006,
+          "latency_ms": 8.746,
           "error": null
         },
         {
@@ -865,7 +865,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 13.853,
+          "latency_ms": 8.737,
           "error": null
         },
         {
@@ -874,7 +874,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 12.525,
+          "latency_ms": 9.28,
           "error": null
         },
         {
@@ -883,7 +883,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 11.503,
+          "latency_ms": 8.529,
           "error": null
         },
         {
@@ -892,7 +892,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 17.531,
+          "latency_ms": 10.462,
           "error": null
         },
         {
@@ -901,7 +901,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 10.992,
+          "latency_ms": 7.021,
           "error": null
         },
         {
@@ -910,7 +910,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 15.407,
+          "latency_ms": 12.565,
           "error": null
         },
         {
@@ -919,7 +919,7 @@
           "ground_truth": "LEAKING",
           "predicted": "CLEAN",
           "correct": false,
-          "latency_ms": 16.182,
+          "latency_ms": 6.087,
           "error": null
         },
         {
@@ -928,7 +928,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 14.432,
+          "latency_ms": 11.517,
           "error": null
         },
         {
@@ -937,7 +937,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 127.141,
+          "latency_ms": 9.603,
           "error": null
         },
         {
@@ -946,7 +946,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 12.441,
+          "latency_ms": 7.248,
           "error": null
         },
         {
@@ -955,7 +955,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 28.428,
+          "latency_ms": 29.864,
           "error": null
         },
         {
@@ -964,7 +964,7 @@
           "ground_truth": "CLEAN",
           "predicted": "CLEAN",
           "correct": true,
-          "latency_ms": 10.504,
+          "latency_ms": 6.267,
           "error": null
         }
       ]
@@ -972,19 +972,19 @@
   },
   "summary_comparison": {
     "our_detector": {
-      "precision": 0.7692,
+      "precision": 0.9091,
       "recall": 0.5882,
-      "f1": 0.6667,
-      "accuracy": 0.6667,
+      "f1": 0.7143,
+      "accuracy": 0.7333,
       "tp": 10,
-      "fp": 3,
-      "tn": 10,
+      "fp": 1,
+      "tn": 12,
       "fn": 7,
-      "false_positive_rate": 0.2308,
+      "false_positive_rate": 0.0769,
       "false_negative_rate": 0.4118,
-      "latency_p50_ms": 19.934,
-      "latency_p95_ms": 56.528,
-      "throughput_samples_per_sec": 27.4,
+      "latency_p50_ms": 26.601,
+      "latency_p95_ms": 118.015,
+      "throughput_samples_per_sec": 17.77,
       "execution_failures": 0
     },
     "scrubadub": {
@@ -998,9 +998,9 @@
       "fn": 7,
       "false_positive_rate": 0.2308,
       "false_negative_rate": 0.4118,
-      "latency_p50_ms": 32.081,
-      "latency_p95_ms": 85.721,
-      "throughput_samples_per_sec": 23.48,
+      "latency_p50_ms": 18.813,
+      "latency_p95_ms": 25.612,
+      "throughput_samples_per_sec": 52.37,
       "execution_failures": 0
     },
     "detect_secrets": {
@@ -1014,9 +1014,9 @@
       "fn": 17,
       "false_positive_rate": 0.0,
       "false_negative_rate": 1.0,
-      "latency_p50_ms": 14.143,
-      "latency_p95_ms": 28.428,
-      "throughput_samples_per_sec": 42.49,
+      "latency_p50_ms": 8.945,
+      "latency_p95_ms": 29.864,
+      "throughput_samples_per_sec": 66.1,
       "execution_failures": 0
     }
   },
