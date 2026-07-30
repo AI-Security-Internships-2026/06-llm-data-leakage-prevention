@@ -59,6 +59,26 @@ _iban_recognizer = PatternRecognizer(
 )
 analyzer.registry.add_recognizer(_iban_recognizer)
 
+# Week 07: context-boosted 16-digit recognizer for synthetic/fake card numbers
+# that fail Presidio's built-in Luhn validation. Only fires when payment-related
+# context words are present — prevents FPs on account numbers or random digits.
+_credit_card_raw_recognizer = PatternRecognizer(
+    supported_entity="CREDIT_CARD",
+    patterns=[
+        Pattern(
+            name="cc_raw_16digit_context",
+            regex=r"\b\d{16}\b",
+            score=0.65,
+        )
+    ],
+    context=[
+        "credit card", "card number", "visa", "mastercard", "amex",
+        "payment", "transaction", "billing", "charge", "debit",
+        "cvv", "expiry", "issued by", "ending with", "card",
+    ],
+)
+analyzer.registry.add_recognizer(_credit_card_raw_recognizer)
+
 # ── Risk classification sets ──────────────────────────────────────────────────
 
 # Week 06 Commit 2: added US_BANK_NUMBER — confirmed hits are high-risk
