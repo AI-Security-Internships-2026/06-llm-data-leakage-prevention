@@ -133,19 +133,49 @@ def load_synthetic_emails(n: int, seed: int = 42) -> list[dict]:
 
 # ── Detection runner ──────────────────────────────────────────────────────────
 
-def run_detection_on_emails(emails: list[dict]) -> tuple[list[dict], list[float]]:
-    """Run detect_pii on each email and collect results + latencies."""
+def build_email_text(em: dict, max_body_chars: int | None = None) -> str:
+    """
+    Assemble the text that will be passed to detect_pii.
+
+    Zone-aware truncation strategy (Week 07 latency investigation):
+    - Headers (From / To / Subject) are always included in full — they are
+      guaranteed PII locations (email addresses, names) and are short (<200 chars).
+    - The body is truncated to *max_body_chars* if that parameter is set.
+      None means no truncation (original behaviour).
+
+    This prevents the p95 latency spike caused by newsletter/digest emails
+    (e.g. "Enron Mentions", 6 056 ms) while preserving recall on header PII
+    that never appears past a 2 000-character cut-off anyway.
+    """
+    header = (
+        f"From: {em.get('from', '')}\n"
+        f"To: {em.get('to', '')}\n"
+        f"Subject: {em.get('subject', '')}\n\n"
+    )
+    body = em.get("body", "")
+    if max_body_chars is not None:
+        body = body[:max_body_chars]
+    return (header + body).strip()
+
+
+def run_detection_on_emails(
+    emails: list[dict],
+    max_body_chars: int | None = None,
+) -> tuple[list[dict], list[float]]:
+    """Run detect_pii on each email and collect results + latencies.
+
+    Parameters
+    ----------
+    emails        : list of parsed email dicts (from/to/subject/body)
+    max_body_chars: if set, body text is truncated to this many characters
+                   before analysis. Headers are always included in full.
+                   None = no truncation (original behaviour).
+    """
     results = []
     latencies = []
 
     for i, em in enumerate(emails):
-        # Concatenate headers + body for detection (headers often contain PII)
-        full_text = (
-            f"From: {em.get('from', '')}\n"
-            f"To: {em.get('to', '')}\n"
-            f"Subject: {em.get('subject', '')}\n\n"
-            f"{em.get('body', '')}"
-        ).strip()
+        full_text = build_email_text(em, max_body_chars)
 
         if not full_text:
             continue
@@ -163,6 +193,7 @@ def run_detection_on_emails(emails: list[dict]) -> tuple[list[dict], list[float]
             "entity_types": [e["type"] for e in detection["entities"]],
             "entity_count": len(detection["entities"]),
             "latency_ms": round(latency_ms, 3),
+            "text_chars": len(full_text),          # Week 07: track input length
             # Ground truth (only available in synthetic mode)
             "true_label": em.get("_label"),
             "true_entity_types": em.get("_entity_types"),
@@ -249,6 +280,25 @@ def main():
     parser.add_argument("--seed",       type=int, default=42)
     parser.add_argument("--output-dir", type=str,
                         default=os.path.join(ROOT, "experiments", "results"))
+    # Week 07: latency investigation options
+    parser.add_argument(
+        "--max-body-chars", type=int, default=None,
+        metavar="N",
+        help=(
+            "Truncate email body to at most N characters before detection. "
+            "Headers (From/To/Subject) are always scanned in full. "
+            "Default: no truncation."
+        ),
+    )
+    parser.add_argument(
+        "--benchmark-truncation", action="store_true",
+        help=(
+            "Run the same email set under five truncation strategies "
+            "(full, 500, 1000, 2000, 4000 body chars) and print a "
+            "side-by-side latency + entity-count comparison table. "
+            "No JSON output is written in this mode."
+        ),
+    )
     args = parser.parse_args()
 
     # Load emails
@@ -269,9 +319,39 @@ def main():
         emails = load_synthetic_emails(args.samples, args.seed)
 
     print(f"Loaded {len(emails)} emails.")
+
+    # ── Benchmark mode ────────────────────────────────────────────────────────
+    if args.benchmark_truncation:
+        strategies = [
+            ("Full (no limit)", None),
+            ("4 000 chars",     4000),
+            ("2 000 chars",     2000),
+            ("1 000 chars",     1000),
+            ("500 chars",        500),
+        ]
+        print("\nRunning truncation benchmark — each strategy on the same email set...\n")
+        print(f"{'Strategy':<20} {'p50 ms':>8} {'p95 ms':>8} {'p99 ms':>8} "
+              f"{'max ms':>8} {'mean ms':>8} {'avg entities':>13}")
+        print("-" * 80)
+        for label, max_chars in strategies:
+            run_results, run_latencies = run_detection_on_emails(emails, max_chars)
+            sl = sorted(run_latencies)
+            n  = len(sl)
+            p50 = sl[int(n * 0.50)]
+            p95 = sl[int(n * 0.95)]
+            p99 = sl[int(n * 0.99)]
+            mx  = sl[-1]
+            mean = sum(run_latencies) / n
+            avg_ent = sum(r["entity_count"] for r in run_results) / len(run_results)
+            print(f"{label:<20} {p50:>8.1f} {p95:>8.1f} {p99:>8.1f} "
+                  f"{mx:>8.1f} {mean:>8.1f} {avg_ent:>13.1f}")
+        print()
+        return
+
+    # ── Normal run ────────────────────────────────────────────────────────────
     print("Running detection...")
 
-    results, latencies = run_detection_on_emails(emails)
+    results, latencies = run_detection_on_emails(emails, args.max_body_chars)
     summary = aggregate(results, latencies)
 
     print(f"\n  Total emails  : {summary['total_emails']}")
@@ -296,6 +376,7 @@ def main():
             "samples_processed": len(results),
             "seed": args.seed,
             "detector": "PIIDetector Stage 1 (Presidio + custom recognisers)",
+            "max_body_chars": args.max_body_chars,   # Week 07: record truncation setting
         },
         "summary": summary,
         "results": results,
