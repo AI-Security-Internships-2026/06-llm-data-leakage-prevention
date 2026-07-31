@@ -59,6 +59,26 @@ _iban_recognizer = PatternRecognizer(
 )
 analyzer.registry.add_recognizer(_iban_recognizer)
 
+# Week 07: context-boosted 16-digit recognizer for synthetic/fake card numbers
+# that fail Presidio's built-in Luhn validation. Only fires when payment-related
+# context words are present — prevents FPs on account numbers or random digits.
+_credit_card_raw_recognizer = PatternRecognizer(
+    supported_entity="CREDIT_CARD",
+    patterns=[
+        Pattern(
+            name="cc_raw_16digit_context",
+            regex=r"\b\d{16}\b",
+            score=0.65,
+        )
+    ],
+    context=[
+        "credit card", "card number", "visa", "mastercard", "amex",
+        "payment", "transaction", "billing", "charge", "debit",
+        "cvv", "expiry", "issued by", "ending with", "card",
+    ],
+)
+analyzer.registry.add_recognizer(_credit_card_raw_recognizer)
+
 # ── Risk classification sets ──────────────────────────────────────────────────
 
 # Week 06 Commit 2: added US_BANK_NUMBER — confirmed hits are high-risk
@@ -96,6 +116,18 @@ def _apply_score_gates(results: list) -> list:
         if r.score >= _SCORE_GATES.get(r.entity_type, 0.0)
     ]
 
+
+def _drop_person_with_digits(results: list, text: str) -> list:
+    """Drop PERSON entities whose span contains any digit.
+    Real person names never contain digits — these are ref codes, order
+    numbers, model IDs etc. that spaCy NER mis-classifies as names.
+    """
+    filtered = []
+    for r in results:
+        if r.entity_type == "PERSON" and any(c.isdigit() for c in text[r.start:r.end]):
+            continue
+        filtered.append(r)
+    return filtered
 
 # ── Normalization regexes ─────────────────────────────────────────────────────
 
@@ -203,9 +235,8 @@ def detect_pii(text: str, language: str = "en", use_stage2: bool = False) -> dic
         language=language,
         entities=SUPPORTED_ENTITIES,
     )
-    # Week 06 Commit 2: drop US_BANK_NUMBER results below the 0.80 score gate.
     results = _apply_score_gates(results)
-
+    results = _drop_person_with_digits(results, normalized)
     entities = [
         {
             "type": r.entity_type,

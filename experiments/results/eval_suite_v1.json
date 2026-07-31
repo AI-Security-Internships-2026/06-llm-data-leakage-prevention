@@ -172,13 +172,10 @@
       ],
       "detected": [
         "CREDIT_CARD",
-        "EMAIL_ADDRESS",
-        "PERSON"
+        "EMAIL_ADDRESS"
       ],
       "missed": [],
-      "extra": [
-        "PERSON"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": null
     },
@@ -197,12 +194,16 @@
     {
       "id": "E12",
       "description": "Python code snippet",
-      "label": "TN",
-      "risk_level": "CLEAN",
+      "label": "FP",
+      "risk_level": "MEDIUM",
       "expected": [],
-      "detected": [],
+      "detected": [
+        "PERSON"
+      ],
       "missed": [],
-      "extra": [],
+      "extra": [
+        "PERSON"
+      ],
       "expected_stage2": false,
       "stage2_flagged": null
     },
@@ -365,16 +366,12 @@
     {
       "id": "E26",
       "description": "Alphanumeric reference code (previously FP: IN_PAN)",
-      "label": "FP",
-      "risk_level": "MEDIUM",
+      "label": "TN",
+      "risk_level": "CLEAN",
       "expected": [],
-      "detected": [
-        "PERSON"
-      ],
+      "detected": [],
       "missed": [],
-      "extra": [
-        "PERSON"
-      ],
+      "extra": [],
       "expected_stage2": false,
       "stage2_flagged": null
     },
