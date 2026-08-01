@@ -1,9 +1,9 @@
 # Research Proposal: LLM Data Leakage Prevention: Detection and Mitigation
 
 **Student:** Muhammad Hashim Mughal
-**Supervisor:** _[Fill in supervisor name]_
-**Start date:** 2026-06-
-**Expected end date:** 2026-08-
+**Supervisor:** Dr. Rana Abu Bakar, Hafiz Mati Ur Rahman
+**Start date:** June 2026
+**Expected end date:** September 2026
 
 ---
 
