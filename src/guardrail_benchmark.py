@@ -278,6 +278,37 @@ def _build_detect_secrets():
     return _detect
 
 
+# ── Implementation D: llm-guard (Protect AI) — Anonymize scanner ─────────────
+
+def _build_llm_guard():
+    """
+    llm-guard 0.3.16 — Protect AI framework.
+    Uses the Anonymize input scanner which wraps Presidio's AnalyzerEngine
+    with optional transformer-based NER on top.
+    We disable the transformer model (use_onnx=False, no model download)
+    and rely on Presidio's rule-based recognizers only so the run is fully
+    offline and deterministic.
+
+    Decision rule: if Anonymize redacts anything (sanitized_text != prompt)
+    the text is LEAKING; otherwise CLEAN.
+    """
+    from llm_guard.input_scanners.anonymize import Anonymize
+    from llm_guard.vault import Vault
+
+    vault = Vault()
+    # entity_types=None → use all default Presidio entities
+    # use_transformers=False → pure rule-based, no model download, fully offline
+    scanner = Anonymize(vault, entity_types=None, use_faker=False)
+
+    def _detect(text: str) -> bool:
+        sanitized, is_valid, risk_score = scanner.scan(text)
+        # is_valid=False  → scanner flagged PII  → LEAKING
+        # is_valid=True   → scanner passed clean → CLEAN
+        return not is_valid
+
+    return _detect
+
+
 # ── version helpers ───────────────────────────────────────────────────────────
 
 def _pkg_version(name: str) -> str:
@@ -315,10 +346,14 @@ def main():
     ds_fn = _build_detect_secrets()
     print("  [C] detect-secrets     OK")
 
+    llm_guard_fn = _build_llm_guard()
+    print("  [D] llm-guard          OK")
+
     # ── run ───────────────────────────────────────────────────────────────
-    results_our  = _run("A: Our detector (Stage 1)",    our_fn,       EVAL_CASES)
-    results_scr  = _run("B: scrubadub 2.0.1",           scrubadub_fn, EVAL_CASES)
-    results_ds   = _run("C: detect-secrets 1.4.0",      ds_fn,        EVAL_CASES)
+    results_our  = _run("A: Our detector (Stage 1)",    our_fn,        EVAL_CASES)
+    results_scr  = _run("B: scrubadub 2.0.1",           scrubadub_fn,  EVAL_CASES)
+    results_ds   = _run("C: detect-secrets 1.4.0",      ds_fn,         EVAL_CASES)
+    results_llmg = _run("D: llm-guard 0.3.16",          llm_guard_fn,  EVAL_CASES)
 
     # ── assemble output ───────────────────────────────────────────────────
     output = {
@@ -418,40 +453,60 @@ def main():
                 "no_external_api": True,
                 **results_ds,
             },
+            "llm_guard": {
+                "name": "llm-guard Anonymize (Protect AI)",
+                "framework": "Protect AI — llm-guard",
+                "component": "llm_guard.input_scanners.Anonymize (rule-based, no transformer model)",
+                "version": {
+                    "llm_guard": _pkg_version("llm-guard"),
+                    "presidio_analyzer": _pkg_version("presidio-analyzer"),
+                },
+                "configuration": {
+                    "entity_types": "default (all Presidio entities)",
+                    "use_faker": False,
+                    "use_transformers": False,
+                    "decision_rule": "is_valid=False → LEAKING (scanner redacted something)",
+                    "note": (
+                        "llm-guard 0.3.16 wraps Presidio's AnalyzerEngine. "
+                        "Transformer-based NER disabled (use_transformers=False) "
+                        "to keep evaluation fully offline and deterministic. "
+                        "transformers pinned to 4.46.3 (llm-guard requires 4.51.3 "
+                        "but that version requires torch.nn.attention.flex_attention "
+                        "unavailable on torch 2.13 / this hardware)."
+                    ),
+                },
+                "threshold": "any redaction by Anonymize scanner → LEAKING",
+                "no_external_api": True,
+                **results_llmg,
+            },
         },
         "summary_comparison": {},
         "reproduction": {
             "commands": [
                 "cd 06-llm-data-leakage-prevention",
-                "pip install scrubadub scrubadub-spacy detect-secrets==1.4.0",
+                "pip install scrubadub scrubadub-spacy detect-secrets==1.4.0 llm-guard==0.3.16 transformers==4.46.3",
                 "python src/guardrail_benchmark.py",
             ],
             "output_file": "experiments/results/guardrail_comparison.json",
-            "note": (
-                "llm-guard (0.3.10) and guardrails-ai (0.10.2) were attempted "
-                "but could not be installed on Windows/Python 3.11: llm-guard "
-                "pins sentencepiece==0.2.0 which requires a C++ build toolchain "
-                "unavailable in this environment; guardrails-ai requires Rust/Cargo "
-                "via the litellm dependency. Both are marked NOT_COMPARABLE below."
-            ),
             "not_comparable": {
-                "llm_guard": {
-                    "reason": "sentencepiece==0.2.0 build failure on Windows/Python 3.11 (no MSVC toolchain)",
-                    "attempted_version": "0.3.10",
-                    "error": "FileNotFoundError: [WinError 2] sentencepiece wheel build failed",
-                },
                 "guardrails_ai": {
-                    "reason": "litellm dependency requires Rust/Cargo on Windows; Cargo not on PATH",
-                    "attempted_version": "0.10.2",
-                    "error": "metadata-generation-failed: litellm requires Rust toolchain",
+                    "reason": "guardrails-ai 0.10.2 installed but its PII validator requires "
+                              "an OpenAI-compatible API key at runtime. Sending eval data to a "
+                              "hosted API violates issue #6 constraint: 'Do not send sensitive "
+                              "data to hosted APIs'. Marked not comparable.",
+                    "status": "installed but excluded",
                 },
                 "nvidia_nemo_guardrails": {
-                    "reason": "Not comparable — NeMo Guardrails is a conversational flow/policy "
-                              "framework, not a PII detector. No equivalent PII scanner component.",
+                    "reason": "Not comparable — NeMo Guardrails is a conversational rail/policy "
+                              "framework, not a PII detector. No equivalent PII scanner component "
+                              "that can run offline without an LLM endpoint.",
+                    "status": "installed but not comparable",
                 },
                 "meta_llama_firewall": {
                     "reason": "Not comparable — LlamaFirewall targets prompt injection and "
-                              "agent safety, not text-level PII/secret scanning.",
+                              "agent safety, not text-level PII/secret scanning. "
+                              "Also broke environment (numpy/typer conflicts); uninstalled.",
+                    "status": "uninstalled after dependency conflict",
                 },
             },
         },
@@ -485,6 +540,7 @@ def main():
         "our_detector":  "A: Our detector (Stage 1)",
         "scrubadub":     "B: scrubadub 2.0.1",
         "detect_secrets":"C: detect-secrets 1.4.0",
+        "llm_guard":     "D: llm-guard 0.3.16",
     }
     for key, label in labels.items():
         s = output["summary_comparison"][key]
