@@ -5,12 +5,19 @@
     "run_date": "2026-08-01T16:40:39.654289+00:00",
     "python_version": "3.11.15",
     "platform": "Windows-10-10.0.19045-SP0",
-    "eval_cases_total": 30,
-    "eval_cases_leaking": 17,
-    "eval_cases_clean": 13,
-    "dataset_source": "src/tests/eval_suite.py cases E01–E30 (same as weekly eval suite)",
-    "task": "Binary text-level PII/secret leakage detection (LEAKING vs CLEAN)"
-  },
+    "hardware": {
+      "cpu": "Intel Core i3-6006U @ 2.00GHz (2 cores, 4 logical CPUs)",
+      "ram_gb": 8,
+      "gpu": "none (CPU-only inference)",
+      "storage": "SSD",
+      "note": "All implementations run single-threaded on CPU. No GPU acceleration used for any baseline."
+    },
+  "eval_cases_total": 30,
+      "eval_cases_leaking": 17,
+      "eval_cases_clean": 13,
+      "dataset_source": "src/tests/eval_suite.py cases E01–E30 (same as weekly eval suite)",
+      "task": "Binary text-level PII/secret leakage detection (LEAKING vs CLEAN)"
+    },
   "implementations": {
     "our_detector": {
       "name": "Our Detector — Stage 1",
