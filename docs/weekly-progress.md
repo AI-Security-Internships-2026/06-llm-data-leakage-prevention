@@ -338,16 +338,16 @@ expected to resolve this figure.
       mapping, download instructions, and evaluation commands
 - [x] Results written to `experiments/results/hf_pii_eval.json` and
       `experiments/results/hf_pii_eval_summary.json`
-- [x] Implemented `src/guardrail_benchmark.py` — three-way comparison of
+- [x] Implemented `src/guardrail_benchmark.py` — initial three-way comparison of
       **Our Detector (Stage 1)** vs **scrubadub** vs **detect-secrets** on
-      the 30-case eval suite (E01–E30); results in
-      `experiments/results/guardrail_comparison.json`
+      the 30-case eval suite (E01–E30)
 - [x] Investigated and documented false-positive patterns: `IN_PAN` and
       `US_DRIVER_LICENSE` excluded via entity blocklist; `US_BANK_NUMBER` gated
       at score ≥ 0.80; new FP cases E26–E30 added to eval suite and all resolved
 - [x] Expanded eval suite from 25 → 30 cases (E26–E30: FP regression cases)
-- [x] Documented installation failures for `llm-guard` (sentencepiece C++ build)
-      and `guardrails-ai` (Rust/Cargo) on Windows/Python 3.13 in benchmark JSON
+- [x] Added `src/tests/test_fp_regression.py` — 15 regression tests for
+      IN_PAN, US_DRIVER_LICENSE, and US_BANK_NUMBER false positives; all passing
+- [x] Total pytest tests: **129 collected** (114 from Week 5 + 15 new)
 
 ### Evaluation Results
 
@@ -386,7 +386,7 @@ expected to resolve this figure.
 > for. On supported entities only, average recall is ~0.67. Coverage gap analysis
 > added to `datasets/english-pii-43k.md`.
 
-#### Guardrail Comparison (30-case eval suite, binary LEAKING/CLEAN)
+#### Guardrail Comparison — initial run (30-case eval suite, binary LEAKING/CLEAN)
 
 | Implementation | Precision | Recall | F1 | Accuracy | p50 ms |
 |---|---|---|---|---|---|
@@ -396,8 +396,8 @@ expected to resolve this figure.
 
 > `detect-secrets` is a secret/credential scanner, not a PII detector — its 0%
 > recall on names, IBANs, phones is expected. Included per issue #6 requirements
-> (Protect AI representative). `llm-guard` and `guardrails-ai` could not be
-> installed on Windows/Python 3.13 (C++ / Rust build failures).
+> (Protect AI representative). `llm-guard` installation failed in this run
+> (sentencepiece C++ build error on Windows); retried and resolved in Week 8.
 
 ### Implementation Notes
 
@@ -420,12 +420,23 @@ The benchmark is fully reproducible with `python src/guardrail_benchmark.py`.
 
 - `llm-guard 0.3.10` build failure: `sentencepiece==0.2.0` requires MSVC
   C++ toolchain, unavailable on the test machine. Documented in benchmark JSON.
+  Resolved in Week 8 by switching to `llm-guard 0.3.16` with `use_transformers=False`.
 - `guardrails-ai 0.10.2` failure: `litellm` dependency pulls in Rust/Cargo;
-  Cargo not on PATH. Documented in benchmark JSON.
+  Cargo not on PATH. Marked `not_comparable` in Week 8 JSON — also requires
+  a hosted API key at runtime, violating Issue #6 constraints.
 - Latency spike on real Enron corpus (p95 = 549 ms vs ~30 ms on synthetic):
   caused by full email threads being passed to spaCy NLP pipeline. Truncating
   to first 2,000 characters would reduce latency but risks missing PII in bodies.
   Flagged as open trade-off for Week 7 investigation.
+
+### Next week plan
+
+- Investigate and fix Enron p95 latency spike with body truncation strategies
+- Add `_credit_card_raw_recognizer` for 16-digit numbers failing Luhn check
+- Fix E26/E27 PERSON false positives on alphanumeric reference codes
+- Re-run HuggingFace eval after detector fixes
+
+---
 
 ## Week 7
 
@@ -441,6 +452,7 @@ The benchmark is fully reproducible with `python src/guardrail_benchmark.py`.
 - [x] Re-ran guardrail benchmark after fix — precision 0.769 → 0.909, F1 0.667 → 0.714
 - [x] Re-ran synthetic eval — CREDIT_CARD recall 0.769 → 0.824
 - [x] Ran HuggingFace english_pii_43k span-level evaluation (1,000 samples)
+      after detector fixes — CREDIT_CARD recall 0.050 → 1.000
 - [x] Investigated Enron latency spike (Week 6 open trade-off) — implemented
       zone-aware body truncation in `src/enron_eval.py`; benchmarked 5 strategies
       on 500 real emails; recommended `--max-body-chars 2000`
@@ -529,3 +541,57 @@ Benchmarked 5 strategies on the same 500 real Enron emails:
 ### Problems / Blockers
 
 None this week.
+
+### Next week plan
+
+- Write `docs/final-report.md` — fill all sections with results from Weeks 1–7
+- Re-run `src/guardrail_benchmark.py` with `llm-guard 0.3.16` added as a fourth
+  baseline (previously failed to install in Week 6; dependency conflict resolved)
+- Update `experiments/results/guardrail_comparison.json` with four-way results
+- Open final PR from `hashim-week-08` → `dev`
+
+---
+
+## Week 8
+
+**Branch:** `hashim-week-08`
+**PR link:** https://github.com/AI-Security-Internships-2026/06-llm-data-leakage-prevention/pull/12
+
+### Completed this week
+
+- [x] Resolved `llm-guard 0.3.16` dependency conflict (pinned `transformers==4.46.3`
+      instead of the incompatible `4.51.3`; transformer-based NER disabled via
+      `use_transformers=False` to keep eval fully offline and deterministic)
+- [x] Re-ran `src/guardrail_benchmark.py` — now a **four-way** comparison:
+      Our Detector (Stage 1) vs scrubadub vs detect-secrets vs llm-guard 0.3.16;
+      results committed to `experiments/results/guardrail_comparison.json`
+- [x] Added `not_comparable` block to JSON for guardrails-ai (hosted API required,
+      violates Issue #6 constraint), NeMo Guardrails (no offline PII scanner
+      component), and LlamaFirewall (numpy/typer conflicts; prompt injection focus)
+- [x] Corrected total pytest test count in progress log: **129 collected**
+      (114 from Week 5 + 15 regression tests added in Week 6 — count was
+      not updated at the time)
+
+### Updated Guardrail Benchmark (Issue #6 — four-way comparison, E01–E30)
+
+| Implementation | Precision | Recall | F1 | Accuracy | p50 ms | Throughput (s/s) |
+|---|---|---|---|---|---|---|
+| **Our Detector (Stage 1)** | **0.909** | 0.588 | **0.714** | **0.733** | 33.9 | 14.2 |
+| scrubadub | 0.769 | 0.588 | 0.667 | 0.667 | 15.9 | 34.7 |
+| detect-secrets (Protect AI) | 0.000 | 0.000 | 0.000 | 0.433 | 10.0 | 64.0 |
+| **llm-guard 0.3.16 (Protect AI)** | **1.000** | 0.529 | 0.692 | 0.733 | 603.1 | 1.1 |
+
+> `detect-secrets` is a credential/secret scanner — 0% recall on PII (names,
+> IBANs, phones) is expected and reported honestly per Issue #6 constraints.
+> `llm-guard` wraps Presidio internally (same engine as Stage 1), which explains
+> its perfect precision and near-identical misses (E19–E25, E09); the key
+> difference is latency — 603 ms p50 vs our 34 ms due to per-call init overhead.
+
+### Problems / Blockers
+
+- `llm-guard` transformer NER requires `transformers==4.51.3` which pulls
+  `torch.nn.attention.flex_attention` unavailable on `torch 2.3.1`. Workaround:
+  `use_transformers=False` (rule-based Presidio only). Documented in JSON.
+- `guardrails-ai` installs but requires an OpenAI API key at runtime — violates
+  Issue #6 constraint "Do not send sensitive data to hosted APIs." Marked
+  `not_comparable` in JSON with full reasoning.
