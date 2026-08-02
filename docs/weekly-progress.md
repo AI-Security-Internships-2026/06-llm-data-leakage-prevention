@@ -542,14 +542,6 @@ Benchmarked 5 strategies on the same 500 real Enron emails:
 
 None this week.
 
-### Next week plan
-
-- Write `docs/final-report.md` — fill all sections with results from Weeks 1–7
-- Re-run `src/guardrail_benchmark.py` with `llm-guard 0.3.16` added as a fourth
-  baseline (previously failed to install in Week 6; dependency conflict resolved)
-- Update `experiments/results/guardrail_comparison.json` with four-way results
-- Open final PR from `hashim-week-08` → `dev`
-
 ---
 
 ## Week 8
