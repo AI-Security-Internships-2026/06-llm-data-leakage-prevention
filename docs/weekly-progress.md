@@ -537,6 +537,7 @@ Benchmarked 5 strategies on the same 500 real Enron emails:
 
 1 000 chars and below sacrifice too much recall (−30–44% entities).
 4 000 chars still leaves p95 at 295 ms with little recall benefit over 2 000.
+git add docs/weekly-progress.md
 
 ### Problems / Blockers
 
