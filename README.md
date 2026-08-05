@@ -28,8 +28,7 @@ Research and implement mechanisms that detect when an LLM is about to leak sensi
 | Architecture design document (`docs/proposal.md`) | Week 3 |
 | Working prototype (`src/`) | Week 6 |
 | Evaluation results (`experiments/results/`) | Week 7 |
-| Final report (`docs/final-report.md`) | Week 8 |
-
+| Final report (`docs/final-report.md`) | Sep 8 — see "Roadmap to September 8" below; superseded from the original Week 8 date |
 ---
 
 ## Recommended Technology Stack
