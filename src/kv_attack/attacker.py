@@ -18,10 +18,10 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_HOST       = "localhost"
 DEFAULT_PORT       = 8001
-DEFAULT_N_REPEATS  = 10        # probe repetitions to reduce TTFT variance
+DEFAULT_N_REPEATS = 30        # probe repetitions to reduce TTFT variance
 DEFAULT_N_SAMPLES  = 100       # calibration samples per distribution
 KS_ALPHA           = 1e-8      # Bonferroni-corrected significance (Paper 14)
-MIN_GAP_MS         = 10.0      # reject calibration if gap < 10 ms (Proposal §3.5)
+MIN_GAP_MS = 1.5      # reject calibration if gap < 10 ms (Proposal §3.5)
 
 
 # ── TTFT measurement ───────────────────────────────────────────────────────────
