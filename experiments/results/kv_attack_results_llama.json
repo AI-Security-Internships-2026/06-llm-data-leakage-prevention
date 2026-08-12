@@ -1,0 +1,218 @@
+{
+  "run_id": "week10-real-20260812T064008Z",
+  "framework": "vllm",
+  "model": "meta-llama/Llama-3.1-8B-Instruct",
+  "apc_enabled": true,
+  "cache_salt": false,
+  "scenario": "S2",
+  "n_victims": 4,
+  "calibration": {
+    "threshold_ms": 82.41521448944695,
+    "hit_mean_ms": 75.23702850099653,
+    "hit_std_ms": 2.087292361217672,
+    "miss_mean_ms": 89.59340047789738,
+    "miss_std_ms": 4.2478396824979265,
+    "timing_gap_ms": 14.356371976900846,
+    "ks_statistic": 0.99,
+    "ks_p_value": 4.417521386399011e-57,
+    "passed": true
+  },
+  "results": [
+    {
+      "victim_id": 2,
+      "ground_truth_fields": {
+        "first_name": "Deborah",
+        "last_name": "Moore",
+        "dob": "1936-05-30",
+        "condition": "anxiety disorder"
+      },
+      "field_results": [
+        {
+          "field_name": "first_name",
+          "ground_truth": "Deborah",
+          "recovered": "Kevin",
+          "correct": false,
+          "queries_used": 1500,
+          "hit_ttft_ms": 77.14049619001646,
+          "miss_ttft_ms": 78.57507067624809,
+          "timing_gap_ms": 1.4345744862316252
+        },
+        {
+          "field_name": "last_name",
+          "ground_truth": "Moore",
+          "recovered": "Carter",
+          "correct": false,
+          "queries_used": 1500,
+          "hit_ttft_ms": 74.71374123512457,
+          "miss_ttft_ms": 75.81952091141724,
+          "timing_gap_ms": 1.10577967629267
+        },
+        {
+          "field_name": "condition",
+          "ground_truth": "anxiety disorder",
+          "recovered": "liver cirrhosis",
+          "correct": false,
+          "queries_used": 600,
+          "hit_ttft_ms": 74.87431204256912,
+          "miss_ttft_ms": 77.12449999975466,
+          "timing_gap_ms": 2.2501879571855454
+        }
+      ],
+      "token_recovery_rate": 0.0,
+      "exact_match": false,
+      "total_queries": 3600,
+      "arpt": 1200.0,
+      "wall_time_s": 277.74
+    },
+    {
+      "victim_id": 3,
+      "ground_truth_fields": {
+        "first_name": "Joseph",
+        "last_name": "Rodriguez",
+        "dob": "1954-05-31",
+        "condition": "chronic kidney disease"
+      },
+      "field_results": [
+        {
+          "field_name": "first_name",
+          "ground_truth": "Joseph",
+          "recovered": "Michelle",
+          "correct": false,
+          "queries_used": 1500,
+          "hit_ttft_ms": 76.94986820376168,
+          "miss_ttft_ms": 78.63803376399335,
+          "timing_gap_ms": 1.688165560231667
+        },
+        {
+          "field_name": "last_name",
+          "ground_truth": "Rodriguez",
+          "recovered": "Taylor",
+          "correct": false,
+          "queries_used": 1500,
+          "hit_ttft_ms": 74.49507225925724,
+          "miss_ttft_ms": 75.85822664609901,
+          "timing_gap_ms": 1.3631543868417708
+        },
+        {
+          "field_name": "condition",
+          "ground_truth": "chronic kidney disease",
+          "recovered": "bipolar disorder",
+          "correct": false,
+          "queries_used": 600,
+          "hit_ttft_ms": 74.96946674461167,
+          "miss_ttft_ms": 77.24601851547496,
+          "timing_gap_ms": 2.2765517708632927
+        }
+      ],
+      "token_recovery_rate": 0.0,
+      "exact_match": false,
+      "total_queries": 3600,
+      "arpt": 1200.0,
+      "wall_time_s": 277.95
+    },
+    {
+      "victim_id": 4,
+      "ground_truth_fields": {
+        "first_name": "Amanda",
+        "last_name": "Mitchell",
+        "dob": "1950-09-06",
+        "condition": "obesity"
+      },
+      "field_results": [
+        {
+          "field_name": "first_name",
+          "ground_truth": "Amanda",
+          "recovered": "Nancy",
+          "correct": false,
+          "queries_used": 1500,
+          "hit_ttft_ms": 77.38325435202569,
+          "miss_ttft_ms": 78.66256334121991,
+          "timing_gap_ms": 1.2793089891942202
+        },
+        {
+          "field_name": "last_name",
+          "ground_truth": "Mitchell",
+          "recovered": "Lewis",
+          "correct": false,
+          "queries_used": 1500,
+          "hit_ttft_ms": 74.2233154674371,
+          "miss_ttft_ms": 75.87018287376355,
+          "timing_gap_ms": 1.6468674063264501
+        },
+        {
+          "field_name": "condition",
+          "ground_truth": "obesity",
+          "recovered": "COPD",
+          "correct": false,
+          "queries_used": 600,
+          "hit_ttft_ms": 75.05391809002806,
+          "miss_ttft_ms": 77.51458292590094,
+          "timing_gap_ms": 2.460664835872876
+        }
+      ],
+      "token_recovery_rate": 0.0,
+      "exact_match": false,
+      "total_queries": 3600,
+      "arpt": 1200.0,
+      "wall_time_s": 278.17
+    },
+    {
+      "victim_id": 5,
+      "ground_truth_fields": {
+        "first_name": "Jennifer",
+        "last_name": "Nguyen",
+        "dob": "1987-08-21",
+        "condition": "Parkinson disease"
+      },
+      "field_results": [
+        {
+          "field_name": "first_name",
+          "ground_truth": "Jennifer",
+          "recovered": "Anthony",
+          "correct": false,
+          "queries_used": 1500,
+          "hit_ttft_ms": 77.19114281547566,
+          "miss_ttft_ms": 78.84650079637994,
+          "timing_gap_ms": 1.6553579809042844
+        },
+        {
+          "field_name": "last_name",
+          "ground_truth": "Nguyen",
+          "recovered": "Scott",
+          "correct": false,
+          "queries_used": 1500,
+          "hit_ttft_ms": 74.80742163024843,
+          "miss_ttft_ms": 76.0075754907337,
+          "timing_gap_ms": 1.2001538604852726
+        },
+        {
+          "field_name": "condition",
+          "ground_truth": "Parkinson disease",
+          "recovered": "chronic kidney disease",
+          "correct": false,
+          "queries_used": 600,
+          "hit_ttft_ms": 75.38355568734308,
+          "miss_ttft_ms": 77.2184935704756,
+          "timing_gap_ms": 1.8349378831325254
+        }
+      ],
+      "token_recovery_rate": 0.0,
+      "exact_match": false,
+      "total_queries": 3600,
+      "arpt": 1200.0,
+      "wall_time_s": 278.49
+    }
+  ],
+  "aggregate": {
+    "n_victims": 4,
+    "mean_trr": 0.0,
+    "success_rate": 0.0,
+    "mean_arpt": 1200.0,
+    "arpt_ci_95": [
+      1200.0,
+      1200.0
+    ],
+    "mean_timing_gap_ms": 1.68,
+    "mean_wall_time_s": 278.09
+  }
+}
