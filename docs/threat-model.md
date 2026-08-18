@@ -108,11 +108,14 @@ overhead trade-off (Sections below). This keeps the reproduction from being
 mistaken for the contribution — the failure mode that would draw a
 "known-attack" desk reject at a Transactions venue.
 
-> **Citation TODO:** insert exact PromptPeek bibliographic entry (authors, venue,
-> year, DOI) plus 2–3 adjacent cache-side-channel references into
-> `docs/literature-review.md` and cross-reference here. Verify the PromptPeek
-> claim set against the published text so the "reproduced vs. novel" boundary is
-> stated accurately.
+> **Citations live in Overleaf, not in this repo.** The PromptPeek entry
+> (authors, venue, year, DOI) and 2–3 adjacent cache-side-channel references are
+> maintained in the manuscript's `.bib` file on Overleaf, where the formal write-up
+> and reference management happen. This public repository holds **code and
+> methodology only** — do not paste bibliography, verbatim related-work prose, or
+> measured results here. Verify the PromptPeek claim set against the published
+> text on Overleaf so the "reproduced vs. novel" boundary is stated accurately in
+> the paper.
 
 ## 6. Contribution Claims (What Is Actually Novel)
 
@@ -128,11 +131,15 @@ C3. A **security-vs-performance benchmark** quantifying the throughput/latency
 cost of each mitigation against the measured drop in attack success rate — the
 trade-off curve is the empirical contribution.
 
-## 7. Validity and Limitations to Report
+## 7. Validity and Limitations — Reporting Guidance
 
-- Report attack success **with its conditions**: e.g. "30/30 PIN recovery, no
-  concurrent load, warm cache, client-side TTFT, N=30." A bare "100%" invites
-  skepticism.
+> **Measured results go in the Overleaf manuscript, not in this public repo.**
+> This section records *how* to report; the actual numbers, tables, and figures
+> belong in the paper. Keep the repository to code, configs, and methodology.
+
+- Report attack success **with its conditions** (recovery rate, load state, cache
+  warmth, timing-measurement side, trial count `N`). A bare "100%" invites
+  skepticism — always attach the conditions under which it was measured.
 - Include a **realistic-load** run (concurrent background traffic + cache
   eviction) to show whether the leak — and the defense — hold outside the quiet
   lab.
