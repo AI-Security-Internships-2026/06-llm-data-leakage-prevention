@@ -1,268 +1,258 @@
 
-
-from __future__ import annotations
-
-import logging
 import random
-from dataclasses import dataclass, field
-from datetime import date
-from typing import Optional
+from datetime import date, timedelta
 
-from faker import Faker
+from openai import OpenAI
+from transformers import AutoTokenizer
 
-logger = logging.getLogger(__name__)
-
-# ── Domain vocabulary ──────────────────────────────────────────────────────────
-# Shared with reconstructor.py — defines the closed-vocabulary assumption.
-# Victims are generated from these lists so the attacker vocabulary has 100%
-# coverage, matching the realistic scenario where both victim and attacker
-# operate in the same application domain (US medical chatbot).
-
-FIRST_NAMES: list[str] = [
-    "James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael",
-    "Linda", "William", "Barbara", "David", "Elizabeth", "Richard", "Susan",
-    "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen", "Christopher",
-    "Lisa", "Daniel", "Nancy", "Matthew", "Betty", "Anthony", "Margaret",
-    "Mark", "Sandra", "Donald", "Ashley", "Steven", "Emily", "Paul", "Kimberly",
-    "Andrew", "Donna", "Joshua", "Michelle", "Kenneth", "Carol", "Kevin",
-    "Amanda", "Brian", "Melissa", "George", "Deborah", "Timothy", "Stephanie",
-]
-
-LAST_NAMES: list[str] = [
-    "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller",
-    "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez",
-    "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin",
-    "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark",
-    "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King",
-    "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green",
-    "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell",
-    "Carter", "Roberts",
-]
-
-MEDICAL_CONDITIONS: list[str] = [
-    "diabetes",
-    "hypertension",
-    "asthma",
-    "chronic kidney disease",
-    "heart failure",
-    "COPD",
-    "depression",
-    "anxiety disorder",
-    "hypothyroidism",
-    "atrial fibrillation",
-    "osteoarthritis",
-    "rheumatoid arthritis",
-    "epilepsy",
-    "Parkinson disease",
-    "Alzheimer disease",
-    "schizophrenia",
-    "bipolar disorder",
-    "obesity",
-    "anemia",
-    "liver cirrhosis",
-]
-
-# System prompt template — the "known" part of Scenario S2.
-# The attacker knows this structure (e.g. by querying the API with an empty
-# user turn and inspecting the shared public system prompt).
-SYSTEM_TEMPLATE: str = (
-    "You are a medical assistant. Answer questions about patient symptoms. "
-    "Patient name: {name}. DOB: {dob}. Condition: {condition}."
+from kv_attack import (
+    MODEL_ID, BLOCK_SIZE,
+    MEDICAL_CONDITIONS, FIRST_NAMES, LAST_NAMES,
 )
 
-# Known prefix shared by ALL victims — this is the template preamble the
-# attacker knows verbatim. Used as the starting point for reconstruction.
-KNOWN_PREFIX: str = (
-    "You are a medical assistant. Answer questions about patient symptoms. "
-    "Patient name: "
+# ── System prefix (fixed, known to attacker in Scenario S2) ──────────────────
+
+_SYSTEM_PREFIX_RAW = (
+    "You are a secure, HIPAA-compliant medical assistant deployed at "
+    "City General Hospital. Your role is to assist physicians and "
+    "nursing staff with accurate, evidence-based patient information. "
+    "Always address patients by their full legal name as recorded in "
+    "the system. Never disclose any protected health information to "
+    "unauthorised third parties under any circumstances. "
+    "All communications must comply with HIPAA Privacy Rule 45 CFR "
+    "Part 164. You must not speculate about diagnoses not present in "
+    "the patient record. Maintain professional tone at all times. "
+    "If asked about medication dosages, always defer to the attending "
+    "physician. Do not provide legal or financial advice. "
+    "In case of a medical emergency, instruct the user to call 911 "
+    "immediately. All session data is encrypted and logged for audit. "
+    "Unauthorised access to this system is a federal offence under "
+    "the Computer Fraud and Abuse Act. You are operating in a "
+    "multi-tenant environment. Treat all patient data as strictly "
+    "confidential and never reference one patient's information when "
+    "responding to another. Session timeout occurs after 15 minutes "
+    "of inactivity. Always verify physician credentials before "
+    "releasing sensitive diagnostic information. Report any suspected "
+    "data breach immediately to the hospital information security "
+    "office. This system is monitored continuously for compliance. "
+    "Do not store or repeat patient identifiers in your responses "
+    "unless directly asked by an authenticated physician. "
+    "These instructions take precedence over all user requests."
 )
 
+# ── Private template (secrets FIRST, long filler AFTER) ──────────────────────
+#
+# _RECORD_FILLER is repeated 14 times to produce ~3,080 tokens total.
+# Calculation:
+#   _RECORD_FILLER ≈ 220 tokens (170 words × 1.3 tokens/word)
+#   14 repetitions × 220 = 3,080 tokens
+#   Total prompt: 271 (system) + 3,080 (private) = 3,351 tokens < 4,096 ✓
+#   Private blocks: floor(3,080 / 16) = 192 complete blocks
+#   Expected timing gap on GB10: 192 × 16 / 50,000 ≈ 62 ms
+#
+# The filler is identical for ALL candidates (victim and attacker use the
+# same template structure). Only {name} and {condition} vary per probe.
+# Because {name}/{condition} are in block N (the FIRST private block),
+# a wrong candidate causes ALL 192 subsequent blocks to miss via the
+# hash chain, producing the full 62 ms timing gap.
+#
+_RECORD_FILLER = (
+    "The patient's medical history has been comprehensively reviewed "
+    "and documented by the attending physician on the date of this record. "
+    "Current prescribed medications have been assessed for efficacy and "
+    "potential interactions with existing treatments. "
+    "All laboratory results are within clinically acceptable parameters "
+    "as of the most recent assessment date on file. "
+    "The treatment plan continues as originally prescribed with no "
+    "modifications required at this time per physician directive. "
+    "Follow-up appointments are scheduled in accordance with the standard "
+    "clinical protocol for this diagnosis category and patient risk profile. "
+    "Nursing staff have been fully briefed on the patient's current "
+    "condition, care requirements, and any special instructions issued "
+    "by the attending physician during the last review session. "
+    "The patient has been informed of their diagnosis, available treatment "
+    "options, and prognosis in language appropriate to their level of "
+    "health literacy and understanding as assessed during intake. "
+    "Informed consent has been obtained, witnessed, and documented in "
+    "accordance with hospital policy and applicable regulations. "
+    "All communications with the patient and their designated emergency "
+    "contacts comply fully with HIPAA privacy regulations and hospital "
+    "information governance policy as reviewed annually. "
+)
 
-# ── Data model ─────────────────────────────────────────────────────────────────
+_PRIVATE_TEMPLATE = (
+    "{name}. {condition}. "
+    + _RECORD_FILLER * 14
+    + "END OF PATIENT RECORD."
+)
 
-@dataclass
-class VictimRecord:
-    """Ground-truth record for one synthetic victim."""
-    victim_id:      int
-    prompt:         str          # full prompt sent to vLLM
-    first_name:     str
-    last_name:      str
-    name:           str          # "{first_name} {last_name}"
-    dob:            str          # ISO-8601 "YYYY-MM-DD"
-    condition:      str
-    seeded:         bool = True  # False if the vLLM call failed
-
-    @property
-    def private_fields(self) -> dict[str, str]:
-        return {
-            "first_name": self.first_name,
-            "last_name":  self.last_name,
-            "dob":        self.dob,
-            "condition":  self.condition,
-        }
-
-    @property
-    def private_tokens(self) -> list[str]:
-        """Ordered list of private atomic values the attacker must recover."""
-        return [self.first_name, self.last_name, self.condition]
+# Padding word for block alignment.
+# " yes" reliably adds exactly 1 token in Llama-3.1 BPE.
+_PAD_WORD = " yes"
 
 
-# ── Prompt builder ─────────────────────────────────────────────────────────────
+# ── Block alignment ───────────────────────────────────────────────────────────
 
-def build_victim_prompt(
-    first_name: str,
-    last_name:  str,
-    dob:        str,
-    condition:  str,
-) -> str:
-    """Render SYSTEM_TEMPLATE with concrete private field values."""
-    return SYSTEM_TEMPLATE.format(
-        name=f"{first_name} {last_name}",
-        dob=dob,
-        condition=condition,
+def build_aligned_system_prompt(
+    tokenizer: AutoTokenizer,
+    has_bos: bool = True,
+) -> tuple[str, int]:
+    """
+    Pad _SYSTEM_PREFIX_RAW so private content starts at a block boundary.
+
+    vLLM prepends BOS for Llama-3.1, so the effective token sequence is:
+        [BOS(1), sys_prefix_tokens(N), private_tokens...]
+    Block boundary condition: (1 + N) % BLOCK_SIZE == 0
+
+    Returns (padded_prefix, n_prefix_tokens_excluding_BOS).
+    """
+    bos_offset = 1 if has_bos else 0
+    padded = _SYSTEM_PREFIX_RAW
+
+    for _ in range(BLOCK_SIZE * 4):
+        tokens = tokenizer.encode(padded, add_special_tokens=False)
+        if (bos_offset + len(tokens)) % BLOCK_SIZE == 0:
+            return padded, len(tokens)
+        padded = padded + _PAD_WORD
+
+    final_tokens = tokenizer.encode(padded, add_special_tokens=False)
+    raise RuntimeError(
+        f"Cannot align system prefix after {BLOCK_SIZE * 4} attempts. "
+        f"Current: {len(final_tokens)} tokens. "
+        f"Need (1 + N) % {BLOCK_SIZE} == 0. "
+        f"Try a different _PAD_WORD."
     )
 
 
-# ── Seeder ─────────────────────────────────────────────────────────────────────
+def build_private_block(name: str, dob: str, condition: str) -> str:
+    """Return the filled private section string."""
+    return _PRIVATE_TEMPLATE.format(name=name, dob=dob, condition=condition)
 
-def generate_victim_records(
-    n_victims: int = 50,
-    seed:      int = 42,
-) -> list[VictimRecord]:
+
+def count_private_blocks(
+    tokenizer     : AutoTokenizer,
+    system_prefix : str,
+    name          : str,
+    dob           : str,
+    condition     : str,
+    has_bos       : bool = True,
+) -> int:
     """
-    Generate *n_victims* synthetic VictimRecord objects using Faker.
-    Does NOT send any requests to vLLM — pure record generation.
-    Use this when you want to control per-victim seeding timing yourself
-    (e.g. the per-victim evict→seed→attack harness loop).
-
-    Parameters / Returns: same as seed_victims() minus client/model.
+    Return the number of COMPLETE KV-cache blocks in the private section.
+    Target: >= 100 for a reliable timing gap on GB10.
     """
-    faker = Faker("en_US")
-    Faker.seed(seed)
-    random.seed(seed)
+    bos_offset    = 1 if has_bos else 0
+    private_str   = build_private_block(name, dob, condition)
+    full_prompt   = system_prefix + " " + private_str
+    full_tokens   = tokenizer.encode(full_prompt,   add_special_tokens=False)
+    prefix_tokens = tokenizer.encode(system_prefix, add_special_tokens=False)
 
-    records: list[VictimRecord] = []
-    for i in range(n_victims):
-        # Names drawn from the closed attacker vocabulary — guarantees 100%
-        # recall coverage (realistic: both victim and attacker use same domain)
-        first_name = random.choice(FIRST_NAMES)
-        last_name  = random.choice(LAST_NAMES)
-        dob_str    = faker.date_of_birth(minimum_age=20, maximum_age=91).isoformat()
-        condition  = random.choice(MEDICAL_CONDITIONS)
-        prompt     = build_victim_prompt(first_name, last_name, dob_str, condition)
-
-        records.append(VictimRecord(
-            victim_id=i + 1,
-            prompt=prompt,
-            first_name=first_name,
-            last_name=last_name,
-            name=f"{first_name} {last_name}",
-            dob=dob_str,
-            condition=condition,
-            seeded=False,   # not yet sent to vLLM
-        ))
-
-    logger.info("Generated %d victim records (not yet seeded to vLLM).", n_victims)
-    return records
+    total_in_cache    = bos_offset + len(full_tokens)
+    prefix_blocks     = (bos_offset + len(prefix_tokens)) // BLOCK_SIZE
+    total_complete    = total_in_cache // BLOCK_SIZE
+    return total_complete - prefix_blocks
 
 
-def seed_single_victim(client, model: str, record: VictimRecord) -> bool:
-    """Send one victim's prompt to vLLM (max_tokens=1) to populate KV cache."""
-    try:
-        client.completions.create(
-            model=model,
-            prompt=record.prompt,
-            max_tokens=1,
-            temperature=0.0,
-            stream=False,
-        )
-        record.seeded = True
-        return True
-    except Exception as exc:
-        logger.warning("Seeding victim %d failed: %s", record.victim_id, exc)
-        return False
+# ── DOB generation ────────────────────────────────────────────────────────────
+
+def _random_dob(rng: random.Random) -> str:
+    """Uniform random DOB in [1935-01-01, 2006-12-31], YYYY-MM-DD."""
+    start = date(1935, 1, 1)
+    delta = (date(2006, 12, 31) - start).days
+    return (start + timedelta(days=rng.randint(0, delta))).isoformat()
 
 
-def seed_victims(
-    client,
-    model:     str,
-    n_victims: int = 50,
-    seed:      int = 42,
-) -> list[VictimRecord]:
+# ── Victim seeding ────────────────────────────────────────────────────────────
+
+def seed_victim_prefix(
+    client        : OpenAI,
+    tokenizer     : AutoTokenizer,
+    system_prefix : str,
+    n_victims     : int = 50,
+    seed          : int = 42,
+) -> list[dict]:
     """
-    Generate *n_victims* synthetic medical prompts, send each to vLLM with
-    max_tokens=1 (prefill only; output discarded), and return ground-truth
-    VictimRecord objects for later evaluation.
+    Generate n_victims synthetic victim prompts, POST each to vLLM to
+    populate the KV cache, and return ground-truth records.
 
-    Parameters
-    ----------
-    client    : OpenAI-compatible client (real vLLM or MockVLLMClient)
-    model     : model ID string passed to vLLM
-    n_victims : number of synthetic victims to seed (default 50)
-    seed      : RNG seed for reproducibility (default 42)
-
-    Returns
-    -------
-    list[VictimRecord] — only successfully seeded victims are included.
-
-    Notes
-    -----
-    - Faker `en_US` provides ~300+ distinct first/last name combinations.
-    - DOB sampled uniformly over 1935-2006 (ages 20-91 at 2026).
-    - Condition sampled uniformly from MEDICAL_CONDITIONS (20 diagnoses).
-    - max_tokens=1 and temperature=0.0 minimise compute cost; we only need
-      the prefill phase to populate the KV cache blocks.
+    Each record:
+        victim_id        : int
+        prompt           : full prompt string (used for re-seeding)
+        ground_truth     : {"name", "dob", "condition"}
+        n_private_blocks : int (complete private KV blocks)
     """
-    faker = Faker("en_US")
-    Faker.seed(seed)
-    random.seed(seed)
+    rng     = random.Random(seed)
+    records = []
 
-    records: list[VictimRecord] = []
-
-    logger.info("Seeding %d victim prefixes into vLLM KV cache ...", n_victims)
+    n_prefix_tok = len(tokenizer.encode(system_prefix, add_special_tokens=False))
+    print(f"[victim_seeder] Seeding {n_victims} victims...")
+    print(f"[victim_seeder] System prefix : {n_prefix_tok} tokens")
 
     for i in range(n_victims):
-        first_name = random.choice(FIRST_NAMES)
-        last_name  = random.choice(LAST_NAMES)
-        dob: date  = faker.date_of_birth(minimum_age=20, maximum_age=91)
-        dob_str    = dob.isoformat()               # "YYYY-MM-DD"
-        condition  = random.choice(MEDICAL_CONDITIONS)
+        name      = f"{rng.choice(FIRST_NAMES)} {rng.choice(LAST_NAMES)}"
+        dob       = _random_dob(rng)
+        condition = rng.choice(MEDICAL_CONDITIONS)
 
-        prompt = build_victim_prompt(first_name, last_name, dob_str, condition)
+        private     = build_private_block(name, dob, condition)
+        full_prompt = system_prefix + " " + private
 
-        seeded = False
+        n_priv = count_private_blocks(tokenizer, system_prefix, name, dob, condition)
+
         try:
-            # max_tokens=1: we only need the prefill to populate KV blocks.
-            # stream=False: we do not measure TTFT here (victim is not the attacker).
             client.completions.create(
-                model=model,
-                prompt=prompt,
-                max_tokens=1,
-                temperature=0.0,
-                stream=False,
+                model      = MODEL_ID,
+                prompt     = full_prompt,
+                max_tokens = 1,
+                temperature= 0.0,
             )
-            seeded = True
         except Exception as exc:
-            logger.warning("Victim %d seeding failed: %s", i + 1, exc)
+            print(f"[victim_seeder] WARNING: victim {i} seed failed: {exc}")
+            continue
 
-        record = VictimRecord(
-            victim_id=i + 1,
-            prompt=prompt,
-            first_name=first_name,
-            last_name=last_name,
-            name=f"{first_name} {last_name}",
-            dob=dob_str,
-            condition=condition,
-            seeded=seeded,
-        )
-        records.append(record)
+        records.append({
+            "victim_id"       : i,
+            "prompt"          : full_prompt,
+            "ground_truth"    : {"name": name, "dob": dob, "condition": condition},
+            "n_private_blocks": n_priv,
+        })
 
-        if seeded:
-            logger.debug(
-                "  [%02d] Seeded: %-12s %-12s | %s | %s",
-                i + 1, first_name, last_name, dob_str, condition,
-            )
+        if (i + 1) % 10 == 0:
+            print(f"[victim_seeder]   {i + 1}/{n_victims} seeded "
+                  f"(private_blocks={n_priv})")
 
-    n_ok = sum(r.seeded for r in records)
-    logger.info("Seeded %d/%d victims successfully.", n_ok, n_victims)
+    print(f"[victim_seeder] Done — {len(records)} victims seeded.")
     return records
+
+
+# ── Smoke test ────────────────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+    print("=== victim_seeder smoke test ===\n")
+    tok = AutoTokenizer.from_pretrained(MODEL_ID)
+
+    prefix, n_tok = build_aligned_system_prompt(tok)
+    print(f"System prefix tokens (not counting BOS): {n_tok}")
+    print(f"(1 + {n_tok}) % {BLOCK_SIZE} = {(1 + n_tok) % BLOCK_SIZE}  "
+          f"<- must be 0")
+    print(f"Private section starts at block : {(1 + n_tok) // BLOCK_SIZE}")
+    print()
+
+    test_cases = [
+        ("John Smith",        "1975-03-21", "diabetes"),
+        ("Patricia Martinez", "1990-11-05", "hypertension"),
+        ("Michael Williams",  "1958-07-14", "coronary artery disease"),
+    ]
+    for name, dob, cond in test_cases:
+        n      = count_private_blocks(tok, prefix, name, dob, cond)
+        full   = prefix + " " + build_private_block(name, dob, cond)
+        n_full = 1 + len(tok.encode(full, add_special_tokens=False))
+        gap_ms = round(n * 16 / 50_000 * 1000, 1)
+        print(f"  {name:25s} | {cond:25s} | "
+              f"private_blocks={n:3d}  total_tokens={n_full:5d}  "
+              f"expected_gap~{gap_ms}ms")
+
+    print()
+    print("Targets:")
+    print("  private_blocks >= 100  (for ~32 ms gap on GB10)")
+    print("  total_tokens   <  4096 (vLLM max_model_len)")
+    print("  (1 + N) % 16   == 0    (block alignment)")
