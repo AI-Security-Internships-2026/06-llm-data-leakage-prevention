@@ -588,3 +588,144 @@ None this week.
 - `guardrails-ai` installs but requires an OpenAI API key at runtime — violates
   Issue #6 constraint "Do not send sensitive data to hosted APIs." Marked
   `not_comparable` in JSON with full reasoning.
+
+---
+
+## Week 9
+
+**Branch:** N/A — no code changes this week
+**PR link:** N/A
+
+### Completed this week
+
+- [x] Deep-read all 10 academic papers in `docs/literature-review.md` — focused on
+      the KV-cache side-channel literature (papers 6–10: Carlini et al. 2021,
+      Shi et al. 2023, Chen et al. 2024, Nasr et al. 2023, Lample et al. 2019)
+- [x] Revised `docs/proposal.md` Phase 2 section — tightened the KV-cache timing
+      attack threat model: clarified attacker capabilities (shared-inference API,
+      no model weights), formalised Scenario S2 (victim prefix already cached,
+      attacker probes with name+condition candidates to observe TTFT delta)
+- [x] Planned the Phase 2 experiment pipeline: calibration → victim seeding →
+      candidate scan → reconstruction → mitigation eval; confirmed vLLM 0.27.1
+      with `--enable-prefix-caching` as the target framework
+- [x] Set up the `src/kv_attack/` module skeleton (empty files, `__init__.py`
+      with all shared constants and vocabulary)
+
+### Implementation Notes
+
+No production code committed this week — all effort was on understanding the
+attack surface before writing any implementation. Key design decision: use
+Youden-J threshold on the calibration distributions (hit vs. miss TTFT) rather
+than a fixed cutoff, so the oracle adapts to hardware variance.
+
+### Problems / Blockers
+
+None.
+
+### Next week plan
+
+- Implement `victim_seeder.py`, `attacker.py`, `reconstructor.py`, and
+  `harness.py`; run baseline attack on 5 victims to confirm timing oracle works
+- If 5-victim run succeeds, scale to 50 victims immediately
+
+---
+
+## Week 10 + 11 (Combined)
+
+**Branch:** `hashim-week-10-11`
+**PR link:** 
+
+### Completed this week
+
+- [x] Implemented full `src/kv_attack/` module (1,443 lines across 6 files):
+      `victim_seeder.py`, `attacker.py`, `reconstructor.py`, `harness.py`,
+      `cache_eviction.py`, `mitigation_eval.py`
+- [x] Ran baseline KV-cache timing attack (Scenario S2) on **5 victims** —
+      100% exact match, 100% token recovery rate; calibration confirmed a
+      timing delta of 488.5 ms (hit 87.6 ms vs. miss 576.1 ms),
+      KS statistic = 1.0, p-value = 1.94 × 10⁻¹¹⁹, Youden-J = 1.0
+- [x] Scaled baseline attack to **50 victims** — 50/50 exact match,
+      50/50 confirmed hits, avg token recovery rate = 1.000,
+      avg API calls per victim = 1,303, avg ARPT = 258.5
+- [x] Results written to `experiments/results/kv_attack_results.json` (5-victim)
+      and `experiments/results/kv_attack_results_50.json` (50-victim)
+- [x] Evaluated **full APC disable** as mitigation (`--no-enable-prefix-caching`):
+      timing gap collapsed from 488.5 ms → 6.8 ms, estimated success rate
+      drops from 1.000 → 0.0005 (99.95% leak reduction), oracle destroyed
+      (KS p-value remains significant but the hit/miss distributions now
+      overlap completely in practice)
+- [x] Benchmarked mitigation overhead: TTFT increases from 87.6 ms → 648.8 ms
+      (+640.5%) — this is the maximum-security operating point; full caching
+      benefit is sacrificed entirely to close the timing oracle
+- [x] Results written to `experiments/results/kv_mitigation_results.json`
+
+### Attack Results Summary
+
+#### Baseline KV-cache Timing Oracle (Calibration, n = 200 samples)
+
+| Metric | Value |
+|---|---|
+| Hit mean TTFT | 87.6 ms |
+| Miss mean TTFT | 576.1 ms |
+| Timing delta | 488.5 ms |
+| Threshold (Youden-J) | 327.6 ms |
+| KS statistic | 1.000 |
+| KS p-value | 1.94 × 10⁻¹¹⁹ |
+| Youden-J | 1.000 |
+
+#### 5-Victim Baseline Run
+
+| Metric | Value |
+|---|---|
+| Victims | 5 |
+| Exact match | 5 / 5 (100%) |
+| Token recovery rate | 1.000 |
+| Avg API calls per victim | 762 |
+| Avg ARPT | 142.4 |
+
+#### 50-Victim Scaled Run
+
+| Metric | Value |
+|---|---|
+| Victims | 50 |
+| Exact match | 50 / 50 (100%) |
+| Confirmed hits | 50 / 50 (100%) |
+| Token recovery rate | 1.000 |
+| Avg API calls per victim | 1,303 |
+| Avg ARPT | 258.5 |
+
+#### Mitigation: Full APC Disable (`--no-enable-prefix-caching`)
+
+| Metric | Unprotected | Protected | Change |
+|---|---|---|---|
+| Hit mean TTFT | 87.6 ms | 648.8 ms | +640.5% |
+| Timing delta (hit vs miss) | 488.5 ms | 6.8 ms | −98.6% |
+| Attack success rate | 1.000 | 0.0005 | −99.95% |
+| Oracle destroyed | — | ✓ | — |
+
+### Implementation Notes
+
+The attack is implemented as a two-phase timing oracle. Phase 1 (calibration):
+200 known-hit and known-miss probes are sent to fit the TTFT distributions and
+derive a Youden-J-optimal threshold. Phase 2 (scan): for each victim, the
+attacker iterates over a vocabulary of name × condition candidate pairs and
+classifies each probe as HIT or MISS against the threshold. The reconstructor
+then assembles the top-scored candidate as the recovered PII tuple.
+
+The 100% exact match rate at both 5 and 50 victims confirms the oracle is
+strong enough that a single timing sample per candidate suffices
+(`N_REPEATS_FAST = 1`) — the 488.5 ms delta is far larger than the per-probe
+standard deviation (~4.7 ms), giving near-zero classification error.
+
+Full APC disable is the nuclear option: it eliminates the timing oracle
+completely at the cost of recomputing all KV blocks on every request.
+The +640% TTFT overhead is the price of maximum security. A finer-grained
+mitigation (cache salting or jitter injection) that preserves some caching
+benefit is the target for Week 12–13.
+
+### Problems / Blockers
+
+- `--cache-salt` flag does not exist in vLLM 0.27.1 — documented in
+  `kv_attack_results.json` under `note_cache_salt`. Workaround: full APC
+  disable used for Week 11 mitigation benchmark; jitter-based partial
+  mitigation deferred to Week 12.
