@@ -1,0 +1,1850 @@
+{
+  "run_id": "week10-baseline-2026-08-22",
+  "framework": "vllm",
+  "vllm_version": "0.27.1",
+  "model": "meta-llama/Llama-3.1-8B-Instruct",
+  "hardware": "NVIDIA GB10 (119.7 GB unified memory, Blackwell)",
+  "apc_enabled": true,
+  "chunked_prefill": false,
+  "cache_salt": false,
+  "note_cache_salt": "--cache-salt does not exist in vLLM 0.27.1",
+  "kv_cache_cap": "2 GB (--kv-cache-memory-bytes 2147483648)",
+  "scenario": "S2",
+  "n_prefix_blocks": 17,
+  "calibration": {
+    "threshold_ms": 331.9358238950372,
+    "hit_mean_ms": 92.24679030710831,
+    "hit_std_ms": 34.13530747409416,
+    "miss_mean_ms": 581.1082732724026,
+    "miss_std_ms": 4.279600718123083,
+    "delta_ms": 488.8614829652943,
+    "ks_stat": 0.995,
+    "ks_p_value": 7.770573798088942e-117,
+    "youden_j": 0.9950000000000001,
+    "recommended_n_rpts": 1
+  },
+  "results": [
+    {
+      "victim_id": 0,
+      "ground_truth": {
+        "name": "Mary Smith",
+        "dob": "2001-07-12",
+        "condition": "hypothyroidism"
+      },
+      "recovered": {
+        "name": "Mary Smith",
+        "condition": "hypothyroidism",
+        "dob": "2001-07-12"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1376,
+      "arpt": 229.33,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Mary Smith",
+          "condition": "hypothyroidism",
+          "mean_ttft": 90.598
+        },
+        {
+          "name": "Robert Miller",
+          "condition": "diabetes",
+          "mean_ttft": 574.72
+        },
+        {
+          "name": "John Johnson",
+          "condition": "atrial fibrillation",
+          "mean_ttft": 574.81
+        }
+      ]
+    },
+    {
+      "victim_id": 1,
+      "ground_truth": {
+        "name": "Patricia Brown",
+        "dob": "1947-07-09",
+        "condition": "arthritis"
+      },
+      "recovered": {
+        "name": "Patricia Brown",
+        "condition": "arthritis",
+        "dob": "1947-07-09"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 695,
+      "arpt": 139.0,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Patricia Brown",
+          "condition": "arthritis",
+          "mean_ttft": 89.62
+        },
+        {
+          "name": "Barbara Jones",
+          "condition": "anxiety",
+          "mean_ttft": 576.33
+        },
+        {
+          "name": "James Brown",
+          "condition": "hyperlipidemia",
+          "mean_ttft": 576.991
+        }
+      ]
+    },
+    {
+      "victim_id": 2,
+      "ground_truth": {
+        "name": "William Johnson",
+        "dob": "1987-12-23",
+        "condition": "atrial fibrillation"
+      },
+      "recovered": {
+        "name": "William Johnson",
+        "condition": "atrial fibrillation",
+        "dob": "1987-12-23"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 142,
+      "arpt": 23.67,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "William Johnson",
+          "condition": "atrial fibrillation",
+          "mean_ttft": 86.031
+        },
+        {
+          "name": "Barbara Williams",
+          "condition": "depression",
+          "mean_ttft": 574.294
+        },
+        {
+          "name": "Barbara Wilson",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 576.563
+        }
+      ]
+    },
+    {
+      "victim_id": 3,
+      "ground_truth": {
+        "name": "James Smith",
+        "dob": "1943-05-29",
+        "condition": "COPD"
+      },
+      "recovered": {
+        "name": "James Smith",
+        "condition": "COPD",
+        "dob": "1943-05-29"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 565,
+      "arpt": 113.0,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "James Smith",
+          "condition": "COPD",
+          "mean_ttft": 86.893
+        },
+        {
+          "name": "Patricia Jones",
+          "condition": "obesity",
+          "mean_ttft": 572.655
+        },
+        {
+          "name": "Linda Martinez",
+          "condition": "depression",
+          "mean_ttft": 574.385
+        }
+      ]
+    },
+    {
+      "victim_id": 4,
+      "ground_truth": {
+        "name": "Patricia Wilson",
+        "dob": "1989-01-03",
+        "condition": "diabetes"
+      },
+      "recovered": {
+        "name": "Patricia Wilson",
+        "condition": "diabetes",
+        "dob": "1989-01-03"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1034,
+      "arpt": 206.8,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Patricia Wilson",
+          "condition": "diabetes",
+          "mean_ttft": 86.908
+        },
+        {
+          "name": "Barbara Davis",
+          "condition": "heart failure",
+          "mean_ttft": 573.339
+        },
+        {
+          "name": "James Garcia",
+          "condition": "migraine",
+          "mean_ttft": 573.642
+        }
+      ]
+    },
+    {
+      "victim_id": 5,
+      "ground_truth": {
+        "name": "William Brown",
+        "dob": "1999-03-28",
+        "condition": "epilepsy"
+      },
+      "recovered": {
+        "name": "William Brown",
+        "condition": "epilepsy",
+        "dob": "1999-03-28"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 390,
+      "arpt": 78.0,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "William Brown",
+          "condition": "epilepsy",
+          "mean_ttft": 87.236
+        },
+        {
+          "name": "William Jones",
+          "condition": "COPD",
+          "mean_ttft": 572.965
+        },
+        {
+          "name": "William Jones",
+          "condition": "epilepsy",
+          "mean_ttft": 573.206
+        }
+      ]
+    },
+    {
+      "victim_id": 6,
+      "ground_truth": {
+        "name": "Michael Brown",
+        "dob": "1975-04-20",
+        "condition": "migraine"
+      },
+      "recovered": {
+        "name": "Michael Brown",
+        "condition": "migraine",
+        "dob": "1975-04-20"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 284,
+      "arpt": 56.8,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Michael Brown",
+          "condition": "migraine",
+          "mean_ttft": 89.664
+        },
+        {
+          "name": "Linda Jones",
+          "condition": "multiple sclerosis",
+          "mean_ttft": 575.117
+        },
+        {
+          "name": "William Miller",
+          "condition": "anxiety",
+          "mean_ttft": 577.784
+        }
+      ]
+    },
+    {
+      "victim_id": 7,
+      "ground_truth": {
+        "name": "Robert Smith",
+        "dob": "2003-01-28",
+        "condition": "anxiety"
+      },
+      "recovered": {
+        "name": "Robert Smith",
+        "condition": "anxiety",
+        "dob": "2003-01-28"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1711,
+      "arpt": 427.75,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Robert Smith",
+          "condition": "anxiety",
+          "mean_ttft": 90.789
+        },
+        {
+          "name": "James Davis",
+          "condition": "multiple sclerosis",
+          "mean_ttft": 573.897
+        },
+        {
+          "name": "Barbara Jones",
+          "condition": "atrial fibrillation",
+          "mean_ttft": 574.298
+        }
+      ]
+    },
+    {
+      "victim_id": 8,
+      "ground_truth": {
+        "name": "Michael Garcia",
+        "dob": "1959-12-06",
+        "condition": "depression"
+      },
+      "recovered": {
+        "name": "Michael Garcia",
+        "condition": "depression",
+        "dob": "1959-12-06"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 392,
+      "arpt": 98.0,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Michael Garcia",
+          "condition": "depression",
+          "mean_ttft": 91.291
+        },
+        {
+          "name": "Barbara Wilson",
+          "condition": "hypothyroidism",
+          "mean_ttft": 573.635
+        },
+        {
+          "name": "William Williams",
+          "condition": "depression",
+          "mean_ttft": 574.383
+        }
+      ]
+    },
+    {
+      "victim_id": 9,
+      "ground_truth": {
+        "name": "Patricia Garcia",
+        "dob": "1944-03-03",
+        "condition": "asthma"
+      },
+      "recovered": {
+        "name": "Patricia Garcia",
+        "condition": "asthma",
+        "dob": "1944-03-03"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 629,
+      "arpt": 125.8,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Patricia Garcia",
+          "condition": "asthma",
+          "mean_ttft": 90.737
+        },
+        {
+          "name": "Robert Williams",
+          "condition": "depression",
+          "mean_ttft": 577.048
+        },
+        {
+          "name": "Mary Miller",
+          "condition": "diabetes",
+          "mean_ttft": 577.79
+        }
+      ]
+    },
+    {
+      "victim_id": 10,
+      "ground_truth": {
+        "name": "Michael Johnson",
+        "dob": "1967-03-17",
+        "condition": "chronic kidney disease"
+      },
+      "recovered": {
+        "name": "Michael Johnson",
+        "condition": "chronic kidney disease",
+        "dob": "1967-03-17"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2379,
+      "arpt": 396.5,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Michael Johnson",
+          "condition": "chronic kidney disease",
+          "mean_ttft": 91.029
+        },
+        {
+          "name": "Patricia Williams",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 573.169
+        },
+        {
+          "name": "Robert Johnson",
+          "condition": "hypertension",
+          "mean_ttft": 573.458
+        }
+      ]
+    },
+    {
+      "victim_id": 11,
+      "ground_truth": {
+        "name": "Barbara Jones",
+        "dob": "1938-11-24",
+        "condition": "osteoporosis"
+      },
+      "recovered": {
+        "name": "Barbara Jones",
+        "condition": "osteoporosis",
+        "dob": "1938-11-24"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1751,
+      "arpt": 291.83,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Barbara Jones",
+          "condition": "osteoporosis",
+          "mean_ttft": 93.032
+        },
+        {
+          "name": "William Martinez",
+          "condition": "COPD",
+          "mean_ttft": 572.677
+        },
+        {
+          "name": "John Johnson",
+          "condition": "heart failure",
+          "mean_ttft": 573.312
+        }
+      ]
+    },
+    {
+      "victim_id": 12,
+      "ground_truth": {
+        "name": "William Johnson",
+        "dob": "1968-12-16",
+        "condition": "asthma"
+      },
+      "recovered": {
+        "name": "William Johnson",
+        "condition": "asthma",
+        "dob": "1968-12-16"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2229,
+      "arpt": 557.25,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "William Johnson",
+          "condition": "asthma",
+          "mean_ttft": 92.91
+        },
+        {
+          "name": "William Brown",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 573.943
+        },
+        {
+          "name": "James Miller",
+          "condition": "arthritis",
+          "mean_ttft": 574.716
+        }
+      ]
+    },
+    {
+      "victim_id": 13,
+      "ground_truth": {
+        "name": "William Jones",
+        "dob": "1991-05-26",
+        "condition": "sleep apnea"
+      },
+      "recovered": {
+        "name": "William Jones",
+        "condition": "sleep apnea",
+        "dob": "1991-05-26"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 687,
+      "arpt": 137.4,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "William Jones",
+          "condition": "sleep apnea",
+          "mean_ttft": 85.962
+        },
+        {
+          "name": "Robert Miller",
+          "condition": "hyperlipidemia",
+          "mean_ttft": 574.851
+        },
+        {
+          "name": "Patricia Wilson",
+          "condition": "depression",
+          "mean_ttft": 574.895
+        }
+      ]
+    },
+    {
+      "victim_id": 14,
+      "ground_truth": {
+        "name": "Jennifer Martinez",
+        "dob": "1952-04-01",
+        "condition": "asthma"
+      },
+      "recovered": {
+        "name": "Jennifer Martinez",
+        "condition": "asthma",
+        "dob": "1952-04-01"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 662,
+      "arpt": 165.5,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Jennifer Martinez",
+          "condition": "asthma",
+          "mean_ttft": 93.002
+        },
+        {
+          "name": "John Smith",
+          "condition": "arthritis",
+          "mean_ttft": 575.911
+        },
+        {
+          "name": "Jennifer Brown",
+          "condition": "chronic kidney disease",
+          "mean_ttft": 576.408
+        }
+      ]
+    },
+    {
+      "victim_id": 15,
+      "ground_truth": {
+        "name": "James Brown",
+        "dob": "2004-05-09",
+        "condition": "hyperlipidemia"
+      },
+      "recovered": {
+        "name": "James Brown",
+        "condition": "hyperlipidemia",
+        "dob": "2004-05-09"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2059,
+      "arpt": 343.17,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "James Brown",
+          "condition": "hyperlipidemia",
+          "mean_ttft": 91.087
+        },
+        {
+          "name": "Jennifer Smith",
+          "condition": "epilepsy",
+          "mean_ttft": 573.533
+        },
+        {
+          "name": "James Brown",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 573.549
+        }
+      ]
+    },
+    {
+      "victim_id": 16,
+      "ground_truth": {
+        "name": "Mary Brown",
+        "dob": "1944-01-23",
+        "condition": "heart failure"
+      },
+      "recovered": {
+        "name": "Mary Brown",
+        "condition": "heart failure",
+        "dob": "1944-01-23"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 861,
+      "arpt": 215.25,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Mary Brown",
+          "condition": "heart failure",
+          "mean_ttft": 91.496
+        },
+        {
+          "name": "James Davis",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 577.284
+        },
+        {
+          "name": "Robert Miller",
+          "condition": "arthritis",
+          "mean_ttft": 577.546
+        }
+      ]
+    },
+    {
+      "victim_id": 17,
+      "ground_truth": {
+        "name": "Robert Davis",
+        "dob": "1992-01-12",
+        "condition": "chronic kidney disease"
+      },
+      "recovered": {
+        "name": "Robert Davis",
+        "condition": "chronic kidney disease",
+        "dob": "1992-01-12"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1476,
+      "arpt": 246.0,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Robert Davis",
+          "condition": "chronic kidney disease",
+          "mean_ttft": 90.464
+        },
+        {
+          "name": "Michael Williams",
+          "condition": "sleep apnea",
+          "mean_ttft": 573.416
+        },
+        {
+          "name": "Linda Jones",
+          "condition": "diabetes",
+          "mean_ttft": 575.335
+        }
+      ]
+    },
+    {
+      "victim_id": 18,
+      "ground_truth": {
+        "name": "John Garcia",
+        "dob": "1966-11-15",
+        "condition": "COPD"
+      },
+      "recovered": {
+        "name": "John Garcia",
+        "condition": "COPD",
+        "dob": "1966-11-15"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1640,
+      "arpt": 328.0,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "John Garcia",
+          "condition": "COPD",
+          "mean_ttft": 91.88
+        },
+        {
+          "name": "Barbara Garcia",
+          "condition": "hypertension",
+          "mean_ttft": 576.843
+        },
+        {
+          "name": "Jennifer Jones",
+          "condition": "sleep apnea",
+          "mean_ttft": 576.867
+        }
+      ]
+    },
+    {
+      "victim_id": 19,
+      "ground_truth": {
+        "name": "Robert Johnson",
+        "dob": "1989-08-25",
+        "condition": "anxiety"
+      },
+      "recovered": {
+        "name": "Robert Johnson",
+        "condition": "anxiety",
+        "dob": "1989-08-25"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 629,
+      "arpt": 157.25,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Robert Johnson",
+          "condition": "anxiety",
+          "mean_ttft": 89.123
+        },
+        {
+          "name": "John Miller",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 574.518
+        },
+        {
+          "name": "Barbara Smith",
+          "condition": "depression",
+          "mean_ttft": 574.869
+        }
+      ]
+    },
+    {
+      "victim_id": 20,
+      "ground_truth": {
+        "name": "William Brown",
+        "dob": "1949-08-29",
+        "condition": "osteoporosis"
+      },
+      "recovered": {
+        "name": "William Brown",
+        "condition": "osteoporosis",
+        "dob": "1949-08-29"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1510,
+      "arpt": 302.0,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "William Brown",
+          "condition": "osteoporosis",
+          "mean_ttft": 89.295
+        },
+        {
+          "name": "Robert Johnson",
+          "condition": "COPD",
+          "mean_ttft": 572.76
+        },
+        {
+          "name": "Michael Jones",
+          "condition": "atrial fibrillation",
+          "mean_ttft": 574.269
+        }
+      ]
+    },
+    {
+      "victim_id": 21,
+      "ground_truth": {
+        "name": "Michael Jones",
+        "dob": "1992-06-01",
+        "condition": "epilepsy"
+      },
+      "recovered": {
+        "name": "Michael Jones",
+        "condition": "epilepsy",
+        "dob": "1992-06-01"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 465,
+      "arpt": 93.0,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Michael Jones",
+          "condition": "epilepsy",
+          "mean_ttft": 90.406
+        },
+        {
+          "name": "Barbara Garcia",
+          "condition": "COPD",
+          "mean_ttft": 575.13
+        },
+        {
+          "name": "William Wilson",
+          "condition": "coronary artery disease",
+          "mean_ttft": 575.601
+        }
+      ]
+    },
+    {
+      "victim_id": 22,
+      "ground_truth": {
+        "name": "Patricia Garcia",
+        "dob": "2003-12-06",
+        "condition": "hypertension"
+      },
+      "recovered": {
+        "name": "Patricia Garcia",
+        "condition": "hypertension",
+        "dob": "2003-12-06"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2410,
+      "arpt": 401.67,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Patricia Garcia",
+          "condition": "hypertension",
+          "mean_ttft": 92.509
+        },
+        {
+          "name": "Michael Brown",
+          "condition": "arthritis",
+          "mean_ttft": 572.781
+        },
+        {
+          "name": "John Garcia",
+          "condition": "migraine",
+          "mean_ttft": 574.458
+        }
+      ]
+    },
+    {
+      "victim_id": 23,
+      "ground_truth": {
+        "name": "Patricia Smith",
+        "dob": "1963-04-20",
+        "condition": "heart failure"
+      },
+      "recovered": {
+        "name": "Patricia Smith",
+        "condition": "heart failure",
+        "dob": "1963-04-20"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2257,
+      "arpt": 451.4,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Patricia Smith",
+          "condition": "heart failure",
+          "mean_ttft": 90.207
+        },
+        {
+          "name": "Linda Miller",
+          "condition": "osteoporosis",
+          "mean_ttft": 573.256
+        },
+        {
+          "name": "John Brown",
+          "condition": "COPD",
+          "mean_ttft": 573.291
+        }
+      ]
+    },
+    {
+      "victim_id": 24,
+      "ground_truth": {
+        "name": "Robert Johnson",
+        "dob": "1953-12-05",
+        "condition": "migraine"
+      },
+      "recovered": {
+        "name": "Robert Johnson",
+        "condition": "migraine",
+        "dob": "1953-12-05"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2304,
+      "arpt": 460.8,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Robert Johnson",
+          "condition": "migraine",
+          "mean_ttft": 88.856
+        },
+        {
+          "name": "William Miller",
+          "condition": "atrial fibrillation",
+          "mean_ttft": 573.588
+        },
+        {
+          "name": "Linda Brown",
+          "condition": "epilepsy",
+          "mean_ttft": 573.779
+        }
+      ]
+    },
+    {
+      "victim_id": 25,
+      "ground_truth": {
+        "name": "Jennifer Brown",
+        "dob": "1993-10-20",
+        "condition": "Parkinson's disease"
+      },
+      "recovered": {
+        "name": "Jennifer Brown",
+        "condition": "Parkinson's disease",
+        "dob": "1993-10-20"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1414,
+      "arpt": 235.67,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Jennifer Brown",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 91.829
+        },
+        {
+          "name": "James Miller",
+          "condition": "depression",
+          "mean_ttft": 574.718
+        },
+        {
+          "name": "Michael Martinez",
+          "condition": "coronary artery disease",
+          "mean_ttft": 574.723
+        }
+      ]
+    },
+    {
+      "victim_id": 26,
+      "ground_truth": {
+        "name": "Michael Davis",
+        "dob": "1947-10-26",
+        "condition": "hypothyroidism"
+      },
+      "recovered": {
+        "name": "Michael Davis",
+        "condition": "hypothyroidism",
+        "dob": "1947-10-26"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1175,
+      "arpt": 195.83,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Michael Davis",
+          "condition": "hypothyroidism",
+          "mean_ttft": 91.034
+        },
+        {
+          "name": "Michael Davis",
+          "condition": "anxiety",
+          "mean_ttft": 573.94
+        },
+        {
+          "name": "Mary Jones",
+          "condition": "diabetes",
+          "mean_ttft": 573.943
+        }
+      ]
+    },
+    {
+      "victim_id": 27,
+      "ground_truth": {
+        "name": "John Brown",
+        "dob": "2001-11-01",
+        "condition": "epilepsy"
+      },
+      "recovered": {
+        "name": "John Brown",
+        "condition": "epilepsy",
+        "dob": "2001-11-01"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1665,
+      "arpt": 333.0,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "John Brown",
+          "condition": "epilepsy",
+          "mean_ttft": 91.482
+        },
+        {
+          "name": "Robert Davis",
+          "condition": "chronic kidney disease",
+          "mean_ttft": 575.102
+        },
+        {
+          "name": "John Wilson",
+          "condition": "hypothyroidism",
+          "mean_ttft": 575.186
+        }
+      ]
+    },
+    {
+      "victim_id": 28,
+      "ground_truth": {
+        "name": "William Jones",
+        "dob": "2002-01-07",
+        "condition": "migraine"
+      },
+      "recovered": {
+        "name": "William Jones",
+        "condition": "migraine",
+        "dob": "2002-01-07"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2319,
+      "arpt": 463.8,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "William Jones",
+          "condition": "migraine",
+          "mean_ttft": 91.015
+        },
+        {
+          "name": "William Davis",
+          "condition": "heart failure",
+          "mean_ttft": 573.018
+        },
+        {
+          "name": "Linda Williams",
+          "condition": "chronic kidney disease",
+          "mean_ttft": 573.659
+        }
+      ]
+    },
+    {
+      "victim_id": 29,
+      "ground_truth": {
+        "name": "Michael Martinez",
+        "dob": "1970-10-31",
+        "condition": "chronic kidney disease"
+      },
+      "recovered": {
+        "name": "Michael Martinez",
+        "condition": "chronic kidney disease",
+        "dob": "1970-10-31"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 791,
+      "arpt": 131.83,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Michael Martinez",
+          "condition": "chronic kidney disease",
+          "mean_ttft": 92.234
+        },
+        {
+          "name": "Jennifer Johnson",
+          "condition": "osteoporosis",
+          "mean_ttft": 574.515
+        },
+        {
+          "name": "James Martinez",
+          "condition": "diabetes",
+          "mean_ttft": 574.69
+        }
+      ]
+    },
+    {
+      "victim_id": 30,
+      "ground_truth": {
+        "name": "Patricia Williams",
+        "dob": "1980-09-17",
+        "condition": "Parkinson's disease"
+      },
+      "recovered": {
+        "name": "Patricia Williams",
+        "condition": "Parkinson's disease",
+        "dob": "1980-09-17"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1576,
+      "arpt": 225.14,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Patricia Williams",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 89.763
+        },
+        {
+          "name": "Michael Garcia",
+          "condition": "chronic kidney disease",
+          "mean_ttft": 572.806
+        },
+        {
+          "name": "Patricia Johnson",
+          "condition": "multiple sclerosis",
+          "mean_ttft": 572.862
+        }
+      ]
+    },
+    {
+      "victim_id": 31,
+      "ground_truth": {
+        "name": "Mary Smith",
+        "dob": "1944-11-01",
+        "condition": "depression"
+      },
+      "recovered": {
+        "name": "Mary Smith",
+        "condition": "depression",
+        "dob": "1944-11-01"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1147,
+      "arpt": 286.75,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Mary Smith",
+          "condition": "depression",
+          "mean_ttft": 92.577
+        },
+        {
+          "name": "William Brown",
+          "condition": "anxiety",
+          "mean_ttft": 573.291
+        },
+        {
+          "name": "Barbara Williams",
+          "condition": "epilepsy",
+          "mean_ttft": 573.452
+        }
+      ]
+    },
+    {
+      "victim_id": 32,
+      "ground_truth": {
+        "name": "John Miller",
+        "dob": "1988-07-04",
+        "condition": "asthma"
+      },
+      "recovered": {
+        "name": "John Miller",
+        "condition": "asthma",
+        "dob": "1988-07-04"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2107,
+      "arpt": 526.75,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "John Miller",
+          "condition": "asthma",
+          "mean_ttft": 89.594
+        },
+        {
+          "name": "Linda Garcia",
+          "condition": "chronic kidney disease",
+          "mean_ttft": 573.947
+        },
+        {
+          "name": "Linda Garcia",
+          "condition": "atrial fibrillation",
+          "mean_ttft": 574.03
+        }
+      ]
+    },
+    {
+      "victim_id": 33,
+      "ground_truth": {
+        "name": "Michael Miller",
+        "dob": "1988-06-17",
+        "condition": "osteoporosis"
+      },
+      "recovered": {
+        "name": "Michael Miller",
+        "condition": "osteoporosis",
+        "dob": "1988-06-17"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2484,
+      "arpt": 496.8,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Michael Miller",
+          "condition": "osteoporosis",
+          "mean_ttft": 91.763
+        },
+        {
+          "name": "Michael Davis",
+          "condition": "arthritis",
+          "mean_ttft": 565.646
+        },
+        {
+          "name": "Patricia Smith",
+          "condition": "multiple sclerosis",
+          "mean_ttft": 566.174
+        }
+      ]
+    },
+    {
+      "victim_id": 34,
+      "ground_truth": {
+        "name": "William Jones",
+        "dob": "1984-08-19",
+        "condition": "diabetes"
+      },
+      "recovered": {
+        "name": "William Jones",
+        "condition": "diabetes",
+        "dob": "1984-08-19"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1244,
+      "arpt": 311.0,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "William Jones",
+          "condition": "diabetes",
+          "mean_ttft": 92.364
+        },
+        {
+          "name": "James Williams",
+          "condition": "coronary artery disease",
+          "mean_ttft": 565.788
+        },
+        {
+          "name": "Patricia Wilson",
+          "condition": "migraine",
+          "mean_ttft": 565.875
+        }
+      ]
+    },
+    {
+      "victim_id": 35,
+      "ground_truth": {
+        "name": "Mary Wilson",
+        "dob": "2002-05-13",
+        "condition": "hypothyroidism"
+      },
+      "recovered": {
+        "name": "Mary Wilson",
+        "condition": "hypothyroidism",
+        "dob": "2002-05-13"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 455,
+      "arpt": 75.83,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Mary Wilson",
+          "condition": "hypothyroidism",
+          "mean_ttft": 89.647
+        },
+        {
+          "name": "Michael Brown",
+          "condition": "heart failure",
+          "mean_ttft": 574.738
+        },
+        {
+          "name": "Patricia Johnson",
+          "condition": "migraine",
+          "mean_ttft": 575.232
+        }
+      ]
+    },
+    {
+      "victim_id": 36,
+      "ground_truth": {
+        "name": "Jennifer Johnson",
+        "dob": "1961-05-01",
+        "condition": "atrial fibrillation"
+      },
+      "recovered": {
+        "name": "Jennifer Johnson",
+        "condition": "atrial fibrillation",
+        "dob": "1961-05-01"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 576,
+      "arpt": 96.0,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Jennifer Johnson",
+          "condition": "atrial fibrillation",
+          "mean_ttft": 91.537
+        },
+        {
+          "name": "Robert Miller",
+          "condition": "anxiety",
+          "mean_ttft": 572.548
+        },
+        {
+          "name": "James Davis",
+          "condition": "migraine",
+          "mean_ttft": 573.211
+        }
+      ]
+    },
+    {
+      "victim_id": 37,
+      "ground_truth": {
+        "name": "John Davis",
+        "dob": "1935-04-17",
+        "condition": "hypothyroidism"
+      },
+      "recovered": {
+        "name": "John Davis",
+        "condition": "hypothyroidism",
+        "dob": "1935-04-17"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2140,
+      "arpt": 356.67,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "John Davis",
+          "condition": "hypothyroidism",
+          "mean_ttft": 89.131
+        },
+        {
+          "name": "James Smith",
+          "condition": "multiple sclerosis",
+          "mean_ttft": 572.95
+        },
+        {
+          "name": "Linda Wilson",
+          "condition": "obesity",
+          "mean_ttft": 573.673
+        }
+      ]
+    },
+    {
+      "victim_id": 38,
+      "ground_truth": {
+        "name": "William Williams",
+        "dob": "1980-07-18",
+        "condition": "arthritis"
+      },
+      "recovered": {
+        "name": "William Williams",
+        "condition": "arthritis",
+        "dob": "1980-07-18"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 770,
+      "arpt": 192.5,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "William Williams",
+          "condition": "arthritis",
+          "mean_ttft": 90.788
+        },
+        {
+          "name": "Jennifer Wilson",
+          "condition": "arthritis",
+          "mean_ttft": 573.612
+        },
+        {
+          "name": "Jennifer Williams",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 574.309
+        }
+      ]
+    },
+    {
+      "victim_id": 39,
+      "ground_truth": {
+        "name": "Robert Wilson",
+        "dob": "1989-08-19",
+        "condition": "COPD"
+      },
+      "recovered": {
+        "name": "Robert Wilson",
+        "condition": "COPD",
+        "dob": "1989-08-19"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2086,
+      "arpt": 417.2,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Robert Wilson",
+          "condition": "COPD",
+          "mean_ttft": 88.937
+        },
+        {
+          "name": "James Garcia",
+          "condition": "coronary artery disease",
+          "mean_ttft": 572.963
+        },
+        {
+          "name": "John Davis",
+          "condition": "obesity",
+          "mean_ttft": 573.585
+        }
+      ]
+    },
+    {
+      "victim_id": 40,
+      "ground_truth": {
+        "name": "John Garcia",
+        "dob": "2003-05-29",
+        "condition": "anxiety"
+      },
+      "recovered": {
+        "name": "John Garcia",
+        "condition": "anxiety",
+        "dob": "2003-05-29"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2369,
+      "arpt": 592.25,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "John Garcia",
+          "condition": "anxiety",
+          "mean_ttft": 93.211
+        },
+        {
+          "name": "Patricia Johnson",
+          "condition": "arthritis",
+          "mean_ttft": 571.613
+        },
+        {
+          "name": "Patricia Garcia",
+          "condition": "multiple sclerosis",
+          "mean_ttft": 573.781
+        }
+      ]
+    },
+    {
+      "victim_id": 41,
+      "ground_truth": {
+        "name": "William Wilson",
+        "dob": "1935-01-19",
+        "condition": "sleep apnea"
+      },
+      "recovered": {
+        "name": "William Wilson",
+        "condition": "sleep apnea",
+        "dob": "1935-01-19"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1297,
+      "arpt": 259.4,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "William Wilson",
+          "condition": "sleep apnea",
+          "mean_ttft": 89.785
+        },
+        {
+          "name": "John Martinez",
+          "condition": "chronic kidney disease",
+          "mean_ttft": 573.522
+        },
+        {
+          "name": "Linda Wilson",
+          "condition": "hypertension",
+          "mean_ttft": 573.689
+        }
+      ]
+    },
+    {
+      "victim_id": 42,
+      "ground_truth": {
+        "name": "Jennifer Davis",
+        "dob": "1936-09-30",
+        "condition": "arthritis"
+      },
+      "recovered": {
+        "name": "Jennifer Davis",
+        "condition": "arthritis",
+        "dob": "1936-09-30"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 11,
+      "arpt": 2.75,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Jennifer Davis",
+          "condition": "arthritis",
+          "mean_ttft": 92.858
+        },
+        {
+          "name": "Patricia Martinez",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 582.537
+        },
+        {
+          "name": "John Brown",
+          "condition": "migraine",
+          "mean_ttft": 582.841
+        }
+      ]
+    },
+    {
+      "victim_id": 43,
+      "ground_truth": {
+        "name": "Jennifer Jones",
+        "dob": "1956-06-25",
+        "condition": "hypertension"
+      },
+      "recovered": {
+        "name": "Jennifer Jones",
+        "condition": "hypertension",
+        "dob": "1956-06-25"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 446,
+      "arpt": 89.2,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Jennifer Jones",
+          "condition": "hypertension",
+          "mean_ttft": 91.056
+        },
+        {
+          "name": "Michael Williams",
+          "condition": "diabetes",
+          "mean_ttft": 575.857
+        },
+        {
+          "name": "Patricia Johnson",
+          "condition": "obesity",
+          "mean_ttft": 575.983
+        }
+      ]
+    },
+    {
+      "victim_id": 44,
+      "ground_truth": {
+        "name": "Patricia Martinez",
+        "dob": "1942-01-24",
+        "condition": "asthma"
+      },
+      "recovered": {
+        "name": "Patricia Martinez",
+        "condition": "asthma",
+        "dob": "1942-01-24"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 2204,
+      "arpt": 440.8,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Patricia Martinez",
+          "condition": "asthma",
+          "mean_ttft": 88.622
+        },
+        {
+          "name": "Mary Miller",
+          "condition": "sleep apnea",
+          "mean_ttft": 571.545
+        },
+        {
+          "name": "James Miller",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 571.879
+        }
+      ]
+    },
+    {
+      "victim_id": 45,
+      "ground_truth": {
+        "name": "Linda Johnson",
+        "dob": "2003-03-28",
+        "condition": "epilepsy"
+      },
+      "recovered": {
+        "name": "Linda Johnson",
+        "condition": "epilepsy",
+        "dob": "2003-03-28"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 931,
+      "arpt": 155.17,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Linda Johnson",
+          "condition": "epilepsy",
+          "mean_ttft": 91.705
+        },
+        {
+          "name": "Jennifer Davis",
+          "condition": "coronary artery disease",
+          "mean_ttft": 572.611
+        },
+        {
+          "name": "Patricia Garcia",
+          "condition": "epilepsy",
+          "mean_ttft": 572.982
+        }
+      ]
+    },
+    {
+      "victim_id": 46,
+      "ground_truth": {
+        "name": "John Williams",
+        "dob": "1994-03-10",
+        "condition": "Parkinson's disease"
+      },
+      "recovered": {
+        "name": "John Williams",
+        "condition": "Parkinson's disease",
+        "dob": "1994-03-10"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1027,
+      "arpt": 171.17,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "John Williams",
+          "condition": "Parkinson's disease",
+          "mean_ttft": 88.235
+        },
+        {
+          "name": "Michael Garcia",
+          "condition": "multiple sclerosis",
+          "mean_ttft": 573.974
+        },
+        {
+          "name": "Robert Wilson",
+          "condition": "multiple sclerosis",
+          "mean_ttft": 576.402
+        }
+      ]
+    },
+    {
+      "victim_id": 47,
+      "ground_truth": {
+        "name": "William Williams",
+        "dob": "1958-10-12",
+        "condition": "multiple sclerosis"
+      },
+      "recovered": {
+        "name": "William Williams",
+        "condition": "multiple sclerosis",
+        "dob": "1958-10-12"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1471,
+      "arpt": 367.75,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "William Williams",
+          "condition": "multiple sclerosis",
+          "mean_ttft": 92.621
+        },
+        {
+          "name": "Mary Wilson",
+          "condition": "heart failure",
+          "mean_ttft": 574.159
+        },
+        {
+          "name": "Mary Brown",
+          "condition": "hyperlipidemia",
+          "mean_ttft": 574.396
+        }
+      ]
+    },
+    {
+      "victim_id": 48,
+      "ground_truth": {
+        "name": "Barbara Miller",
+        "dob": "1954-01-01",
+        "condition": "epilepsy"
+      },
+      "recovered": {
+        "name": "Barbara Miller",
+        "condition": "epilepsy",
+        "dob": "1954-01-01"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 1916,
+      "arpt": 319.33,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Barbara Miller",
+          "condition": "epilepsy",
+          "mean_ttft": 92.517
+        },
+        {
+          "name": "James Martinez",
+          "condition": "heart failure",
+          "mean_ttft": 573.287
+        },
+        {
+          "name": "Michael Martinez",
+          "condition": "arthritis",
+          "mean_ttft": 573.848
+        }
+      ]
+    },
+    {
+      "victim_id": 49,
+      "ground_truth": {
+        "name": "Patricia Jones",
+        "dob": "1970-10-18",
+        "condition": "chronic kidney disease"
+      },
+      "recovered": {
+        "name": "Patricia Jones",
+        "condition": "chronic kidney disease",
+        "dob": "1970-10-18"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 969,
+      "arpt": 138.43,
+      "n_private_blocks": 178,
+      "top_scan_results": [
+        {
+          "name": "Patricia Jones",
+          "condition": "chronic kidney disease",
+          "mean_ttft": 91.725
+        },
+        {
+          "name": "Robert Williams",
+          "condition": "sleep apnea",
+          "mean_ttft": 573.939
+        },
+        {
+          "name": "Jennifer Wilson",
+          "condition": "multiple sclerosis",
+          "mean_ttft": 573.984
+        }
+      ]
+    }
+  ],
+  "aggregate": {
+    "n_victims": 50,
+    "mean_trr": 1.0,
+    "success_rate": 1.0,
+    "confirmed_hit_rate": 1.0,
+    "mean_arpt": 258.52,
+    "arpt_ci_95": [
+      218.2,
+      299.82
+    ],
+    "mean_total_api_calls": 1302.5,
+    "mean_timing_gap_ms": 488.86,
+    "ks_p_value": 7.770573798088942e-117,
+    "total_attack_time_s": 37423.5,
+    "known_dob": true,
+    "trr_note": "TRR over {name, condition} only \u2014 DOB given as prior",
+    "arpt_note": "ARPT = API calls / vocab tokens in recovered fields (Papers 1-5)",
+    "target_trr": 0.85,
+    "target_sr": 0.8,
+    "trr_target_met": true,
+    "sr_target_met": true
+  }
+}
