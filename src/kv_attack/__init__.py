@@ -3,7 +3,7 @@
 VLLM_BASE_URL = "http://localhost:8001/v1"
 VLLM_HOST     = "localhost"
 VLLM_PORT     = 8001
-MODEL_ID      = "meta-llama/Llama-3.1-8B-Instruct"
+MODEL_ID      = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
 BLOCK_SIZE    = 16
 
 # ── Timing parameters ─────────────────────────────────────────────────────────

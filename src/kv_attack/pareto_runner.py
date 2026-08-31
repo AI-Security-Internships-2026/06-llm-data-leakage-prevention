@@ -431,7 +431,7 @@ def main() -> None:
         from kv_attack.victim_seeder import (
             build_aligned_system_prompt, seed_victim_prefix
         )
-        tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
+        tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-R1-Distill-Llama-8B")
         system_prefix, _ = build_aligned_system_prompt(tokenizer)
 
         # Build victim records from Week 10 results if available
