@@ -427,12 +427,16 @@ def main() -> None:
     if args.run_m3:
         print("[pareto_runner] Running M3 empirical evaluation...")
         from transformers import AutoTokenizer
+        from kv_attack import MODEL_ID, detect_has_bos
         from kv_attack.backends.mock_backend import MockBackend
         from kv_attack.victim_seeder import (
             build_aligned_system_prompt, seed_victim_prefix
         )
-        tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-R1-Distill-Llama-8B")
-        system_prefix, _ = build_aligned_system_prompt(tokenizer)
+        _m3_model_id = getattr(args, "model_id", MODEL_ID)
+        tokenizer = AutoTokenizer.from_pretrained(_m3_model_id)
+        system_prefix, _ = build_aligned_system_prompt(
+            tokenizer, has_bos=detect_has_bos(_m3_model_id)
+        )
 
         # Build victim records from Week 10 results if available
         victim_records = []

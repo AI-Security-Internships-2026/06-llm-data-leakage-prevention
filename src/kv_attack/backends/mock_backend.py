@@ -85,7 +85,7 @@ class MockBackend(BackendClient):
             backend_name  = "mock",
             framework     = "mock",
             framework_ver = "1.0",
-            model_id      = "mock-llama-3.1-8b",
+            model_id      = "mock-deepseek-r1-distill-llama-8b",
             base_url      = "mock://localhost",
             apc_enabled   = self.apc_enabled,
             extra         = {

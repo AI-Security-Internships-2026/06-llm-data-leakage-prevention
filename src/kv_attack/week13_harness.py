@@ -43,7 +43,7 @@ from pathlib import Path
 from openai import OpenAI
 from transformers import AutoTokenizer
 
-from kv_attack import VLLM_BASE_URL, MODEL_ID
+from kv_attack import VLLM_BASE_URL, MODEL_ID, detect_has_bos
 from kv_attack.backends.mock_backend import MockBackend
 from kv_attack.backends.vllm_backend import VLLMBackend
 from kv_attack.victim_seeder import build_aligned_system_prompt
@@ -136,7 +136,9 @@ def main() -> None:
     print("=" * 65 + "\n")
 
     # 1. Build aligned system prefix
-    system_prefix, n_prefix_tok = build_aligned_system_prompt(tokenizer, has_bos=True)
+    system_prefix, n_prefix_tok = build_aligned_system_prompt(
+        tokenizer, has_bos=detect_has_bos(args.model_id)
+    )
     print(f"[harness_v2] System prefix: {n_prefix_tok} tokens\n")
 
     # 2. Seed victims
@@ -179,6 +181,24 @@ def main() -> None:
         t2_ms = calibration["t2_threshold_ms"]
         print(f"[harness_v2] Empirical thresholds: T1={t1_ms:.1f} ms, T2={t2_ms:.1f} ms\n")
 
+        # FEASIBILITY GUARD — abort if the intermediate TTFT level is not
+        # statistically separable. Proceeding with indistinguishable distributions
+        # produces 0% success rate and wastes GPU time on a broken attack.
+        # Root cause: the template or model does not exhibit three distinct TTFT
+        # levels. Use week10/12 linear_early_exit for a guaranteed 100% SR instead.
+        if not calibration.get("intermediate_feasible", True):
+            raise SystemExit(
+                "\n[harness_v2] ABORT: The S1_HIT (right name, wrong condition) TTFT "
+                "distribution is NOT separable from the MISS distribution on this "
+                f"model/template (p_s1_miss={calibration['ks_s1hit_vs_miss']['p']:.2e}, "
+                f"p_hit_s1={calibration['ks_hit_vs_s1hit']['p']:.2e}).\n"
+                "This means the two-stage speedup cannot be achieved empirically.\n"
+                "RECOMMENDATION: re-run with the linear attack:\n"
+                "  python -m kv_attack.multi_backend_harness --n-victims N\n"
+                "The 12.62x BLQ gain remains valid analytically for architectures where "
+                "the intermediate level exists (see docs/final-report.md Section 6.6)."
+            )
+
     # 4. Attack each victim
     results: list[TwoStageResult] = []
 
@@ -205,7 +225,7 @@ def main() -> None:
             t1_ms          = t1_ms,
             t2_ms          = t2_ms,
             victim_record  = victim_record,
-            candidate_seed = vid,
+            candidate_seed = args.seed * 1000 + vid,
         )
         results.append(result)
 

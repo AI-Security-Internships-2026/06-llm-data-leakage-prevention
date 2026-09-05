@@ -36,7 +36,7 @@ Launch command (reference)
     docker run --gpus all --shm-size 1g \\
         -p 8002:80 \\
         ghcr.io/huggingface/text-generation-inference:2.1.4 \\
-        --model-id meta-llama/Llama-3.1-8B-Instruct \\
+        --model-id deepseek-ai/DeepSeek-R1-Distill-Llama-8B \\
         --prefix-caching true \\
         --max-total-tokens 4096 \\
         --dtype bfloat16

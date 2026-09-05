@@ -25,7 +25,7 @@ from pathlib import Path
 import numpy as np
 from transformers import AutoTokenizer
 
-from kv_attack import MODEL_ID
+from kv_attack import MODEL_ID, detect_has_bos
 from kv_attack.backends import get_backend, BackendClient
 from kv_attack.backends.base import BackendInfo
 from kv_attack.victim_seeder import build_private_block, build_aligned_system_prompt
@@ -111,7 +111,7 @@ def _run_single_backend(
           f"APC metric detected={info.apc_enabled}")
 
     system_prefix, n_prefix_tokens = build_aligned_system_prompt(
-        tokenizer, has_bos=True
+        tokenizer, has_bos=detect_has_bos(model_id)
     )
     print(f"[harness] system_prefix tokens={n_prefix_tokens}")
 
@@ -168,6 +168,9 @@ def _run_single_backend(
             print(f"[harness]    WARNING: reseed failed: {exc}")
             continue
 
+        # candidate_seed must incorporate the run seed so that two independent
+        # runs (different models, same victim_id) produce different shuffle orders.
+        # Using seed * 1000 + i avoids collisions for any reasonable victim count.
         result = reconstruct_victim_adaptive(
             backend        = backend,
             tokenizer      = tokenizer,
@@ -175,7 +178,7 @@ def _run_single_backend(
             threshold_ms   = threshold_ms,
             victim_record  = record,
             known_dob      = True,
-            candidate_seed = i,
+            candidate_seed = seed * 1000 + i,
         )
         results.append(result)
 

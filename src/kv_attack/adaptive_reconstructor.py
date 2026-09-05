@@ -78,62 +78,15 @@ VOCAB_SIZE   = N_NAMES * N_CONDITIONS                # 2 000
 H0_BITS      = math.log2(VOCAB_SIZE)                 # ≈ 10.97 bits
 
 # Eviction parameters
-# Cache capacity: ~45,700 blocks (16 tokens each) = ~731,000 tokens (Llama-3.1-8B on GB10).
+# Cache capacity: ~45,700 blocks (16 tokens each) = ~731,000 tokens
+# (DeepSeek-R1-Distill-Llama-8B on GB10 — same Llama-3.1 architecture,
+#  same KV head count, same block capacity as Llama-3.1-8B on this hardware).
 # Each eviction prompt must be FULLY UNIQUE (every block a new hash) so it actually
 # displaces cached blocks. A shared word-bank filler produces only ~2 unique blocks per
 # prompt — useless against 195,000+ contamination blocks left by prior scans.
 # Fix: generate random ASCII words per request → ~187 unique blocks per prompt.
 # 295 prompts × 187 blocks = 55,165 unique blocks > 45,700 cache blocks → full LRU cycle.
 EVICT_N_REQUESTS  = 500     # 500 × 178 unique blocks = 89,000 > 45,697 cache → 1.95× cycle
-_EVICT_CHARS      = "abcdefghijklmnopqrstuvwxyz"
-
-
-def evict_cache_full(backend: BackendClient, system_prefix: str) -> int:
-    """
-    Flush the backend KV cache using victim-structured eviction prompts.
-
-    ROOT CAUSE of prior failures
-    ----------------------------
-    Random-content eviction prompts (e.g. "xkqp znjb ...") live in a separate
-    subtree of vLLM's APC prefix trie.  vLLM's LRU eviction operates within
-    a subtree: pressure from the random subtree does NOT evict blocks in the
-    victim subtree (system_prefix → private blocks).  So all 500 random
-    eviction prompts had zero effect on victim scan-probe contamination.
-
-    Fix
-    ---
-    Use the SAME system_prefix as victim prompts, followed by a unique
-    EVICT+uuid private section.  These prompts join the victim subtree and
-    their blocks directly compete with — and evict — victim scan-probe blocks
-    under LRU.
-
-    Each eviction prompt ≈ 3,100 tokens (system 271 + private 2,848) — well
-    under the 4,096-token limit.  Each contributes 178 unique private blocks
-    (hash-chained from a unique first block, so all 178 are distinct).
-
-    500 prompts × 178 blocks = 89,000 unique victim-subtree blocks
-    → 1.95× the 45,697-block cache capacity → guaranteed full LRU flush.
-
-    Returns the number of successful eviction API calls.
-    """
-    import uuid as _uuid
-    calls = 0
-    for i in range(EVICT_N_REQUESTS):
-        # UUID hex name ensures block 17 (first private block) is unique.
-        # All subsequent blocks (18–194) chain from block 17 → also unique.
-        evict_name = f"EVICT{_uuid.uuid4().hex}"
-        prompt = system_prefix + " " + build_private_block(
-            evict_name, "1900-01-01", "unknown"
-        )
-        try:
-            backend.measure_ttft(prompt)
-            calls += 1
-        except Exception as exc:
-            if i < 3:
-                print(f"[evict] WARNING: eviction request {i} failed: {exc}")
-    return calls
-
-
 # ── Result dataclass ──────────────────────────────────────────────────────────
 
 @dataclass
