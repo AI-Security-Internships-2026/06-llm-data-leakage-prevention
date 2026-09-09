@@ -38,6 +38,22 @@ import dataclasses
 import datetime
 import json
 import sys
+
+import numpy as np
+
+
+class _NumpyEncoder(json.JSONEncoder):
+    """Convert numpy scalars/arrays to native Python types for JSON serialisation."""
+    def default(self, obj):
+        if isinstance(obj, np.bool_):
+            return bool(obj)
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
 from pathlib import Path
 
 from openai import OpenAI
@@ -281,7 +297,7 @@ def main() -> None:
 
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     with open(args.output, "w") as fh:
-        json.dump(out_data, fh, indent=2)
+        json.dump(out_data, fh, indent=2, cls=_NumpyEncoder)
     print(f"[harness_v2] Results written to {args.output}")
 
 

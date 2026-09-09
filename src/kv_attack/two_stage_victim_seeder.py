@@ -128,39 +128,43 @@ T_S1_HIT_MS = 264.0
 
 def build_name_block(name: str, tokenizer: AutoTokenizer) -> str:
     """
-    Build the name block string: name + filler, padded to exactly
-    NAME_BLOCKS × BLOCK_SIZE tokens.
+    Build the name block string padded to exactly NAME_BLOCKS × BLOCK_SIZE tokens.
 
-    The padding ensures that block N+128 starts at a clean boundary,
-    making Stage 2 (condition scan) independent of the name length.
+    vLLM v1 uses content-only block hashing (not chain hashing).
+    Identical filler tokens across candidates → same block hash → shared cache.
+    Fix: repeat the candidate name throughout the filler so every block
+    has unique content per candidate → different hash → no cross-candidate hits.
     """
-    base = f"{name}. " + _NAME_FILLER
+    name_saturated_filler = (f" {name}." * 40) + " " + _NAME_FILLER
+    base = f"{name}. " + name_saturated_filler
 
-    # Iteratively pad until we reach exactly NAME_BLOCKS full blocks
-    # (or as close as possible within 1 token due to BPE rounding).
-    for _ in range(BLOCK_SIZE * 4):
+    for _ in range(NAME_BLOCKS * BLOCK_SIZE):
         toks = tokenizer.encode(base, add_special_tokens=False)
         n_complete = len(toks) // BLOCK_SIZE
         if n_complete >= NAME_BLOCKS:
             break
-        base = base + _PAD_WORD
+        base = base + f" {name}"
 
     return base
 
 
 def build_condition_block(condition: str, tokenizer: AutoTokenizer) -> str:
     """
-    Build the condition block string: condition + filler, padded to exactly
-    COND_BLOCKS × BLOCK_SIZE tokens.
-    """
-    base = f"{condition}. " + _CONDITION_FILLER
+    Build the condition block string padded to exactly COND_BLOCKS × BLOCK_SIZE tokens.
 
-    for _ in range(BLOCK_SIZE * 4):
+    Same content-uniqueness fix as build_name_block: repeat the condition
+    string throughout the filler so every condition block has unique content
+    per condition under vLLM v1 content-only hashing.
+    """
+    cond_saturated_filler = (f" {condition}." * 20) + " " + _CONDITION_FILLER
+    base = f"{condition}. " + cond_saturated_filler
+
+    for _ in range(COND_BLOCKS * BLOCK_SIZE):
         toks = tokenizer.encode(base, add_special_tokens=False)
         n_complete = len(toks) // BLOCK_SIZE
         if n_complete >= COND_BLOCKS:
             break
-        base = base + _PAD_WORD
+        base = base + f" {condition}"
 
     return base
 

