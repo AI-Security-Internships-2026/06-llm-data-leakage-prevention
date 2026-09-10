@@ -1,4 +1,3 @@
-
 import argparse
 import datetime
 import json
@@ -14,6 +13,7 @@ from transformers import AutoTokenizer
 
 from kv_attack import (
     VLLM_BASE_URL, VLLM_HOST, VLLM_PORT, MODEL_ID, BLOCK_SIZE,
+    detect_has_bos,
 )
 from kv_attack.victim_seeder import (
     build_aligned_system_prompt,
@@ -91,7 +91,7 @@ def run_attack(
     # ── Phase 1: Block-aligned system prefix ─────────────────────────────────
     print("\n[harness] PHASE 1 — Building block-aligned system prefix...")
     system_prefix, n_prefix_tokens = build_aligned_system_prompt(
-        tokenizer, has_bos=True
+        tokenizer, has_bos=detect_has_bos(MODEL_ID)
     )
     n_prefix_blocks = (1 + n_prefix_tokens) // BLOCK_SIZE
     print(f"[harness] System prefix : {n_prefix_tokens} tokens "
@@ -186,7 +186,7 @@ def run_attack(
             threshold_ms  = threshold_ms,
             victim_record = record,
             known_dob     = known_dob,
-            candidate_seed= i,
+            candidate_seed= seed * 1000 + i,
         )
         results.append(result)
 

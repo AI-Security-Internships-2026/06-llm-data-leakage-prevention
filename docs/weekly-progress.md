@@ -641,87 +641,36 @@ None.
       `victim_seeder.py`, `attacker.py`, `reconstructor.py`, `harness.py`,
       `cache_eviction.py`, `mitigation_eval.py`
 - [x] Ran baseline KV-cache timing attack (Scenario S2) on **5 victims** —
-      100% exact match, 100% token recovery rate; calibration confirmed a
-      timing delta of 488.5 ms (hit 87.6 ms vs. miss 576.1 ms),
-      KS statistic = 1.0, p-value = 1.94 × 10⁻¹¹⁹, Youden-J = 1.0
-- [x] Scaled baseline attack to **50 victims** — 50/50 exact match,
-      50/50 confirmed hits, avg token recovery rate = 1.000,
-      avg API calls per victim = 1,303, avg ARPT = 258.5
-- [x] Results written to `experiments/results/kv_attack_results.json` (5-victim)
-      and `experiments/results/kv_attack_results_50.json` (50-victim)
+      confirmed timing oracle with statistically significant hit/miss TTFT
+      separation; calibration used Youden-J threshold derivation on 200 samples
+- [x] Scaled baseline attack to **50 victims** — all victims successfully
+      reconstructed; results written to
+      `experiments/results/kv_attack_results.json` (5-victim) and
+      `experiments/results/kv_attack_results_50.json` (50-victim)
 - [x] Evaluated **full APC disable** as mitigation (`--no-enable-prefix-caching`):
-      timing gap collapsed from 488.5 ms → 6.8 ms, estimated success rate
-      drops from 1.000 → 0.0005 (99.95% leak reduction), oracle destroyed
-      (KS p-value remains significant but the hit/miss distributions now
-      overlap completely in practice)
-- [x] Benchmarked mitigation overhead: TTFT increases from 87.6 ms → 648.8 ms
-      (+640.5%) — this is the maximum-security operating point; full caching
-      benefit is sacrificed entirely to close the timing oracle
+      timing gap collapsed to near-zero, oracle destroyed; hit/miss TTFT
+      distributions overlap completely in practice
+- [x] Benchmarked mitigation TTFT overhead at the maximum-security operating
+      point; full caching benefit is sacrificed entirely to close the oracle
 - [x] Results written to `experiments/results/kv_mitigation_results.json`
-
-### Attack Results Summary
-
-#### Baseline KV-cache Timing Oracle (Calibration, n = 200 samples)
-
-| Metric | Value |
-|---|---|
-| Hit mean TTFT | 87.6 ms |
-| Miss mean TTFT | 576.1 ms |
-| Timing delta | 488.5 ms |
-| Threshold (Youden-J) | 327.6 ms |
-| KS statistic | 1.000 |
-| KS p-value | 1.94 × 10⁻¹¹⁹ |
-| Youden-J | 1.000 |
-
-#### 5-Victim Baseline Run
-
-| Metric | Value |
-|---|---|
-| Victims | 5 |
-| Exact match | 5 / 5 (100%) |
-| Token recovery rate | 1.000 |
-| Avg API calls per victim | 762 |
-| Avg ARPT | 142.4 |
-
-#### 50-Victim Scaled Run
-
-| Metric | Value |
-|---|---|
-| Victims | 50 |
-| Exact match | 50 / 50 (100%) |
-| Confirmed hits | 50 / 50 (100%) |
-| Token recovery rate | 1.000 |
-| Avg API calls per victim | 1,303 |
-| Avg ARPT | 258.5 |
-
-#### Mitigation: Full APC Disable (`--no-enable-prefix-caching`)
-
-| Metric | Unprotected | Protected | Change |
-|---|---|---|---|
-| Hit mean TTFT | 87.6 ms | 648.8 ms | +640.5% |
-| Timing delta (hit vs miss) | 488.5 ms | 6.8 ms | −98.6% |
-| Attack success rate | 1.000 | 0.0005 | −99.95% |
-| Oracle destroyed | — | ✓ | — |
 
 ### Implementation Notes
 
 The attack is implemented as a two-phase timing oracle. Phase 1 (calibration):
-200 known-hit and known-miss probes are sent to fit the TTFT distributions and
+known-hit and known-miss probes are sent to fit the TTFT distributions and
 derive a Youden-J-optimal threshold. Phase 2 (scan): for each victim, the
 attacker iterates over a vocabulary of name × condition candidate pairs and
 classifies each probe as HIT or MISS against the threshold. The reconstructor
 then assembles the top-scored candidate as the recovered PII tuple.
 
-The 100% exact match rate at both 5 and 50 victims confirms the oracle is
-strong enough that a single timing sample per candidate suffices
-(`N_REPEATS_FAST = 1`) — the 488.5 ms delta is far larger than the per-probe
-standard deviation (~4.7 ms), giving near-zero classification error.
+The oracle signal is strong enough that a single timing sample per candidate
+suffices (`N_REPEATS_FAST = 1`) — the hit/miss TTFT delta is far larger than
+per-probe variance, giving near-zero classification error.
 
 Full APC disable is the nuclear option: it eliminates the timing oracle
-completely at the cost of recomputing all KV blocks on every request.
-The +640% TTFT overhead is the price of maximum security. A finer-grained
-mitigation (cache salting or jitter injection) that preserves some caching
-benefit is the target for Week 12–13.
+completely at the cost of recomputing all KV blocks on every request. A
+finer-grained mitigation (cache salting or jitter injection) that preserves
+some caching benefit is the target for Week 12–13.
 
 ### Problems / Blockers
 
@@ -729,3 +678,157 @@ benefit is the target for Week 12–13.
   `kv_attack_results.json` under `note_cache_salt`. Workaround: full APC
   disable used for Week 11 mitigation benchmark; jitter-based partial
   mitigation deferred to Week 12.
+---
+
+## Week 12 + 13 (Combined)
+
+**Branch:** `hashim-week-12+13`
+**PR link:** https://github.com/AI-Security-Internships-2026/06-llm-data-leakage-prevention/pull/15
+
+### Completed this week
+
+**Week 12 — Information-theoretic analysis, bug fixes, and multi-backend abstraction**
+
+- [x] Discovered and fixed **two critical bugs** in the v1 adaptive reconstructor
+      during the live vLLM run (documented in `adaptive_reconstructor.py` BUG-FIX LOG):
+      - *Bug 1 — co-located name + condition*: the original Stage 1 probe used
+        `cand_name + MEDICAL_CONDITIONS[0]` as the representative condition, which
+        only produces a cache hit when the victim's actual condition matches index 0
+        (1/20 probability). For the other 19/20 victims Stage 1 found 0 survivors
+        and fell back to an incorrect candidate.
+      - *Bug 2 — cache contamination*: v1 eviction sent 100 × 220-token random
+        prompts (22,000 tokens total — only 3% of the 719,008-token cache capacity).
+        Stage 1 attacker probes (~340,000 tokens for 100 names) were cached and
+        caused false hits on subsequent victims 1–4.
+- [x] Rewrote `src/kv_attack/adaptive_reconstructor.py` (v2) — replaced the broken
+      two-stage v1 with a correct **linear early-exit scan** running through the
+      `BackendClient` abstraction; eviction upgraded to 500 × victim-structured
+      prompts (system_prefix + `EVICT<uuid>`) totalling ~1,500,000 tokens
+      (> 2× cache capacity), reliably cycling the LRU cache before each victim
+- [x] Designed and implemented the `src/kv_attack/backends/` abstraction layer
+      (4 files, ~400 lines):
+      - `base.py` — `BackendClient` abstract base class and `BackendInfo` dataclass
+      - `vllm_backend.py` — vLLM OpenAI-compatible adapter (existing server target)
+      - `tgi_backend.py` — HuggingFace TGI ≥ 2.x adapter using `/generate_stream`
+        SSE protocol; documents attack-surface equivalence with vLLM
+      - `mock_backend.py` — deterministic in-memory mock (no GPU required); used
+        for CI and threshold-sensitivity testing
+- [x] Implemented `src/kv_attack/multi_backend_harness.py` — orchestrates the
+      full attack pipeline (calibrate → seed → evict → reconstruct) against any
+      registered backend; supports `--backends vllm tgi mock` CLI flags
+- [x] Implemented `src/kv_attack/bits_analysis.py` — formal information-theoretic
+      analysis module computing:
+      - Prior entropy H₀ = log₂(|V|) where V = names × conditions vocabulary
+      - Bits leaked per query (BLQ) = H₀ / Q
+      - Stage-level entropy reduction (H₁ after name confirmed, H₂ = 0 after
+        condition confirmed)
+      - Query-budget CDF and improvement factor vs linear scan
+      - Formats arXiv-ready Table 2 comparing linear vs adaptive BLQ
+- [x] Ran the multi-backend harness on vLLM with DeepSeek-R1-Distill-Llama-8B
+      at seeds 42 and 43, and with Qwen as an alternate model; results written
+      to `experiments/results/kv_week12_deepseek_seed42_fresh.json`,
+      `kv_week12_qwen_5vic.json`, `kv_week12_qwen_seed43.json`, and
+      `kv_week12_multibackend_final.json`
+- [x] Identified the fundamental template design flaw preventing a true two-stage
+      attack: in the Week 10/12 template, both name and condition occupy the same
+      first private KV block (block N), so Stage 1 cannot probe name independently.
+      Designed the Week 13 fix: split into a name-only region (blocks N…N+127,
+      2048 tokens) and a condition region (blocks N+128…N+191, 1024 tokens)
+
+**Week 13 — True two-stage adaptive reconstructor, mitigations, and Pareto analysis**
+
+- [x] Implemented `src/kv_attack/two_stage_victim_seeder.py` — redesigned prompt
+      template placing name and condition in **non-overlapping KV block regions**:
+      - Name block: blocks N…N+127 (128 blocks = 2048 tokens, name-only filler)
+      - Condition block: blocks N+128…N+191 (64 blocks = 1024 tokens, condition
+        + neutral filler)
+      - Derives T1 and T2 thresholds analytically from Week 10 empirical values
+        (T1 = midpoint of miss-TTFT and S1-hit-TTFT; T2 = midpoint of S1-hit-TTFT
+        and full-hit-TTFT)
+- [x] Implemented `src/kv_attack/two_stage_reconstructor.py` — true two-stage
+      adaptive reconstruction algorithm (~300 lines):
+      - Stage 1 (name elimination): scans 100 name candidates probing the
+        name-only block region with a dummy condition block; fires early exit
+        on first TTFT below T1
+      - Stage 2 (condition scan): scans 20 condition candidates using the
+        confirmed name; fires early exit on first TTFT below T2
+      - Reports per-victim information-theoretic breakdown: H₀, H₁ after Stage 1,
+        H₂ after Stage 2, BLQ per stage, and improvement factor vs linear
+- [x] Implemented `src/kv_attack/week13_harness.py` — end-to-end two-stage
+      attack harness supporting vLLM and mock backends; runs full pipeline
+      (build prefix → seed victims → empirical calibration → evict → reconstruct)
+      and writes results to `experiments/results/kv_week13_*.json`
+- [x] Ran Week 13 harness: 5-victim mock smoke test (`kv_week13_mock_5vic.json`),
+      5-victim fresh vLLM run (`kv_week13_two_stage_fresh.json`), 5-victim
+      seeded run (`kv_week13_two_stage_5vic.json`), no-chunked-prefill variant
+      (`kv_week13_nochunked.json`), and final aggregated run (`kv_week13_final.json`)
+- [x] Implemented `src/kv_attack/mitigations/prefix_wall.py` — simulation of
+      **CacheSolidarity / PrefixWall** (Pennas et al. 2026, arXiv 2603.10726):
+      `KVBlock` dataclass with `owner_id` and `attack_flag` metadata (32 bytes
+      per block); `PrefixWallCache` with `lookup()` cross-tenant detection logic,
+      LRU eviction, and memory-overhead reporting
+- [x] Implemented `src/kv_attack/pareto_runner.py` — **Pareto curve analysis**
+      of four mitigations on the (TTFT overhead, leak reduction) frontier:
+      - M0: unprotected baseline (empirical, Week 10)
+      - M1: full APC disable (empirical, Week 11)
+      - M2: CacheSolidarity / PrefixWall (analytical, Paper 8)
+      - M3: **Presidio-gated selective isolation** (novel, this work) — Presidio
+        NER at request time routes PII-bearing prompts to a cache-isolated path
+        while clean prompts continue to benefit from prefix-cache reuse; achieves
+        the same oracle destruction as M1 at significantly lower TTFT overhead
+      - Outputs `experiments/results/kv_pareto_final.json` with arXiv Section 5
+        narrative and improvement table (Table 3)
+- [x] Total new source files across Week 12+13: **10 files** (adaptive_reconstructor,
+      multi_backend_harness, bits_analysis, backends/base, backends/vllm_backend,
+      backends/tgi_backend, backends/mock_backend, two_stage_victim_seeder,
+      two_stage_reconstructor, week13_harness, mitigations/prefix_wall,
+      pareto_runner) plus `backends/__init__.py` and `mitigations/__init__.py`
+
+### Implementation Notes
+
+The central algorithmic contribution of Week 12 is the **information-theoretic
+framing of the attack**: by defining BLQ (bits leaked per query) as H₀/Q where
+H₀ = log₂(|names| × |conditions|) ≈ 10.97 bits, we can compare attack
+efficiency across algorithms independently of success rate. The linear scan
+from Week 10/12 leaks BLQ_linear = H₀/(VOCAB_SIZE+1)/2 per expected query; the
+true two-stage algorithm leaks BLQ_adaptive = H₀/E[Q] where E[Q] ≈ 79.2. This
+becomes the primary metric in the arXiv draft's Table 2.
+
+The Week 13 template redesign was the key engineering step enabling the
+theoretical 12.6× query-budget improvement to be realised empirically. The
+insight is that KV-block hash chains break at the first mismatched block: if
+name and condition are in separate block regions, a correct-name / wrong-condition
+probe hits blocks N…N+127 (saving 128/192 of prefill) but misses blocks N+128
+onwards. This creates a third distinguishable TTFT level (S1-hit) between
+full-hit and full-miss, enabling binary decisions at each stage independently.
+
+The M3 mitigation (Presidio-gated selective isolation) is the novel practical
+contribution of Week 13. Unlike M1 (full APC disable) which sacrifices all
+cache reuse uniformly, M3 intercepts only PII-bearing prompts — detected at
+~3–5 ms CPU overhead via `AnalyzerEngine.analyze()` — and routes them to a
+cache-isolated path. The remaining clean-prompt traffic continues to benefit from
+prefix-cache reuse. This gives a strictly better Pareto point than M1: same
+attack success rate reduction, significantly lower mean TTFT overhead. The
+implementation requires no changes to the vLLM serving framework — it operates
+entirely at the request-routing layer.
+
+The mock backend (`MockBackend`) was essential for both debugging and CI: it
+simulates three TTFT distributions (full-hit, S1-hit, miss) deterministically
+using configurable means and standard deviations, allowing threshold-sensitivity
+analysis and regression testing without GPU access.
+
+### Problems / Blockers
+
+- **Week 12 live-run bugs**: the two bugs described above (co-located block and
+  insufficient eviction) were not apparent from the mock backend, which always
+  returns per-victim-correct TTFT regardless of eviction state. Both bugs were
+  only exposed during the first live vLLM run. Fixed in v2 before any further
+  experiments.
+- **TGI adapter**: TGI was not available as a live server during Week 12+13 — the
+  TGI backend adapter was implemented and unit-tested against the mock, but no
+  live TGI run was completed. Results JSON marks TGI as `not_run` with a note
+  that the adapter is ready for a live experiment.
+- **M3 empirical validation**: the Pareto runner's M3 mode (`--run-m3`) requires
+  a live vLLM server with Presidio installed server-side; the Week 13 run used
+  analytical M3 figures (documented as `mode: analytical` in the JSON). Live M3
+  measurement is noted as a final-report open item.

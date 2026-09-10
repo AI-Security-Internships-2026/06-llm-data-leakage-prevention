@@ -7,7 +7,7 @@
 # Usage:
 #   # Terminal 1: start vLLM with APC DISABLED
 #   .venv/bin/python -m vllm.entrypoints.openai.api_server \
-#       --model meta-llama/Llama-3.1-8B-Instruct \
+#       --model deepseek-ai/DeepSeek-R1-Distill-Llama-8B \
 #       --no-enable-prefix-caching \
 #       --gpu-memory-utilization 0.88 \
 #       --no-enable-chunked-prefill \
