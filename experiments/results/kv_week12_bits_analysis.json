@@ -1,0 +1,119 @@
+{
+  "analysis_title": "KV-Cache Timing Attack: Information-Theoretic Analysis (Week 12)",
+  "analytical_linear_scan": {
+    "algorithm": "linear_scan",
+    "vocab_size": 2000,
+    "prior_entropy_bits": 10.9658,
+    "q_min": 1,
+    "q_expected": 1000.5,
+    "q_max": 2000,
+    "blq_best_case": 10.965784,
+    "blq_expected": 0.01096,
+    "blq_worst_case": 0.005483,
+    "note": "Linear scan shuffles candidates. E[Q] = (|V|+1)/2 \u2248 1000 for |V|=2000. Week 10 empirical: Q\u0304 = 762 (5 victims) / 1303 (50 victims), consistent with uniform-shuffle expectation."
+  },
+  "analytical_adaptive": {
+    "algorithm": "adaptive_two_stage",
+    "vocab_size": 2000,
+    "prior_entropy_bits": 10.9658,
+    "stage1": {
+      "probes_names": 100,
+      "bits_reduced": 6.6439,
+      "q_scan_expected": 50.5,
+      "q_reseed_expected": 12.6,
+      "q_total_expected": 63.1,
+      "q_max": 125,
+      "blq_stage1_expected": 0.105249,
+      "bits_remaining_after": 4.3219
+    },
+    "stage2": {
+      "probes_conditions": 20,
+      "bits_reduced": 4.3219,
+      "q_scan_expected": 10.5,
+      "q_reseed_expected": 2.6,
+      "q_total_expected": 13.1,
+      "q_max": 25,
+      "blq_stage2_expected": 0.32929,
+      "bits_remaining_after": 0.0
+    },
+    "confirmation_calls": 3,
+    "q_total_expected": 79.2,
+    "q_total_max": 153,
+    "q_total_min": 5,
+    "blq_best_case": 2.193157,
+    "blq_expected": 0.13837,
+    "blq_worst_case": 0.071672
+  },
+  "improvement_table": {
+    "table_caption": "Table 2: Query efficiency of linear scan (Week 10) vs adaptive two-stage (Week 12). Vocabulary V = 2000 (100 names \u00d7 20 conditions), H\u2080 = 10.97 bits.",
+    "rows": [
+      {
+        "algorithm": "Linear scan (Week 10)",
+        "q_expected": 1000.5,
+        "q_max": 2000,
+        "blq_expected": 0.01096,
+        "blq_best_case": 10.965784,
+        "blq_worst_case": 0.005483
+      },
+      {
+        "algorithm": "Adaptive two-stage (Week 12)",
+        "q_expected": 79.2,
+        "q_max": 153,
+        "blq_expected": 0.13837,
+        "blq_best_case": 2.193157,
+        "blq_worst_case": 0.071672
+      }
+    ],
+    "improvement": {
+      "query_reduction_factor": 12.63,
+      "blq_improvement_factor": 12.62,
+      "note": "Adaptive algorithm requires 12.63\u00d7 fewer queries on average, yielding a 12.62\u00d7 improvement in bits leaked per query."
+    }
+  },
+  "empirical": {
+    "source_file": "../experiments/results/kv_attack_results.json",
+    "n_victims": 5,
+    "prior_entropy_bits": 10.9658,
+    "empirical_calls": {
+      "mean": 762.4,
+      "median": 695.0,
+      "std": 419.21,
+      "min": 142,
+      "max": 1376,
+      "p25": 565.0,
+      "p75": 1034.0
+    },
+    "empirical_blq": {
+      "mean": 0.026197,
+      "median": 0.015778,
+      "std": 0.025821,
+      "min": 0.007969,
+      "max": 0.077224
+    },
+    "query_budget_cdf": {
+      "50": 0.0,
+      "100": 0.0,
+      "120": 0.0,
+      "200": 0.2,
+      "500": 0.2,
+      "762": 0.6,
+      "1000": 0.6,
+      "1303": 0.8,
+      "2000": 1.0
+    }
+  },
+  "arxiv_section4_summary": {
+    "H0_bits": 10.9658,
+    "H_after_stage1_bits": 4.3219,
+    "H_after_stage2_bits": 0.0,
+    "linear_q_expected": 1000.5,
+    "adaptive_q_expected": 79.2,
+    "linear_blq_expected": 0.01096,
+    "adaptive_blq_expected": 0.13837,
+    "query_reduction": 12.63,
+    "blq_improvement": 12.62,
+    "empirical_mean_calls": 762.4,
+    "empirical_mean_blq": 0.026197,
+    "narrative": "The prior uncertainty about a victim's identity is H\u2080 = log\u2082(2000) \u2248 10.97 bits (100 names \u00d7 20 conditions). The linear scan (Week 10) recovers this in an expected 1000 queries, yielding BLQ \u2248 0.0110 bits/query. The adaptive two-stage algorithm (Week 12) achieves the same recovery in an expected 79 queries (worst-case 153), yielding BLQ \u2248 0.1384 bits/query \u2014 a 12.62\u00d7 improvement. Stage 1 (name elimination) reduces uncertainty by 6.64 bits at a cost of ~63 queries; Stage 2 (condition scan) accounts for the remaining 4.32 bits in ~13 queries."
+  }
+}
