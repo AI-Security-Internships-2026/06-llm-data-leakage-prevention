@@ -1,0 +1,365 @@
+{
+  "run_id": "week12-multibackend-2026-09-05",
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "hardware": "NVIDIA GB10 (119.7 GB unified memory, Blackwell)",
+  "scenario": "S2",
+  "algorithm": "linear_early_exit",
+  "vllm_version": "0.27.1",
+  "n_victims_per_backend": 5,
+  "n_calibration_samples": 200,
+  "eviction_blocks_per_victim": 89000,
+  "backends": {
+    "vllm": {
+      "status": "OK",
+      "backend_info": {
+        "backend_name": "vllm",
+        "framework": "vllm",
+        "framework_ver": "0.27.1",
+        "model_id": "Qwen/Qwen2.5-7B-Instruct",
+        "base_url": "http://localhost:8002/v1",
+        "apc_enabled": false
+      },
+      "calibration": {
+        "threshold_ms": 351.80368460714817,
+        "hit_mean_ms": 84.3411,
+        "hit_std_ms": 5.3941,
+        "miss_mean_ms": 585.8733,
+        "miss_std_ms": 61.6573,
+        "delta_ms": 501.5322,
+        "ks_stat": 1.0,
+        "ks_p_value": 1.9426434495222354e-119,
+        "youden_j": 1.0
+      },
+      "results": [
+        {
+          "victim_id": 0,
+          "ground_truth": {
+            "name": "James Jones",
+            "dob": "1997-06-17",
+            "condition": "depression"
+          },
+          "recovered": {
+            "name": "James Jones",
+            "condition": "depression",
+            "dob": "1997-06-17"
+          },
+          "token_recovery_rate": 1.0,
+          "exact_match": true,
+          "confirmed_hit": true,
+          "total_api_calls": 1197,
+          "arpt": 299.25,
+          "n_private_blocks": 178,
+          "information_theory": {
+            "vocab_size": 2000,
+            "prior_entropy_bits": 10.9658,
+            "total_api_calls": 1197,
+            "bits_leaked_per_query": 0.009161,
+            "blq_linear_theoretical": 0.01096,
+            "efficiency_vs_theoretical": 0.8358,
+            "note": "BLQ = H0 / total_api_calls. H0 = log2(2000) \u2248 10.97 bits. Efficiency vs theoretical = BLQ / BLQ_linear_expected. Values > 1 indicate early exit triggered before the expected midpoint."
+          },
+          "top_scan_results": [
+            {
+              "name": "James Jones",
+              "condition": "depression",
+              "mean_ttft": 84.9,
+              "is_hit": true
+            },
+            {
+              "name": "Jennifer Martinez",
+              "condition": "heart failure",
+              "mean_ttft": 557.17,
+              "is_hit": false
+            },
+            {
+              "name": "James Brown",
+              "condition": "osteoporosis",
+              "mean_ttft": 557.444,
+              "is_hit": false
+            }
+          ],
+          "algorithm": "linear_early_exit"
+        },
+        {
+          "victim_id": 1,
+          "ground_truth": {
+            "name": "Linda Garcia",
+            "dob": "1995-04-04",
+            "condition": "arthritis"
+          },
+          "recovered": {
+            "name": "Linda Garcia",
+            "condition": "arthritis",
+            "dob": "1995-04-04"
+          },
+          "token_recovery_rate": 1.0,
+          "exact_match": true,
+          "confirmed_hit": true,
+          "total_api_calls": 1180,
+          "arpt": 236.0,
+          "n_private_blocks": 178,
+          "information_theory": {
+            "vocab_size": 2000,
+            "prior_entropy_bits": 10.9658,
+            "total_api_calls": 1180,
+            "bits_leaked_per_query": 0.009293,
+            "blq_linear_theoretical": 0.01096,
+            "efficiency_vs_theoretical": 0.8479,
+            "note": "BLQ = H0 / total_api_calls. H0 = log2(2000) \u2248 10.97 bits. Efficiency vs theoretical = BLQ / BLQ_linear_expected. Values > 1 indicate early exit triggered before the expected midpoint."
+          },
+          "top_scan_results": [
+            {
+              "name": "Linda Garcia",
+              "condition": "arthritis",
+              "mean_ttft": 83.093,
+              "is_hit": true
+            },
+            {
+              "name": "William Davis",
+              "condition": "depression",
+              "mean_ttft": 555.433,
+              "is_hit": false
+            },
+            {
+              "name": "Barbara Wilson",
+              "condition": "osteoporosis",
+              "mean_ttft": 556.791,
+              "is_hit": false
+            }
+          ],
+          "algorithm": "linear_early_exit"
+        },
+        {
+          "victim_id": 2,
+          "ground_truth": {
+            "name": "Linda Martinez",
+            "dob": "1979-09-14",
+            "condition": "sleep apnea"
+          },
+          "recovered": {
+            "name": "Linda Martinez",
+            "condition": "sleep apnea",
+            "dob": "1979-09-14"
+          },
+          "token_recovery_rate": 1.0,
+          "exact_match": true,
+          "confirmed_hit": true,
+          "total_api_calls": 2364,
+          "arpt": 394.0,
+          "n_private_blocks": 178,
+          "information_theory": {
+            "vocab_size": 2000,
+            "prior_entropy_bits": 10.9658,
+            "total_api_calls": 2364,
+            "bits_leaked_per_query": 0.004639,
+            "blq_linear_theoretical": 0.01096,
+            "efficiency_vs_theoretical": 0.4232,
+            "note": "BLQ = H0 / total_api_calls. H0 = log2(2000) \u2248 10.97 bits. Efficiency vs theoretical = BLQ / BLQ_linear_expected. Values > 1 indicate early exit triggered before the expected midpoint."
+          },
+          "top_scan_results": [
+            {
+              "name": "Linda Martinez",
+              "condition": "sleep apnea",
+              "mean_ttft": 84.083,
+              "is_hit": true
+            },
+            {
+              "name": "William Jones",
+              "condition": "hypothyroidism",
+              "mean_ttft": 557.532,
+              "is_hit": false
+            },
+            {
+              "name": "James Miller",
+              "condition": "sleep apnea",
+              "mean_ttft": 557.777,
+              "is_hit": false
+            }
+          ],
+          "algorithm": "linear_early_exit"
+        },
+        {
+          "victim_id": 3,
+          "ground_truth": {
+            "name": "James Wilson",
+            "dob": "1973-10-16",
+            "condition": "migraine"
+          },
+          "recovered": {
+            "name": "James Wilson",
+            "condition": "migraine",
+            "dob": "1973-10-16"
+          },
+          "token_recovery_rate": 1.0,
+          "exact_match": true,
+          "confirmed_hit": true,
+          "total_api_calls": 2164,
+          "arpt": 432.8,
+          "n_private_blocks": 178,
+          "information_theory": {
+            "vocab_size": 2000,
+            "prior_entropy_bits": 10.9658,
+            "total_api_calls": 2164,
+            "bits_leaked_per_query": 0.005067,
+            "blq_linear_theoretical": 0.01096,
+            "efficiency_vs_theoretical": 0.4623,
+            "note": "BLQ = H0 / total_api_calls. H0 = log2(2000) \u2248 10.97 bits. Efficiency vs theoretical = BLQ / BLQ_linear_expected. Values > 1 indicate early exit triggered before the expected midpoint."
+          },
+          "top_scan_results": [
+            {
+              "name": "James Wilson",
+              "condition": "migraine",
+              "mean_ttft": 84.758,
+              "is_hit": true
+            },
+            {
+              "name": "Patricia Johnson",
+              "condition": "depression",
+              "mean_ttft": 554.0,
+              "is_hit": false
+            },
+            {
+              "name": "William Brown",
+              "condition": "hypothyroidism",
+              "mean_ttft": 555.657,
+              "is_hit": false
+            }
+          ],
+          "algorithm": "linear_early_exit"
+        },
+        {
+          "victim_id": 4,
+          "ground_truth": {
+            "name": "Jennifer Martinez",
+            "dob": "1984-01-27",
+            "condition": "atrial fibrillation"
+          },
+          "recovered": {
+            "name": "Jennifer Martinez",
+            "condition": "atrial fibrillation",
+            "dob": "1984-01-27"
+          },
+          "token_recovery_rate": 1.0,
+          "exact_match": true,
+          "confirmed_hit": true,
+          "total_api_calls": 529,
+          "arpt": 88.17,
+          "n_private_blocks": 178,
+          "information_theory": {
+            "vocab_size": 2000,
+            "prior_entropy_bits": 10.9658,
+            "total_api_calls": 529,
+            "bits_leaked_per_query": 0.020729,
+            "blq_linear_theoretical": 0.01096,
+            "efficiency_vs_theoretical": 1.8913,
+            "note": "BLQ = H0 / total_api_calls. H0 = log2(2000) \u2248 10.97 bits. Efficiency vs theoretical = BLQ / BLQ_linear_expected. Values > 1 indicate early exit triggered before the expected midpoint."
+          },
+          "top_scan_results": [
+            {
+              "name": "Jennifer Martinez",
+              "condition": "atrial fibrillation",
+              "mean_ttft": 87.662,
+              "is_hit": true
+            },
+            {
+              "name": "John Jones",
+              "condition": "hyperlipidemia",
+              "mean_ttft": 556.907,
+              "is_hit": false
+            },
+            {
+              "name": "Patricia Miller",
+              "condition": "obesity",
+              "mean_ttft": 557.705,
+              "is_hit": false
+            }
+          ],
+          "algorithm": "linear_early_exit"
+        }
+      ],
+      "aggregate": {
+        "algorithm": "linear_early_exit",
+        "n_victims": 5,
+        "mean_trr": 1.0,
+        "success_rate": 1.0,
+        "confirmed_hit_rate": 1.0,
+        "mean_arpt": 290.04,
+        "arpt_ci_95": [
+          178.9,
+          390.57
+        ],
+        "mean_total_api_calls": 1486.8,
+        "mean_timing_gap_ms": 501.53,
+        "ks_p_value": 1.9426434495222354e-119,
+        "total_attack_time_s": 5028.3,
+        "target_trr": 0.85,
+        "target_sr": 0.8,
+        "trr_target_met": true,
+        "sr_target_met": true
+      },
+      "information_theory": {
+        "algorithm": "linear_early_exit",
+        "n_victims": 5,
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "mean_api_calls": 1486.8,
+        "mean_blq": 0.009778,
+        "blq_linear_week10": 0.014383,
+        "blq_improvement_factor": 0.68,
+        "query_budget_cdf": {
+          "50": 0.0,
+          "100": 0.0,
+          "200": 0.0,
+          "500": 0.0,
+          "762": 0.2,
+          "1000": 0.2,
+          "1303": 0.6,
+          "2000": 0.6
+        },
+        "note": "Week 12 uses early-exit linear scan through BackendClient abstraction. BLQ improvement > 1 indicates early exit triggered before the theoretical midpoint (VOCAB_SIZE+1)/2=1000.5 \u2014 i.e. the victim's candidate appeared earlier in the shuffled list than average. Week 13 target: true two-stage adaptive (name block redesign) giving E[Q] \u2248 63 vs E[Q] \u2248 1000 for linear."
+      }
+    }
+  },
+  "cross_backend_comparison": {
+    "timing_gaps_ms": {
+      "vllm": 501.53
+    },
+    "success_rates": {
+      "vllm": 1.0
+    },
+    "mean_blq": {
+      "vllm": 0.009778
+    },
+    "vulnerable": {
+      "vllm": true
+    },
+    "generalises": true
+  },
+  "information_theory_per_backend": {
+    "vllm": {
+      "algorithm": "linear_early_exit",
+      "n_victims": 5,
+      "vocab_size": 2000,
+      "prior_entropy_bits": 10.9658,
+      "mean_api_calls": 1486.8,
+      "mean_blq": 0.009778,
+      "blq_linear_week10": 0.014383,
+      "blq_improvement_factor": 0.68,
+      "query_budget_cdf": {
+        "50": 0.0,
+        "100": 0.0,
+        "200": 0.0,
+        "500": 0.0,
+        "762": 0.2,
+        "1000": 0.2,
+        "1303": 0.6,
+        "2000": 0.6
+      },
+      "note": "Week 12 uses early-exit linear scan through BackendClient abstraction. BLQ improvement > 1 indicates early exit triggered before the theoretical midpoint (VOCAB_SIZE+1)/2=1000.5 \u2014 i.e. the victim's candidate appeared earlier in the shuffled list than average. Week 13 target: true two-stage adaptive (name block redesign) giving E[Q] \u2248 63 vs E[Q] \u2248 1000 for linear."
+    }
+  },
+  "bugfix_notes": {
+    "v1_bug1": "Stage 1 representative-condition probe only hits when victim condition = MEDICAL_CONDITIONS[0]. Fixed: full linear scan.",
+    "v1_bug2": "Random eviction prompts lived in a different APC subtree from victim data \u2014 vLLM LRU only evicts within the same subtree. Fixed: victim-structured eviction prompts (system_prefix + EVICT<uuid>), 500 \u00d7 178 blocks = 89,000 victim-subtree blocks (1.95\u00d7 cache capacity)."
+  }
+}

@@ -1,4 +1,3 @@
-
 import random
 from datetime import date, timedelta
 
@@ -87,7 +86,8 @@ _PRIVATE_TEMPLATE = (
 )
 
 # Padding word for block alignment.
-# " yes" reliably adds exactly 1 token in Llama-3.1 BPE.
+# " yes" reliably adds exactly 1 token in the Llama-3.1 BPE tokenizer.
+# DeepSeek-R1-Distill-Llama-8B uses the same tokenizer, so this holds.
 _PAD_WORD = " yes"
 
 
@@ -100,7 +100,8 @@ def build_aligned_system_prompt(
     """
     Pad _SYSTEM_PREFIX_RAW so private content starts at a block boundary.
 
-    vLLM prepends BOS for Llama-3.1, so the effective token sequence is:
+    vLLM prepends BOS for Llama-family models (including DeepSeek-R1-Distill-Llama-8B),
+    so the effective token sequence is:
         [BOS(1), sys_prefix_tokens(N), private_tokens...]
     Block boundary condition: (1 + N) % BLOCK_SIZE == 0
 
