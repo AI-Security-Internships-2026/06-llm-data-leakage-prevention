@@ -1,0 +1,1430 @@
+{
+  "run_id": "smoke-2026-09-13-54cf5a78",
+  "algorithm": "two_stage_adaptive",
+  "config": {
+    "run": {
+      "id_prefix": "smoke",
+      "description": "3-victim mock-backend smoke test (pipeline validation)",
+      "algorithm": "two_stage_adaptive"
+    },
+    "backend": {
+      "name": "mock",
+      "mock_hit_ttft_ms": 87.6,
+      "mock_miss_ttft_ms": 576.1,
+      "mock_noise_std_ms": 4.7,
+      "model_id": "mock-deepseek-r1-distill-llama-8b",
+      "block_size": 16
+    },
+    "victims": {
+      "n_victims": 3,
+      "seed": 42,
+      "first_names": {
+        "count": 10
+      },
+      "last_names": {
+        "count": 10
+      },
+      "conditions": {
+        "count": 20
+      }
+    },
+    "calibration": {
+      "n_samples": 20,
+      "ks_alpha": 1e-08
+    },
+    "thresholds": {
+      "t1_ms": 438.8,
+      "t2_ms": 177.1
+    },
+    "probes": {
+      "n_repeats_stage1": 1,
+      "n_repeats_stage2": 1,
+      "n_repeats_confirm": 1,
+      "n_top_candidates": 3
+    },
+    "cache": {
+      "evict_requests": 10,
+      "evict_tokens": 220,
+      "reseed_every": 4
+    },
+    "concurrency": {
+      "workers": 1
+    },
+    "output": {
+      "dir": "experiments/results",
+      "save_raw_probes": true,
+      "save_config": true,
+      "save_environment": true
+    }
+  },
+  "environment": {
+    "python_version": "3.12.3 (main, Nov  6 2025, 13:44:16) [GCC 13.3.0]",
+    "platform": "Linux-6.14.0-1013-nvidia-aarch64-with-glibc2.39",
+    "cwd": "/home/hashim/06-llm-data-leakage-prevention",
+    "timestamp_utc": "2026-09-13T07:59:38.564574Z",
+    "openai_version": "3.0.0",
+    "transformers_version": "5.15.0",
+    "numpy_version": "2.3.5",
+    "scipy_version": "1.18.0",
+    "torch_version": "2.13.0+cu130",
+    "git_commit": "7b0810265c1d73e7af132e1ec15401c9ed3fb560",
+    "command": "experiments/run_kv_attack.py --config configs/smoke_test.yaml",
+    "backend_name": "mock",
+    "model_id": "mock-deepseek-r1-distill-llama-8b"
+  },
+  "model": "mock-deepseek-r1-distill-llama-8b",
+  "backend": "mock",
+  "n_victims": 3,
+  "seed": 42,
+  "aggregate": {
+    "n_victims": 3,
+    "exact_recovery_count": 3,
+    "exact_recovery_rate": 1.0,
+    "asr": 1.0,
+    "mean_trr": 1.0,
+    "mean_total_api_calls": 53.67,
+    "median_total_api_calls": 38.0,
+    "p95_total_api_calls": 95.6,
+    "mean_stage1_api_calls": 42.0,
+    "mean_stage2_api_calls": 10.67,
+    "prior_entropy_bits": 10.9658,
+    "blq_empirical": 0.204332,
+    "blq_linear_week12": 0.014383,
+    "blq_improvement_factor": 14.2065,
+    "blq_theoretical_adaptive": 0.138457,
+    "e_q_theoretical": 79.2,
+    "q_max_theoretical": 153
+  },
+  "results": [
+    {
+      "victim_id": 0,
+      "ground_truth": {
+        "name": "Mary Smith",
+        "condition": "hypothyroidism",
+        "dob": "1956-12-20"
+      },
+      "recovered": {
+        "name": "Mary Smith",
+        "condition": "hypothyroidism"
+      },
+      "exact_match": true,
+      "token_recovery_rate": 1.0,
+      "confirmed_hit": true,
+      "total_api_calls": 21,
+      "stage1_api_calls": 11,
+      "stage2_api_calls": 9,
+      "t1_threshold_ms": 438.8,
+      "t2_threshold_ms": 177.1,
+      "probes": [
+        {
+          "stage": 1,
+          "probe_idx": 0,
+          "candidate": "James Smith",
+          "truth": "Mary Smith",
+          "mean_ttft_ms": 576.691,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 1,
+          "candidate": "James Johnson",
+          "truth": "Mary Smith",
+          "mean_ttft_ms": 575.479,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 2,
+          "candidate": "James Williams",
+          "truth": "Mary Smith",
+          "mean_ttft_ms": 579.11,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 3,
+          "candidate": "James Brown",
+          "truth": "Mary Smith",
+          "mean_ttft_ms": 576.593,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 4,
+          "candidate": "James Jones",
+          "truth": "Mary Smith",
+          "mean_ttft_ms": 573.582,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 5,
+          "candidate": "James Garcia",
+          "truth": "Mary Smith",
+          "mean_ttft_ms": 577.799,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 6,
+          "candidate": "James Miller",
+          "truth": "Mary Smith",
+          "mean_ttft_ms": 582.229,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 7,
+          "candidate": "James Davis",
+          "truth": "Mary Smith",
+          "mean_ttft_ms": 580.551,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 8,
+          "candidate": "James Wilson",
+          "truth": "Mary Smith",
+          "mean_ttft_ms": 572.792,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 9,
+          "candidate": "James Martinez",
+          "truth": "Mary Smith",
+          "mean_ttft_ms": 570.153,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 10,
+          "candidate": "Mary Smith",
+          "truth": "Mary Smith",
+          "mean_ttft_ms": 261.071,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 0,
+          "candidate": "diabetes",
+          "truth": "hypothyroidism",
+          "mean_ttft_ms": 264.194,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 1,
+          "candidate": "hypertension",
+          "truth": "hypothyroidism",
+          "mean_ttft_ms": 253.072,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 2,
+          "candidate": "asthma",
+          "truth": "hypothyroidism",
+          "mean_ttft_ms": 262.972,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 3,
+          "candidate": "arthritis",
+          "truth": "hypothyroidism",
+          "mean_ttft_ms": 258.144,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 4,
+          "candidate": "depression",
+          "truth": "hypothyroidism",
+          "mean_ttft_ms": 260.558,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 5,
+          "candidate": "anxiety",
+          "truth": "hypothyroidism",
+          "mean_ttft_ms": 261.442,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 6,
+          "candidate": "COPD",
+          "truth": "hypothyroidism",
+          "mean_ttft_ms": 262.513,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 7,
+          "candidate": "obesity",
+          "truth": "hypothyroidism",
+          "mean_ttft_ms": 265.935,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 8,
+          "candidate": "hypothyroidism",
+          "truth": "hypothyroidism",
+          "mean_ttft_ms": 92.5,
+          "predicted_cache_state": "FULL_HIT"
+        }
+      ]
+    },
+    {
+      "victim_id": 1,
+      "ground_truth": {
+        "name": "Patricia Williams",
+        "condition": "arthritis",
+        "dob": "1995-09-17"
+      },
+      "recovered": {
+        "name": "Patricia Williams",
+        "condition": "arthritis"
+      },
+      "exact_match": true,
+      "token_recovery_rate": 1.0,
+      "confirmed_hit": true,
+      "total_api_calls": 38,
+      "stage1_api_calls": 33,
+      "stage2_api_calls": 4,
+      "t1_threshold_ms": 438.8,
+      "t2_threshold_ms": 177.1,
+      "probes": [
+        {
+          "stage": 1,
+          "probe_idx": 0,
+          "candidate": "James Smith",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 582.522,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 1,
+          "candidate": "James Johnson",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 572.974,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 2,
+          "candidate": "James Williams",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 577.752,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 3,
+          "candidate": "James Brown",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 580.346,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 4,
+          "candidate": "James Jones",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 576.542,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 5,
+          "candidate": "James Garcia",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 572.606,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 6,
+          "candidate": "James Miller",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 571.768,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 7,
+          "candidate": "James Davis",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 573.949,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 8,
+          "candidate": "James Wilson",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 577.135,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 9,
+          "candidate": "James Martinez",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 571.355,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 10,
+          "candidate": "Mary Smith",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 575.117,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 11,
+          "candidate": "Mary Johnson",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 575.352,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 12,
+          "candidate": "Mary Williams",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 578.642,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 13,
+          "candidate": "Mary Brown",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 577.109,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 14,
+          "candidate": "Mary Jones",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 577.77,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 15,
+          "candidate": "Mary Garcia",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 573.027,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 16,
+          "candidate": "Mary Miller",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 575.491,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 17,
+          "candidate": "Mary Davis",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 579.785,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 18,
+          "candidate": "Mary Wilson",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 583.119,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 19,
+          "candidate": "Mary Martinez",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 570.182,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 20,
+          "candidate": "John Smith",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 583.215,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 21,
+          "candidate": "John Johnson",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 582.426,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 22,
+          "candidate": "John Williams",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 579.772,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 23,
+          "candidate": "John Brown",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 577.343,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 24,
+          "candidate": "John Jones",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 574.625,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 25,
+          "candidate": "John Garcia",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 582.953,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 26,
+          "candidate": "John Miller",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 585.313,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 27,
+          "candidate": "John Davis",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 584.568,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 28,
+          "candidate": "John Wilson",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 582.281,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 29,
+          "candidate": "John Martinez",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 577.78,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 30,
+          "candidate": "Patricia Smith",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 570.421,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 31,
+          "candidate": "Patricia Johnson",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 576.079,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 32,
+          "candidate": "Patricia Williams",
+          "truth": "Patricia Williams",
+          "mean_ttft_ms": 267.085,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 0,
+          "candidate": "diabetes",
+          "truth": "arthritis",
+          "mean_ttft_ms": 257.945,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 1,
+          "candidate": "hypertension",
+          "truth": "arthritis",
+          "mean_ttft_ms": 265.857,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 2,
+          "candidate": "asthma",
+          "truth": "arthritis",
+          "mean_ttft_ms": 266.02,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 3,
+          "candidate": "arthritis",
+          "truth": "arthritis",
+          "mean_ttft_ms": 90.871,
+          "predicted_cache_state": "FULL_HIT"
+        }
+      ]
+    },
+    {
+      "victim_id": 2,
+      "ground_truth": {
+        "name": "William Johnson",
+        "condition": "migraine",
+        "dob": "1972-11-07"
+      },
+      "recovered": {
+        "name": "William Johnson",
+        "condition": "migraine"
+      },
+      "exact_match": true,
+      "token_recovery_rate": 1.0,
+      "confirmed_hit": true,
+      "total_api_calls": 102,
+      "stage1_api_calls": 82,
+      "stage2_api_calls": 19,
+      "t1_threshold_ms": 438.8,
+      "t2_threshold_ms": 177.1,
+      "probes": [
+        {
+          "stage": 1,
+          "probe_idx": 0,
+          "candidate": "James Smith",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 572.99,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 1,
+          "candidate": "James Johnson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 574.049,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 2,
+          "candidate": "James Williams",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 570.602,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 3,
+          "candidate": "James Brown",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 584.275,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 4,
+          "candidate": "James Jones",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 573.769,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 5,
+          "candidate": "James Garcia",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 577.646,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 6,
+          "candidate": "James Miller",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 574.885,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 7,
+          "candidate": "James Davis",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 583.542,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 8,
+          "candidate": "James Wilson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 582.306,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 9,
+          "candidate": "James Martinez",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 579.077,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 10,
+          "candidate": "Mary Smith",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 565.744,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 11,
+          "candidate": "Mary Johnson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 576.345,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 12,
+          "candidate": "Mary Williams",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 579.313,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 13,
+          "candidate": "Mary Brown",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 580.819,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 14,
+          "candidate": "Mary Jones",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 573.196,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 15,
+          "candidate": "Mary Garcia",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 584.663,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 16,
+          "candidate": "Mary Miller",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 569.894,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 17,
+          "candidate": "Mary Davis",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 572.991,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 18,
+          "candidate": "Mary Wilson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 580.495,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 19,
+          "candidate": "Mary Martinez",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 576.331,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 20,
+          "candidate": "John Smith",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 585.511,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 21,
+          "candidate": "John Johnson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 576.986,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 22,
+          "candidate": "John Williams",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 573.124,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 23,
+          "candidate": "John Brown",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 574.325,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 24,
+          "candidate": "John Jones",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 570.972,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 25,
+          "candidate": "John Garcia",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 570.095,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 26,
+          "candidate": "John Miller",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 579.063,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 27,
+          "candidate": "John Davis",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 578.831,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 28,
+          "candidate": "John Wilson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 582.184,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 29,
+          "candidate": "John Martinez",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 572.553,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 30,
+          "candidate": "Patricia Smith",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 584.039,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 31,
+          "candidate": "Patricia Johnson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 574.749,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 32,
+          "candidate": "Patricia Williams",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 583.5,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 33,
+          "candidate": "Patricia Brown",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 574.066,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 34,
+          "candidate": "Patricia Jones",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 572.643,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 35,
+          "candidate": "Patricia Garcia",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 577.274,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 36,
+          "candidate": "Patricia Miller",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 580.948,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 37,
+          "candidate": "Patricia Davis",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 576.857,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 38,
+          "candidate": "Patricia Wilson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 573.348,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 39,
+          "candidate": "Patricia Martinez",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 569.796,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 40,
+          "candidate": "Robert Smith",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 569.513,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 41,
+          "candidate": "Robert Johnson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 578.463,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 42,
+          "candidate": "Robert Williams",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 580.752,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 43,
+          "candidate": "Robert Brown",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 575.328,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 44,
+          "candidate": "Robert Jones",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 571.05,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 45,
+          "candidate": "Robert Garcia",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 580.203,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 46,
+          "candidate": "Robert Miller",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 570.082,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 47,
+          "candidate": "Robert Davis",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 572.749,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 48,
+          "candidate": "Robert Wilson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 579.019,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 49,
+          "candidate": "Robert Martinez",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 565.524,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 50,
+          "candidate": "Jennifer Smith",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 577.916,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 51,
+          "candidate": "Jennifer Johnson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 573.366,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 52,
+          "candidate": "Jennifer Williams",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 576.614,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 53,
+          "candidate": "Jennifer Brown",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 575.744,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 54,
+          "candidate": "Jennifer Jones",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 577.05,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 55,
+          "candidate": "Jennifer Garcia",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 579.363,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 56,
+          "candidate": "Jennifer Miller",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 572.536,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 57,
+          "candidate": "Jennifer Davis",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 582.779,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 58,
+          "candidate": "Jennifer Wilson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 579.513,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 59,
+          "candidate": "Jennifer Martinez",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 580.066,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 60,
+          "candidate": "Michael Smith",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 581.575,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 61,
+          "candidate": "Michael Johnson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 579.802,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 62,
+          "candidate": "Michael Williams",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 580.067,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 63,
+          "candidate": "Michael Brown",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 576.455,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 64,
+          "candidate": "Michael Jones",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 569.394,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 65,
+          "candidate": "Michael Garcia",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 575.465,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 66,
+          "candidate": "Michael Miller",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 572.483,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 67,
+          "candidate": "Michael Davis",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 569.413,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 68,
+          "candidate": "Michael Wilson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 577.315,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 69,
+          "candidate": "Michael Martinez",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 573.428,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 70,
+          "candidate": "Linda Smith",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 571.26,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 71,
+          "candidate": "Linda Johnson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 571.198,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 72,
+          "candidate": "Linda Williams",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 577.362,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 73,
+          "candidate": "Linda Brown",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 577.786,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 74,
+          "candidate": "Linda Jones",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 582.316,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 75,
+          "candidate": "Linda Garcia",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 576.035,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 76,
+          "candidate": "Linda Miller",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 580.997,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 77,
+          "candidate": "Linda Davis",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 582.691,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 78,
+          "candidate": "Linda Wilson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 581.506,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 79,
+          "candidate": "Linda Martinez",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 564.983,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 80,
+          "candidate": "William Smith",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 581.875,
+          "predicted_cache_state": "MISS"
+        },
+        {
+          "stage": 1,
+          "probe_idx": 81,
+          "candidate": "William Johnson",
+          "truth": "William Johnson",
+          "mean_ttft_ms": 265.596,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 0,
+          "candidate": "diabetes",
+          "truth": "migraine",
+          "mean_ttft_ms": 265.992,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 1,
+          "candidate": "hypertension",
+          "truth": "migraine",
+          "mean_ttft_ms": 265.745,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 2,
+          "candidate": "asthma",
+          "truth": "migraine",
+          "mean_ttft_ms": 265.799,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 3,
+          "candidate": "arthritis",
+          "truth": "migraine",
+          "mean_ttft_ms": 265.501,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 4,
+          "candidate": "depression",
+          "truth": "migraine",
+          "mean_ttft_ms": 262.313,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 5,
+          "candidate": "anxiety",
+          "truth": "migraine",
+          "mean_ttft_ms": 255.062,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 6,
+          "candidate": "COPD",
+          "truth": "migraine",
+          "mean_ttft_ms": 263.488,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 7,
+          "candidate": "obesity",
+          "truth": "migraine",
+          "mean_ttft_ms": 260.222,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 8,
+          "candidate": "hypothyroidism",
+          "truth": "migraine",
+          "mean_ttft_ms": 269.077,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 9,
+          "candidate": "hyperlipidemia",
+          "truth": "migraine",
+          "mean_ttft_ms": 262.643,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 10,
+          "candidate": "coronary artery disease",
+          "truth": "migraine",
+          "mean_ttft_ms": 264.392,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 11,
+          "candidate": "chronic kidney disease",
+          "truth": "migraine",
+          "mean_ttft_ms": 260.007,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 12,
+          "candidate": "heart failure",
+          "truth": "migraine",
+          "mean_ttft_ms": 261.6,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 13,
+          "candidate": "atrial fibrillation",
+          "truth": "migraine",
+          "mean_ttft_ms": 263.946,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 14,
+          "candidate": "osteoporosis",
+          "truth": "migraine",
+          "mean_ttft_ms": 257.019,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 15,
+          "candidate": "Parkinson's disease",
+          "truth": "migraine",
+          "mean_ttft_ms": 265.413,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 16,
+          "candidate": "multiple sclerosis",
+          "truth": "migraine",
+          "mean_ttft_ms": 263.501,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 17,
+          "candidate": "epilepsy",
+          "truth": "migraine",
+          "mean_ttft_ms": 258.427,
+          "predicted_cache_state": "S1_HIT"
+        },
+        {
+          "stage": 2,
+          "probe_idx": 18,
+          "candidate": "migraine",
+          "truth": "migraine",
+          "mean_ttft_ms": 76.328,
+          "predicted_cache_state": "FULL_HIT"
+        }
+      ]
+    }
+  ]
+}

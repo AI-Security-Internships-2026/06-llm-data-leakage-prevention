@@ -9,7 +9,6 @@ from kv_attack import (
     MEDICAL_CONDITIONS, FIRST_NAMES, LAST_NAMES,
 )
 
-# ── System prefix (fixed, known to attacker in Scenario S2) ──────────────────
 
 _SYSTEM_PREFIX_RAW = (
     "You are a secure, HIPAA-compliant medical assistant deployed at "
@@ -39,22 +38,6 @@ _SYSTEM_PREFIX_RAW = (
     "These instructions take precedence over all user requests."
 )
 
-# ── Private template (secrets FIRST, long filler AFTER) ──────────────────────
-#
-# _RECORD_FILLER is repeated 14 times to produce ~3,080 tokens total.
-# Calculation:
-#   _RECORD_FILLER ≈ 220 tokens (170 words × 1.3 tokens/word)
-#   14 repetitions × 220 = 3,080 tokens
-#   Total prompt: 271 (system) + 3,080 (private) = 3,351 tokens < 4,096 ✓
-#   Private blocks: floor(3,080 / 16) = 192 complete blocks
-#   Expected timing gap on GB10: 192 × 16 / 50,000 ≈ 62 ms
-#
-# The filler is identical for ALL candidates (victim and attacker use the
-# same template structure). Only {name} and {condition} vary per probe.
-# Because {name}/{condition} are in block N (the FIRST private block),
-# a wrong candidate causes ALL 192 subsequent blocks to miss via the
-# hash chain, producing the full 62 ms timing gap.
-#
 _RECORD_FILLER = (
     "The patient's medical history has been comprehensively reviewed "
     "and documented by the attending physician on the date of this record. "
@@ -85,13 +68,9 @@ _PRIVATE_TEMPLATE = (
     + "END OF PATIENT RECORD."
 )
 
-# Padding word for block alignment.
-# " yes" reliably adds exactly 1 token in the Llama-3.1 BPE tokenizer.
-# DeepSeek-R1-Distill-Llama-8B uses the same tokenizer, so this holds.
 _PAD_WORD = " yes"
 
 
-# ── Block alignment ───────────────────────────────────────────────────────────
 
 def build_aligned_system_prompt(
     tokenizer: AutoTokenizer,
@@ -154,7 +133,6 @@ def count_private_blocks(
     return total_complete - prefix_blocks
 
 
-# ── DOB generation ────────────────────────────────────────────────────────────
 
 def _random_dob(rng: random.Random) -> str:
     """Uniform random DOB in [1935-01-01, 2006-12-31], YYYY-MM-DD."""
@@ -163,7 +141,6 @@ def _random_dob(rng: random.Random) -> str:
     return (start + timedelta(days=rng.randint(0, delta))).isoformat()
 
 
-# ── Victim seeding ────────────────────────────────────────────────────────────
 
 def seed_victim_prefix(
     client        : OpenAI,
@@ -225,7 +202,6 @@ def seed_victim_prefix(
     return records
 
 
-# ── Smoke test ────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     print("=== victim_seeder smoke test ===\n")

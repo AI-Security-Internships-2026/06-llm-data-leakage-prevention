@@ -17,7 +17,6 @@ from detector import detect_pii
 
 
 EVAL_CASES = [
-    # ── LEAKING — clear verbatim PII (Week 03) ───────────────────────────
     {
         "id": "E01",
         "description": "Email address in plain prose",
@@ -88,7 +87,6 @@ EVAL_CASES = [
         "label": "LEAKING",
         "expected": {"EMAIL_ADDRESS", "CREDIT_CARD"},
     },
-    # ── CLEAN (Week 03) ──────────────────────────────────────────────────
     {
         "id": "E11",
         "description": "Technical API documentation",
@@ -145,9 +143,6 @@ EVAL_CASES = [
         "label": "CLEAN",
         "expected": set(),
     },
-    # ── LEAKING — inference-based PII (Week 05) ───────────────────────────
-    # Stage 1 returns CLEAN on these — no literal PII to match.
-    # Stage 2 (LLM-as-judge) catches them via keyword heuristic or zero-shot.
     {
         "id": "E19",
         "description": "Implicit IBAN reference (no literal IBAN present)",
@@ -204,10 +199,6 @@ EVAL_CASES = [
         "expected": set(),
         "expected_stage2": True,
     },
-    # ── CLEAN — FP regression cases (Week 06) ────────────────────────────
-    # These texts triggered IN_PAN, US_DRIVER_LICENSE, or low-confidence
-    # US_BANK_NUMBER false positives in the Week 05 Enron synthetic eval.
-    # All must return CLEAN after the Week 06 entity allow-list + score gate.
     {
         "id": "E26",
         "description": "Alphanumeric reference code (previously FP: IN_PAN)",
@@ -245,13 +236,10 @@ EVAL_CASES = [
     },
 ]
 
-# Stage 1 gate — lower because inference cases (E19-E25) require Stage 2
-# Stage 1 is only expected to catch verbatim PII (E01-E10)
 PRECISION_GATE    = 0.90
 RECALL_GATE       = 0.55
 F1_GATE           = 0.70
 
-# Stage 2 gate — full pipeline should catch all 25 cases
 STAGE2_PRECISION_GATE = 0.90
 STAGE2_RECALL_GATE    = 0.95
 STAGE2_F1_GATE        = 0.95

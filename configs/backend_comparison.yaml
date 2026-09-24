@@ -1,0 +1,21 @@
+# configs/backend_comparison.yaml — Issue #6
+run:
+  id_prefix: "backend-cmp"
+  description: "vLLM vs SGLang cross-backend comparison"
+
+backends:
+  a:
+    name: "vllm"
+    base_url: "http://localhost:8001/v1"
+  b:
+    name: "sglang"
+    base_url: "http://localhost:8002/v1"
+  model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+
+experiment:
+  n_victims: 30
+  n_calib: 50
+  seed: 42
+
+output:
+  dir: "experiments/results"

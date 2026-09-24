@@ -14,7 +14,6 @@ from presidio_anonymizer.entities import OperatorConfig
 analyzer = AnalyzerEngine()
 anonymizer = AnonymizerEngine()
 
-# ── Custom recognizers ────────────────────────────────────────────────────────
 
 _cnic_recognizer = PatternRecognizer(
     supported_entity="PK_CNIC",
@@ -38,8 +37,6 @@ _ssn_recognizer = PatternRecognizer(
 )
 analyzer.registry.add_recognizer(_ssn_recognizer)
 
-# Week 05: threshold 0.75 → 0.65 and significantly expanded context list
-# Addresses supervisor feedback: IBAN recall was 0.825 (weakest entity)
 _iban_recognizer = PatternRecognizer(
     supported_entity="IBAN_CODE",
     patterns=[
@@ -59,9 +56,6 @@ _iban_recognizer = PatternRecognizer(
 )
 analyzer.registry.add_recognizer(_iban_recognizer)
 
-# Week 07: context-boosted 16-digit recognizer for synthetic/fake card numbers
-# that fail Presidio's built-in Luhn validation. Only fires when payment-related
-# context words are present — prevents FPs on account numbers or random digits.
 _credit_card_raw_recognizer = PatternRecognizer(
     supported_entity="CREDIT_CARD",
     patterns=[
@@ -79,9 +73,7 @@ _credit_card_raw_recognizer = PatternRecognizer(
 )
 analyzer.registry.add_recognizer(_credit_card_raw_recognizer)
 
-# ── Risk classification sets ──────────────────────────────────────────────────
 
-# Week 06 Commit 2: added US_BANK_NUMBER — confirmed hits are high-risk
 _HIGH_RISK_TYPES = {
     "CREDIT_CARD", "IBAN_CODE", "MEDICAL_LICENSE",
     "US_SSN", "UK_NHS", "PK_CNIC", "US_BANK_NUMBER",
@@ -91,19 +83,12 @@ _NOISE_TYPES = {"DATE_TIME", "NRP"}
 
 _SUPPORTED_LANGUAGES = {"en"}
 
-# Week 06 Commit 1: explicit entity allow-list passed to analyzer.analyze().
-# IN_PAN and US_DRIVER_LICENSE are intentionally excluded — their Presidio
-# built-in recognisers fire too often on generic text (ref codes, model IDs,
-# employee numbers). Presidio will only run recognisers for types listed here.
-# Week 06 Commit 2: US_BANK_NUMBER added — gated at score >= 0.80 below.
 SUPPORTED_ENTITIES = [
     "EMAIL_ADDRESS", "CREDIT_CARD", "PHONE_NUMBER", "PERSON",
     "US_SSN", "IBAN_CODE", "PK_CNIC", "LOCATION",
     "MEDICAL_LICENSE", "UK_NHS", "US_BANK_NUMBER",
 ]
 
-# Week 06 Commit 2: per-entity minimum confidence thresholds.
-# Results below these scores are dropped before risk scoring and output.
 _SCORE_GATES: dict[str, float] = {
     "US_BANK_NUMBER": 0.80,
 }
@@ -129,7 +114,6 @@ def _drop_person_with_digits(results: list, text: str) -> list:
         filtered.append(r)
     return filtered
 
-# ── Normalization regexes ─────────────────────────────────────────────────────
 
 _SPACED_CARD_RE = re.compile(r"\b(\d{4})[ ](\d{4})[ ](\d{4})[ ](\d{4})\b")
 _HYPHEN_CARD_RE = re.compile(r"\b(\d{4})-(\d{4})-(\d{4})-(\d{4})\b")
@@ -137,10 +121,8 @@ _DOT_CARD_RE    = re.compile(r"\b(\d{4})\.(\d{4})\.(\d{4})\.(\d{4})\b")
 
 _DOT_PHONE_RE   = re.compile(r"\b(\d{3})\.(\d{3})\.(\d{4})\b")
 
-# Week 05 fix: also handle +44 20 7946 0958 → +442079460958 for Presidio
 _UK_PHONE_RE    = re.compile(r"(\+44)\s+(\d{2})\s+(\d{4})\s+(\d{4})\b")
 
-# Week 05 fix: improved to handle alice AT example.com (real dot, no DOT keyword)
 _OBFUSC_EMAIL_RE = re.compile(
     r"([\w.+\-]+?)"
     r"\s*(?:\[at\]|\(at\)|\bAT\b)\s*"
@@ -228,8 +210,6 @@ def detect_pii(text: str, language: str = "en", use_stage2: bool = False) -> dic
         )
 
     normalized = normalize_text(text)
-    # Week 06 Commit 1: pass entities= so Presidio only runs allowed recognisers.
-    # This is the single line that suppresses IN_PAN and US_DRIVER_LICENSE.
     results = analyzer.analyze(
         text=normalized,
         language=language,
@@ -265,11 +245,10 @@ def detect_pii(text: str, language: str = "en", use_stage2: bool = False) -> dic
         "sanitized": sanitized_text,
     }
 
-    # Stage 2: LLM-as-judge — only for MEDIUM/LOW outputs from Stage 1
     if use_stage2:
         stage2_flagged = False
         if risk in ("MEDIUM", "LOW", "CLEAN"):
-            from llm_judge import judge_text  # lazy import — keeps Stage 1 fast
+            from llm_judge import judge_text
             judge = judge_text(text)
             if judge.is_pii:
                 risk = "HIGH"

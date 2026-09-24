@@ -1,0 +1,29 @@
+{
+  "fig1_asr_vs_load": [
+    {
+      "level": "L0",
+      "n_tenants": 0,
+      "asr": 1.0
+    },
+    {
+      "level": "L1",
+      "n_tenants": 2,
+      "asr": 1.0
+    },
+    {
+      "level": "L2",
+      "n_tenants": 5,
+      "asr": 0.6
+    },
+    {
+      "level": "L3",
+      "n_tenants": 10,
+      "asr": 1.0
+    },
+    {
+      "level": "L4",
+      "n_tenants": 20,
+      "asr": 1.0
+    }
+  ]
+}

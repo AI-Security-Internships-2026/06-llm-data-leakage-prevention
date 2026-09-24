@@ -78,15 +78,8 @@ from kv_attack.victim_seeder import (
 )
 
 
-# ── Name-block filler (makes name occupy exactly NAME_BLOCKS complete blocks) ─
-#
-# NAME_BLOCKS × BLOCK_SIZE = 128 × 16 = 2048 tokens for the name region.
-# After the 4-6 token name itself, we need ~2042 tokens of padding.
-# This filler is IDENTICAL for all name candidates — only the first few tokens
-# (the name) differ, which is exactly what we need for Stage 1 sensitivity.
-#
-NAME_BLOCKS = 128    # 128 × 16 = 2048 tokens for name block
-COND_BLOCKS = 64     # 64  × 16 = 1024 tokens for condition block
+NAME_BLOCKS = 128
+COND_BLOCKS = 64
 
 _NAME_FILLER = (
     "Patient name field. Identity confirmed by attending physician. "
@@ -112,19 +105,14 @@ _CONDITION_FILLER = (
     "discharge planning protocol and multidisciplinary team recommendations. "
 )
 
-# Dummy fixed condition used in Stage 1 probes (value doesn't matter —
-# only the name block needs to match for Stage 1 to detect a cache hit).
 _DUMMY_CONDITION = "diabetes"
 
-# Analytical TTFT thresholds (derived from Week 10/12 empirical measurements)
-T1_THRESHOLD_MS = 438.8   # Stage 1: name confirmed if TTFT < T1
-T2_THRESHOLD_MS = 177.1   # Stage 2: condition confirmed if TTFT < T2
+T1_THRESHOLD_MS = 438.8
+T2_THRESHOLD_MS = 177.1
 
-# Intermediate TTFT expected when name matches but condition does not
 T_S1_HIT_MS = 264.0
 
 
-# ── Template builders ─────────────────────────────────────────────────────────
 
 def build_name_block(name: str, tokenizer: AutoTokenizer) -> str:
     """
@@ -226,7 +214,6 @@ def count_two_stage_blocks(
     }
 
 
-# ── Victim seeder ─────────────────────────────────────────────────────────────
 
 def seed_victims_two_stage(
     client        : OpenAI,
@@ -298,7 +285,6 @@ def seed_victims_two_stage(
     return records
 
 
-# ── Smoke test ────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     print("=== two_stage_victim_seeder smoke test ===\n")

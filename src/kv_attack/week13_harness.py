@@ -80,7 +80,55 @@ from kv_attack.two_stage_reconstructor import (
 HARDWARE = "NVIDIA GB10 (119.7 GB unified memory, Blackwell)"
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
+
+def _save_partial(
+    output_path   : str,
+    args          : argparse.Namespace,
+    calibration   : dict,
+    results       : list,
+    victim_records: list,
+) -> None:
+    """
+    Write current results to disk immediately after each victim.
+    Safe to call after every victim — uses a temp file + atomic rename
+    so the JSON is never left in a half-written state.
+    """
+    partial_aggregate = aggregate_two_stage(results) if results else {}
+
+    out_data = {
+        "run_id"        : f"week13-twostage-{datetime.datetime.utcnow().strftime('%Y-%m-%d')}",
+        "algorithm"     : "two_stage_adaptive",
+        "model"         : args.model_id,
+        "hardware"      : HARDWARE,
+        "backend"       : args.backend,
+        "n_victims"     : args.n_victims,
+        "n_victims_done": len(results),
+        "n_calibration" : args.n_calib,
+        "seed"          : args.seed,
+        "calibration"   : calibration,
+        "aggregate"     : partial_aggregate,
+        "results"       : [
+            {
+                **{k: v for k, v in dataclasses.asdict(r).items()
+                   if k not in ("scan_results_s1", "scan_results_s2")},
+                "top_scan_s1": r.scan_results_s1[:3],
+                "top_scan_s2": r.scan_results_s2[:3],
+            }
+            for r in results
+        ],
+    }
+
+    out_path = Path(output_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = out_path.with_suffix(".tmp.json")
+
+    with open(tmp_path, "w") as fh:
+        json.dump(out_data, fh, indent=2, cls=_NumpyEncoder)
+
+    tmp_path.replace(out_path)
+    print(f"[harness_v2] Incremental save: {len(results)}/{args.n_victims} victims → {output_path}")
+
+
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
@@ -107,14 +155,10 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-# ── Backend factory ───────────────────────────────────────────────────────────
 
 def make_backend(args: argparse.Namespace, tokenizer: AutoTokenizer):
     if args.backend == "mock":
         print("[harness_v2] Using MockBackend (deterministic, no GPU required)")
-        # Two-stage mock: need THREE distributions — full hit, S1-hit, miss
-        # We simulate this by patching the mock to return intermediate TTFT
-        # for prompts containing the dummy condition marker.
         mock = MockBackend(
             hit_ttft_ms  = 90.2,
             miss_ttft_ms = 613.6,
@@ -136,7 +180,6 @@ def make_backend(args: argparse.Namespace, tokenizer: AutoTokenizer):
         return VLLMBackend(base_url=args.base_url, model_id=args.model_id)
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
     args      = parse_args()
@@ -151,13 +194,11 @@ def main() -> None:
     print(f"[harness_v2] Output    : {args.output}")
     print("=" * 65 + "\n")
 
-    # 1. Build aligned system prefix
     system_prefix, n_prefix_tok = build_aligned_system_prompt(
         tokenizer, has_bos=detect_has_bos(args.model_id)
     )
     print(f"[harness_v2] System prefix: {n_prefix_tok} tokens\n")
 
-    # 2. Seed victims
     victim_records = seed_victims_two_stage(
         client        = OpenAI(base_url=args.base_url, api_key="EMPTY")
                         if args.backend == "vllm" else None,
@@ -172,7 +213,6 @@ def main() -> None:
     if not victim_records:
         raise SystemExit("[harness_v2] No victims seeded. Aborting.")
 
-    # 3. Calibrate thresholds
     if args.use_analytical_thresholds:
         t1_ms = T1_THRESHOLD_MS
         t2_ms = T2_THRESHOLD_MS
@@ -197,11 +237,6 @@ def main() -> None:
         t2_ms = calibration["t2_threshold_ms"]
         print(f"[harness_v2] Empirical thresholds: T1={t1_ms:.1f} ms, T2={t2_ms:.1f} ms\n")
 
-        # FEASIBILITY GUARD — abort if the intermediate TTFT level is not
-        # statistically separable. Proceeding with indistinguishable distributions
-        # produces 0% success rate and wastes GPU time on a broken attack.
-        # Root cause: the template or model does not exhibit three distinct TTFT
-        # levels. Use week10/12 linear_early_exit for a guaranteed 100% SR instead.
         if not calibration.get("intermediate_feasible", True):
             raise SystemExit(
                 "\n[harness_v2] ABORT: The S1_HIT (right name, wrong condition) TTFT "
@@ -215,7 +250,6 @@ def main() -> None:
                 "the intermediate level exists (see docs/final-report.md Section 6.6)."
             )
 
-    # 4. Attack each victim
     results: list[TwoStageResult] = []
 
     for victim_record in victim_records:
@@ -226,7 +260,6 @@ def main() -> None:
               f"name='{victim_record['ground_truth']['name']}'  "
               f"condition='{victim_record['ground_truth']['condition']}'")
 
-        # Evict cache
         if not args.skip_evict:
             print(f"[harness_v2] Evicting KV cache...")
             n_evict = evict_cache_two_stage(backend, system_prefix, tokenizer)
@@ -251,7 +284,8 @@ def main() -> None:
               f"(s1={result.stage1_api_calls}, s2={result.stage2_api_calls})  "
               f"BLQ={result.information_theory.get('bits_leaked_per_query', 0):.4f}")
 
-    # 5. Aggregate and write results
+        _save_partial(args.output, args, calibration, results, victim_records)
+
     aggregate = aggregate_two_stage(results)
 
     print(f"\n{'=' * 65}")
@@ -272,7 +306,6 @@ def main() -> None:
           f"SR={aggregate['sr_target_met']}")
     print(f"{'=' * 65}\n")
 
-    # Serialise
     out_data = {
         "run_id"       : f"week13-twostage-{datetime.datetime.utcnow().strftime('%Y-%m-%d')}",
         "algorithm"    : "two_stage_adaptive",
@@ -301,7 +334,6 @@ def main() -> None:
     print(f"[harness_v2] Results written to {args.output}")
 
 
-# ── Mock victim seeding (no real vLLM needed) ─────────────────────────────────
 
 def _mock_seed_victims(
     tokenizer     : AutoTokenizer,

@@ -1,0 +1,25 @@
+{
+  "description": "Recovery success rate with Wilson 95% CI per algorithm",
+  "source_files": [
+    "kv_attack_results_50.json",
+    "kv_week13_final.json"
+  ],
+  "experiments": [
+    {
+      "label": "Linear baseline\n(Week 10, n=50)",
+      "n": 50,
+      "k": 50,
+      "sr": 1.0,
+      "ci_lo": 0.9286499658256813,
+      "ci_hi": 1.0
+    },
+    {
+      "label": "Two-stage adaptive\n(Week 13, n=5)",
+      "n": 50,
+      "k": 34,
+      "sr": 0.68,
+      "ci_lo": 0.5418944286372394,
+      "ci_hi": 0.792419559060006
+    }
+  ]
+}

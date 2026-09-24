@@ -1,0 +1,32 @@
+# configs/defense_eval.yaml
+# Issue #7 — Risk-Adaptive Cache Isolation evaluation config
+#
+# Smoke run (fast, ~5 min):  n_victims_per_policy: 5,  n_workload_per_category: 5
+# Full run  (paper quality):  n_victims_per_policy: 30, n_workload_per_category: 10
+
+# ── Backend ───────────────────────────────────────────────────────────────────
+backend: vllm                              # vllm | sglang | mock
+vllm_base_url: "http://localhost:8001/v1"
+sglang_base_url: "http://localhost:30000/v1"
+model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+
+# ── Reproducibility ───────────────────────────────────────────────────────────
+seed: 42
+
+# ── Workload ──────────────────────────────────────────────────────────────────
+n_workload_per_category: 10   # prompts per sensitivity category (5 categories total)
+
+# ── Attack (residual ASR measurement) ────────────────────────────────────────
+n_victims_per_policy: 10      # victims to attack under each D0-D4 policy
+                               # set to 30 for paper-quality run
+
+# ── Calibration ──────────────────────────────────────────────────────────────
+n_calibration: 50             # TTFT samples for hit/miss calibration
+
+# ── Tenants ──────────────────────────────────────────────────────────────────
+victim_tenant_id:   "tenant-victim"
+attacker_tenant_id: "tenant-attacker"   # different → cross-tenant blocked by D2/D4
+
+# ── Output ────────────────────────────────────────────────────────────────────
+output_dir: "experiments/results"
+figures_dir: "experiments/figures"

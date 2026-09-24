@@ -1,0 +1,32 @@
+# configs/probe_detection_eval.yaml
+# Issue #8 — Timing-probe behaviour detection evaluation
+
+# ── Backend ───────────────────────────────────────────────────────────────────
+backend: vllm
+vllm_base_url: "http://localhost:8001/v1"
+model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+
+# ── Reproducibility ───────────────────────────────────────────────────────────
+seed: 42
+
+# ── Workload sizes ────────────────────────────────────────────────────────────
+# Benign workloads
+n_benign_repeated:   30    # benign user repeating similar questions
+n_benign_bursty:     30    # bursty but legitimate traffic
+
+# Attack workloads
+n_linear_enum:       60    # linear enumeration (full name scan)
+n_two_stage:         40    # two-stage adaptive (names then conditions)
+n_low_rate:          40    # slow attacker (1 probe per 2 seconds simulated)
+
+# ── Detector thresholds ───────────────────────────────────────────────────────
+threshold_med:  0.40
+threshold_high: 0.65
+cooldown_probes: 10
+
+# ── ROC sweep ────────────────────────────────────────────────────────────────
+roc_thresholds: [0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90]
+
+# ── Output ────────────────────────────────────────────────────────────────────
+output_dir: "experiments/results"
+figures_dir: "experiments/figures"

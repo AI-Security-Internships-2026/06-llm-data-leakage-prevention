@@ -17,16 +17,13 @@ from typing import Any
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
 
-from src.detector import detect_pii  # noqa: E402
+from src.detector import detect_pii
 
 
 
 DEFAULT_DATASET = os.path.join(ROOT, "experiments", "results", "synthetic_dataset.json")
 
 
-# ---------------------------------------------------------------------------
-# Dataset loader
-# ---------------------------------------------------------------------------
 
 def load_dataset(path: str) -> list[dict[str, Any]]:
     if not os.path.exists(path):
@@ -43,9 +40,6 @@ def load_dataset(path: str) -> list[dict[str, Any]]:
     return data
 
 
-# ---------------------------------------------------------------------------
-# Inference helper
-# ---------------------------------------------------------------------------
 
 def run_detector(text: str) -> tuple[str, float]:
     t0 = time.perf_counter()
@@ -55,9 +49,6 @@ def run_detector(text: str) -> tuple[str, float]:
     return predicted, latency_ms
 
 
-# ---------------------------------------------------------------------------
-# Binary classification
-# ---------------------------------------------------------------------------
 
 def binary_classification(dataset: list[dict[str, Any]]) -> tuple[dict, list[dict], list[float]]:
     TP = FP = TN = FN = 0
@@ -107,9 +98,6 @@ def binary_classification(dataset: list[dict[str, Any]]) -> tuple[dict, list[dic
     return metrics, sample_results, latencies
 
 
-# ---------------------------------------------------------------------------
-# Per-entity-type recall breakdown
-# ---------------------------------------------------------------------------
 
 def per_entity_metrics(sample_results: list[dict]) -> dict[str, dict]:
     entity_total: dict[str, int]    = defaultdict(int)
@@ -141,9 +129,6 @@ def per_entity_metrics(sample_results: list[dict]) -> dict[str, dict]:
     return metrics
 
 
-# ---------------------------------------------------------------------------
-# Latency benchmarking
-# ---------------------------------------------------------------------------
 
 def latency_stats(latencies: list[float]) -> dict:
     if not latencies:
@@ -176,9 +161,6 @@ def latency_stats(latencies: list[float]) -> dict:
     return stats
 
 
-# ---------------------------------------------------------------------------
-# Confusion matrix printer
-# ---------------------------------------------------------------------------
 
 def print_confusion_matrix(metrics: dict) -> None:
     TP, FP = metrics["TP"], metrics["FP"]
@@ -195,9 +177,6 @@ def print_confusion_matrix(metrics: dict) -> None:
     print(f"  Accuracy  : {metrics['accuracy']:.4f}")
 
 
-# ---------------------------------------------------------------------------
-# JSON results output with summary
-# ---------------------------------------------------------------------------
 
 def build_results(
     dataset: list[dict],
@@ -237,9 +216,6 @@ def build_results(
     }
 
 
-# ---------------------------------------------------------------------------
-# Main evaluation entry point
-# ---------------------------------------------------------------------------
 
 def evaluate(dataset: list[dict[str, Any]], dataset_path: str) -> dict[str, Any]:
     metrics, sample_results, latencies = binary_classification(dataset)
@@ -263,12 +239,10 @@ def main():
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # Full results (all samples)
     out_path = os.path.join(args.output_dir, "synthetic_eval.json")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
-    # Summary only (lightweight)
     summary_path = os.path.join(args.output_dir, "synthetic_eval_summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump({

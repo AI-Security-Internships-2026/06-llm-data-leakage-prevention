@@ -32,10 +32,7 @@ _CNIC_DIGITS = lambda: (
     f"{random.randint(0,9)}"
 )
 
-# Week 05: expanded from 15 → 30 IBANs covering all major SEPA country prefixes
-# Directly addresses supervisor feedback: IBAN recall was 0.825 (weakest entity)
 _IBAN_POOL = [
-    # Original 15
     "GB29NWBK60161331926819",
     "DE89370400440532013000",
     "FR7614508711002120144503422",
@@ -51,7 +48,6 @@ _IBAN_POOL = [
     "NO9386011117947",
     "PT50000201231234567890154",
     "IE29AIBK93115212345678",
-    # New 15 (Week 05)
     "LU280019400644750000",
     "FI2112345600000785",
     "HU42117730161111101800000000",
@@ -179,7 +175,6 @@ ENTITY_TEMPLATES: list[EntityTemplate] = [
 _ENTITY_MAP = {t.entity_type: t for t in ENTITY_TEMPLATES}
 
 CLEAN_TEMPLATES = [
-    # Original 30
     "The REST endpoint accepts JSON over HTTPS and returns a 200 status on success.",
     "def detect(text: str) -> dict:\n    return analyze(text)",
     "Hypertension is treated with ACE inhibitors and calcium channel blockers.",
@@ -210,7 +205,6 @@ CLEAN_TEMPLATES = [
     "The autoclave cycle maintains 121°C at 15 PSI for 30 minutes.",
     "git rebase -i HEAD~5 squashes the last five commits into one.",
     "The firewall blocks all inbound traffic on port 22 except from the VPN range.",
-    # New 5 (Week 05) — finance/GDPR/networking topics
     "GDPR Article 17 grants data subjects the right to erasure of their personal data.",
     "The BGP route was withdrawn after a peer session reset on AS64512.",
     "PCI-DSS requires all cardholder data environments to be segmented from corporate networks.",
@@ -259,7 +253,6 @@ MULTI_PII_TEMPLATES = [
         f"Delivery for {fake.name()} to be sent to {fake.address()}.",
         ["PERSON", "LOCATION"],
     ),
-    # New Week 05: IBAN-focused multi-PII templates
     lambda: (
         f"Payee: {fake.name()}, IBAN: {random.choice(_IBAN_POOL)}, BIC: DEUTDEDB.",
         ["PERSON", "IBAN_CODE"],

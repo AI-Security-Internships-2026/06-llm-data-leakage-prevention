@@ -37,9 +37,7 @@ _FALLBACK_PATTERNS = [
     re.compile(r"\bpassport\s+(?:number|no\.?|details)\b", re.IGNORECASE),
     re.compile(r"\bdate\s+of\s+birth\b", re.IGNORECASE),
     re.compile(r"\b(?:home|work|mobile|cell)\s+(?:number|phone|address)\b", re.IGNORECASE),
-    # Week 05 patch: catch E23 "bank account number on the invoice"
     re.compile(r"\b(?:bank\s+account|account\s+number)\b", re.IGNORECASE),
-    # Week 05 patch: catch E25 "CNIC and passport details"
     re.compile(r"\bcnic\b", re.IGNORECASE),
 ]
 

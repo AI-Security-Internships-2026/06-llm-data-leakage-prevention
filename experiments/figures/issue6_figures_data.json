@@ -1,0 +1,44 @@
+{
+  "fig1_ttft_distributions": [
+    {
+      "backend": "vllm",
+      "hit_mean_ms": 179.9,
+      "miss_mean_ms": 1297.7,
+      "gap_ms": 1117.8,
+      "roc_auc": 0.9999
+    },
+    {
+      "backend": "mock",
+      "hit_mean_ms": 227.7,
+      "miss_mean_ms": 1456.2,
+      "gap_ms": 1228.6,
+      "roc_auc": 1.0
+    }
+  ],
+  "fig2_asr_with_ci": [
+    {
+      "backend": "vllm",
+      "asr": 1.0,
+      "ci_lo": 0.7225,
+      "ci_hi": 1.0
+    },
+    {
+      "backend": "mock",
+      "asr": 1.0,
+      "ci_lo": 0.7225,
+      "ci_hi": 1.0
+    }
+  ],
+  "fig3_query_cost": [
+    {
+      "backend": "vllm",
+      "median_q": 82.0,
+      "p95_q": 124.89999999999998
+    },
+    {
+      "backend": "mock",
+      "median_q": 53.0,
+      "p95_q": 94.69999999999999
+    }
+  ]
+}

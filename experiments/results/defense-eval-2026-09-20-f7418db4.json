@@ -1,0 +1,414 @@
+"""
+kv_attack.probe_detector
+=========================
+Issue #8 — Lightweight explainable timing-probe behaviour detection.
+
+Detects KV-cache timing attacks by monitoring per-client probe sequences
+and computing an explainable suspicion score from four behavioural signals.
+No ML model required — simple statistics catch the attack patterns reliably.
+
+Suspicion signals
+-----------------
+F1  repeated_prefix    Fraction of probes that share a long common prefix
+                       with the preceding probe (>= PREFIX_OVERLAP_THRESH
+                       tokens).  Legitimate users rarely repeat near-identical
+                       prefixes; attackers always do.
+
+F2  high_frequency     Probe rate relative to a rolling baseline.  An attacker
+                       must issue many probes quickly to recover a victim before
+                       cache eviction.
+
+F3  substitution       Fraction of consecutive probe pairs where only one
+                       short "slot" changed (≤ SUBSTITUTION_MAX_WORDS words
+                       differ between the stripped prompts).  This is the
+                       hallmark of candidate enumeration.
+
+F4  miss_streak        Length of consecutive cache-miss probes.  An attacker
+                       probing unseen victims repeatedly gets misses; legitimate
+                       users mostly get hits after the first request.
+
+Suspicion score
+---------------
+    suspicion = w1*F1 + w2*F2 + w3*F3 + w4*F4   (clipped to [0, 1])
+
+Default weights: w1=0.35, w2=0.20, w3=0.30, w4=0.15
+
+Threshold
+---------
+    suspicion >= THRESHOLD_HIGH  → ALERT (high suspicion)
+    suspicion >= THRESHOLD_MED   → WARN  (medium suspicion)
+    suspicion <  THRESHOLD_MED   → OK
+
+Cooldown
+--------
+Once an ALERT fires, the client enters a COOLDOWN state for
+COOLDOWN_PROBES probes.  After cooldown, suspicion resets to 0.
+If another ALERT fires during cooldown, the cooldown resets.
+
+Usage
+-----
+    from kv_attack.probe_detector import ProbeDetector, SuspicionLevel
+
+    det = ProbeDetector(client_id="attacker-1")
+
+    for prompt, ttft_ms, cache_hit in probe_stream:
+        result = det.observe(prompt, ttft_ms, cache_hit)
+        if result.level == SuspicionLevel.ALERT:
+            # escalate cache policy
+            ...
+"""
+from __future__ import annotations
+
+import difflib
+import json
+import time
+from dataclasses import dataclass, field
+from enum import Enum
+from pathlib import Path
+from typing import List, Optional
+
+
+# ── Tunable constants ─────────────────────────────────────────────────────────
+
+PREFIX_OVERLAP_THRESH  = 0.70   # ≥70% word overlap → "near-identical prefix"
+SUBSTITUTION_MAX_WORDS = 4      # ≤4 words changed  → "systematic substitution"
+FREQUENCY_WINDOW_S     = 60.0   # rolling window for rate estimation (seconds)
+FREQUENCY_BASELINE_RPM = 5.0    # expected benign requests per minute
+FREQUENCY_SPIKE_MULT   = 3.0    # rate > baseline × spike_mult → frequency flag
+MISS_STREAK_ALERT      = 5      # consecutive misses before flagging
+
+WEIGHT_PREFIX       = 0.35
+WEIGHT_FREQUENCY    = 0.20
+WEIGHT_SUBSTITUTION = 0.30
+WEIGHT_MISS_STREAK  = 0.15
+
+THRESHOLD_MED  = 0.40   # WARN
+THRESHOLD_HIGH = 0.65   # ALERT
+
+COOLDOWN_PROBES = 10    # probes before suspicion resets after an alert
+HISTORY_WINDOW  = 20    # how many recent probes to keep for feature computation
+
+
+# ── Enums and dataclasses ─────────────────────────────────────────────────────
+
+class SuspicionLevel(str, Enum):
+    OK    = "OK"
+    WARN  = "WARN"
+    ALERT = "ALERT"
+
+
+@dataclass
+class ProbeRecord:
+    """One observed probe from a client."""
+    timestamp_s:  float
+    prompt:       str
+    ttft_ms:      float
+    cache_hit:    bool
+    probe_index:  int       # global index within this client's session
+
+
+@dataclass
+class SuspicionResult:
+    """Output of ProbeDetector.observe()."""
+    probe_index:         int
+    suspicion_score:     float          # [0, 1]
+    level:               SuspicionLevel
+    features: dict = field(default_factory=dict)   # per-feature scores
+    reasons:  List[str] = field(default_factory=list)  # human-readable
+    in_cooldown:         bool = False
+    cooldown_remaining:  int  = 0
+
+    def to_dict(self) -> dict:
+        return {
+            "probe_index":        self.probe_index,
+            "suspicion_score":    round(self.suspicion_score, 4),
+            "level":              self.level.value,
+            "features":           {k: round(v, 4) for k, v in self.features.items()},
+            "reasons":            self.reasons,
+            "in_cooldown":        self.in_cooldown,
+            "cooldown_remaining": self.cooldown_remaining,
+        }
+
+
+# ── Feature helpers ───────────────────────────────────────────────────────────
+
+def _word_overlap(a: str, b: str) -> float:
+    """Jaccard overlap of word sets between two prompts."""
+    wa = set(a.lower().split())
+    wb = set(b.lower().split())
+    if not wa or not wb:
+        return 0.0
+    return len(wa & wb) / len(wa | wb)
+
+
+def _words_changed(a: str, b: str) -> int:
+    """Count of words that differ between two prompts (symmetric)."""
+    wa = a.lower().split()
+    wb = b.lower().split()
+    matcher = difflib.SequenceMatcher(None, wa, wb)
+    changed = sum(
+        max(i2 - i1, j2 - j1)
+        for tag, i1, i2, j1, j2 in matcher.get_opcodes()
+        if tag != "equal"
+    )
+    return changed
+
+
+# ── Main detector ─────────────────────────────────────────────────────────────
+
+class ProbeDetector:
+    """
+    Per-client probe behaviour detector.
+
+    One instance per monitored client / tenant.  Call observe() for each
+    incoming probe.  The detector maintains a rolling history and updates
+    all four feature scores incrementally.
+
+    Parameters
+    ----------
+    client_id          : identifier for logging / audit
+    threshold_med      : suspicion score for WARN
+    threshold_high     : suspicion score for ALERT
+    cooldown_probes    : probes before suspicion resets after alert
+    """
+
+    def __init__(
+        self,
+        client_id:       str   = "client",
+        threshold_med:   float = THRESHOLD_MED,
+        threshold_high:  float = THRESHOLD_HIGH,
+        cooldown_probes: int   = COOLDOWN_PROBES,
+    ):
+        self.client_id       = client_id
+        self.threshold_med   = threshold_med
+        self.threshold_high  = threshold_high
+        self.cooldown_probes = cooldown_probes
+
+        self._history:      List[ProbeRecord]      = []
+        self._results:      List[SuspicionResult]  = []
+        self._probe_index:  int                    = 0
+        self._cooldown_left: int                   = 0
+        self._alert_count:  int                    = 0
+
+    # ── Public API ────────────────────────────────────────────────────────────
+
+    def observe(
+        self,
+        prompt:    str,
+        ttft_ms:   float,
+        cache_hit: bool,
+        timestamp_s: Optional[float] = None,
+    ) -> SuspicionResult:
+        """
+        Record one probe and return the updated suspicion assessment.
+
+        Parameters
+        ----------
+        prompt      : the raw prompt text sent to the LLM
+        ttft_ms     : measured time-to-first-token in milliseconds
+        cache_hit   : True if TTFT < calibration threshold (cache hit)
+        timestamp_s : Unix timestamp; defaults to time.time()
+        """
+        if timestamp_s is None:
+            timestamp_s = time.time()
+
+        record = ProbeRecord(
+            timestamp_s  = timestamp_s,
+            prompt       = prompt,
+            ttft_ms      = ttft_ms,
+            cache_hit    = cache_hit,
+            probe_index  = self._probe_index,
+        )
+        self._history.append(record)
+        # Keep only the recent window to bound memory
+        if len(self._history) > HISTORY_WINDOW * 2:
+            self._history = self._history[-HISTORY_WINDOW:]
+
+        # Compute features
+        features = self._compute_features()
+        score    = self._combine(features)
+
+        # Cooldown logic
+        if self._cooldown_left > 0:
+            self._cooldown_left -= 1
+            in_cooldown = True
+        else:
+            in_cooldown = False
+
+        if score >= self.threshold_high and not in_cooldown:
+            level = SuspicionLevel.ALERT
+            self._alert_count   += 1
+            self._cooldown_left  = self.cooldown_probes
+        elif score >= self.threshold_med:
+            level = SuspicionLevel.WARN
+        else:
+            level = SuspicionLevel.OK
+
+        reasons = self._build_reasons(features, score, level)
+
+        result = SuspicionResult(
+            probe_index        = self._probe_index,
+            suspicion_score    = round(score, 4),
+            level              = level,
+            features           = features,
+            reasons            = reasons,
+            in_cooldown        = in_cooldown,
+            cooldown_remaining = self._cooldown_left,
+        )
+        self._results.append(result)
+        self._probe_index += 1
+        return result
+
+    @property
+    def alert_count(self) -> int:
+        return self._alert_count
+
+    @property
+    def history(self) -> List[ProbeRecord]:
+        return list(self._history)
+
+    @property
+    def results(self) -> List[SuspicionResult]:
+        return list(self._results)
+
+    def reset(self) -> None:
+        """Reset all state (e.g. after cooldown period expires completely)."""
+        self._history      = []
+        self._results      = []
+        self._probe_index  = 0
+        self._cooldown_left = 0
+        self._alert_count  = 0
+
+    # ── Feature computation ───────────────────────────────────────────────────
+
+    def _compute_features(self) -> dict:
+        recent = self._history[-HISTORY_WINDOW:]
+        n      = len(recent)
+
+        f1 = self._feature_prefix_overlap(recent)
+        f2 = self._feature_frequency(recent)
+        f3 = self._feature_substitution(recent)
+        f4 = self._feature_miss_streak(recent)
+
+        return {
+            "repeated_prefix":    f1,
+            "high_frequency":     f2,
+            "substitution":       f3,
+            "miss_streak":        f4,
+        }
+
+    def _feature_prefix_overlap(self, recent: List[ProbeRecord]) -> float:
+        """F1: fraction of consecutive probe pairs with high word overlap."""
+        if len(recent) < 2:
+            return 0.0
+        pairs   = list(zip(recent, recent[1:]))
+        flagged = sum(
+            1 for a, b in pairs
+            if _word_overlap(a.prompt, b.prompt) >= PREFIX_OVERLAP_THRESH
+        )
+        return flagged / len(pairs)
+
+    def _feature_frequency(self, recent: List[ProbeRecord]) -> float:
+        """F2: probe rate relative to expected benign rate."""
+        if len(recent) < 2:
+            return 0.0
+        window_s = recent[-1].timestamp_s - recent[0].timestamp_s
+        if window_s <= 0:
+            window_s = 1.0
+        rate_rpm = (len(recent) - 1) / window_s * 60.0
+        # Normalise: 0.0 at baseline, 1.0 at spike_mult × baseline
+        normalised = (rate_rpm - FREQUENCY_BASELINE_RPM) / (
+            FREQUENCY_BASELINE_RPM * (FREQUENCY_SPIKE_MULT - 1)
+        )
+        return max(0.0, min(1.0, normalised))
+
+    def _feature_substitution(self, recent: List[ProbeRecord]) -> float:
+        """F3: fraction of pairs where only a small slot changed."""
+        if len(recent) < 2:
+            return 0.0
+        pairs   = list(zip(recent, recent[1:]))
+        flagged = sum(
+            1 for a, b in pairs
+            if 1 <= _words_changed(a.prompt, b.prompt) <= SUBSTITUTION_MAX_WORDS
+        )
+        return flagged / len(pairs)
+
+    def _feature_miss_streak(self, recent: List[ProbeRecord]) -> float:
+        """F4: normalised length of the current consecutive-miss streak."""
+        streak = 0
+        for r in reversed(recent):
+            if not r.cache_hit:
+                streak += 1
+            else:
+                break
+        return min(streak / MISS_STREAK_ALERT, 1.0)
+
+    def _combine(self, features: dict) -> float:
+        score = (
+            WEIGHT_PREFIX       * features["repeated_prefix"]
+            + WEIGHT_FREQUENCY  * features["high_frequency"]
+            + WEIGHT_SUBSTITUTION * features["substitution"]
+            + WEIGHT_MISS_STREAK * features["miss_streak"]
+        )
+        return min(max(score, 0.0), 1.0)
+
+    def _build_reasons(
+        self,
+        features: dict,
+        score:    float,
+        level:    SuspicionLevel,
+    ) -> List[str]:
+        reasons: List[str] = []
+        if features["repeated_prefix"] >= 0.5:
+            reasons.append(
+                f"repeated_prefix={features['repeated_prefix']:.0%}: "
+                f">{PREFIX_OVERLAP_THRESH:.0%} word overlap in consecutive probes"
+            )
+        if features["high_frequency"] >= 0.3:
+            reasons.append(
+                f"high_frequency={features['high_frequency']:.2f}: "
+                f"probe rate well above benign baseline"
+            )
+        if features["substitution"] >= 0.5:
+            reasons.append(
+                f"substitution={features['substitution']:.0%}: "
+                f"systematic single-field swaps detected"
+            )
+        if features["miss_streak"] >= 0.5:
+            reasons.append(
+                f"miss_streak={features['miss_streak']:.2f}: "
+                f"long consecutive cache-miss run"
+            )
+        if not reasons:
+            reasons.append(
+                f"suspicion={score:.3f}: below alert threshold — behaviour normal"
+            )
+        return reasons
+
+    # ── Audit log ─────────────────────────────────────────────────────────────
+
+    def dump_log(self, path: str) -> None:
+        """Write per-probe results as newline-delimited JSON."""
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w") as fh:
+            for r in self._results:
+                row = r.to_dict()
+                row["client_id"] = self.client_id
+                fh.write(json.dumps(row) + "\n")
+
+    def summary(self) -> dict:
+        if not self._results:
+            return {"n_probes": 0}
+        scores = [r.suspicion_score for r in self._results]
+        alerts = [r for r in self._results if r.level == SuspicionLevel.ALERT]
+        warns  = [r for r in self._results if r.level == SuspicionLevel.WARN]
+        first_alert_idx = alerts[0].probe_index if alerts else None
+        return {
+            "client_id":       self.client_id,
+            "n_probes":        len(self._results),
+            "n_alerts":        len(alerts),
+            "n_warns":         len(warns),
+            "first_alert_at":  first_alert_idx,
+            "mean_suspicion":  round(sum(scores) / len(scores), 4),
+            "max_suspicion":   round(max(scores), 4),
+        }

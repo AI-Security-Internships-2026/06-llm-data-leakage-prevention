@@ -39,7 +39,6 @@ from kv_attack.adaptive_reconstructor import (
 )
 
 
-# ── Victim seeding ────────────────────────────────────────────────────────────
 
 def _seed_victims(
     backend       : BackendClient,
@@ -70,7 +69,7 @@ def _seed_victims(
         n_priv    = count_private_blocks(tokenizer, system_prefix, name, dob, condition)
 
         try:
-            backend.measure_ttft(prompt)     # seeds the KV cache
+            backend.measure_ttft(prompt)
         except Exception as exc:
             print(f"[seed] victim {i} seed failed: {exc}")
             continue
@@ -87,7 +86,6 @@ def _seed_victims(
     return records
 
 
-# ── Single-backend runner ─────────────────────────────────────────────────────
 
 def _run_single_backend(
     backend_name  : str,
@@ -115,21 +113,18 @@ def _run_single_backend(
     )
     print(f"[harness] system_prefix tokens={n_prefix_tokens}")
 
-    # Seed victims
     print(f"\n[harness] Seeding {n_victims} victims ...")
     victim_records = _seed_victims(backend, tokenizer, system_prefix,
                                    n_victims=n_victims, seed=seed)
     if not victim_records:
         return {"status": "SEED_FAILED", "error": "No victims seeded."}
 
-    # Miss prompt factory
     def miss_prompt_factory() -> str:
         uid = f"MISS{uuid.uuid4().hex[:16].upper()}"
         return system_prefix + " " + build_private_block(
             uid, "1900-01-01", "FAKE_CONDITION_XYZ"
         )
 
-    # Calibration (uses victim 0's cached prompt as the known hit)
     print(f"\n[harness] Calibrating ({n_calibration} samples each) ...")
     try:
         calibration = calibrate_threshold_backend(
@@ -146,7 +141,6 @@ def _run_single_backend(
           f"delta={calibration['delta_ms']:.1f} ms  "
           f"p={calibration['ks_p_value']:.2e}")
 
-    # Attack each victim
     print(f"\n[harness] Attacking {len(victim_records)} victims ...")
     results: list[AdaptiveReconstructionResult] = []
     t_start = time.perf_counter()
@@ -156,21 +150,16 @@ def _run_single_backend(
         print(f"\n[harness] ── Victim {i + 1}/{len(victim_records)} ──")
         print(f"[harness]    GT: name='{gt['name']}'  condition='{gt['condition']}'")
 
-        # Full cache eviction — cycles 1,500,000 tokens through the 719,008-token cache
         print(f"[harness]    Evicting cache (victim-structured, {EVICT_N_REQUESTS} prompts) ...")
         evict_calls = evict_cache_full(backend, system_prefix)
         print(f"[harness]    Eviction done ({evict_calls} calls). Re-seeding victim ...")
 
-        # Re-seed this victim after eviction
         try:
             backend.measure_ttft(record["prompt"])
         except Exception as exc:
             print(f"[harness]    WARNING: reseed failed: {exc}")
             continue
 
-        # candidate_seed must incorporate the run seed so that two independent
-        # runs (different models, same victim_id) produce different shuffle orders.
-        # Using seed * 1000 + i avoids collisions for any reasonable victim count.
         result = reconstruct_victim_adaptive(
             backend        = backend,
             tokenizer      = tokenizer,
@@ -218,7 +207,6 @@ def _run_single_backend(
     }
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _result_to_dict(r: AdaptiveReconstructionResult) -> dict:
     return {
@@ -298,7 +286,6 @@ def _cross_backend_comparison(backend_results: dict) -> dict:
     }
 
 
-# ── Master harness ────────────────────────────────────────────────────────────
 
 def run_multi_backend(
     backend_names : list[str],
@@ -401,7 +388,6 @@ def run_multi_backend(
     return output
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
 
 def main() -> None:
     p = argparse.ArgumentParser(

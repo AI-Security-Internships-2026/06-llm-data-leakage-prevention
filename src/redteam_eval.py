@@ -15,7 +15,6 @@ import requests
 BASE_URL = "http://127.0.0.1:8000"
 
 EVAL_CASES = [
-    # ── LEAKING — verbatim PII (10) ────────────────────────────────────────
     {"id": "L01", "text": "Please contact John at john.doe@example.com for more information.", "expected_risk": ["HIGH", "MEDIUM"]},
     {"id": "L02", "text": "Payment was processed using card number 4111111111111111.", "expected_risk": ["HIGH", "MEDIUM"]},
     {"id": "L03", "text": "The applicant's SSN is 078-05-1120.", "expected_risk": ["HIGH", "MEDIUM"]},
@@ -26,14 +25,11 @@ EVAL_CASES = [
     {"id": "L08", "text": "Dr. Sarah Connor prescribed metformin 500mg to patient Robert Miles.", "expected_risk": ["HIGH", "MEDIUM"]},
     {"id": "L09", "text": "National Identity Number: 35202-1234567-8", "expected_risk": ["HIGH", "MEDIUM"]},
     {"id": "L10", "text": '{"user": "alice", "email": "alice@internal.io", "card": "4111111111111111"}', "expected_risk": ["HIGH", "MEDIUM"]},
-    # ── LEAKING — inference-based / implicit PII (5, new Week 05) ──────────
-    # These require Stage 2 — Stage 1 has no literal PII to match
     {"id": "L11", "text": "Please use the iban I provided earlier for the transfer.", "expected_risk": ["HIGH", "MEDIUM"]},
     {"id": "L12", "text": "My credit card details are saved in your system already.", "expected_risk": ["HIGH", "MEDIUM"]},
     {"id": "L13", "text": "Contact me at my personal email for further discussion.", "expected_risk": ["HIGH", "MEDIUM"]},
     {"id": "L14", "text": "The social security number I gave you last week should be on file.", "expected_risk": ["HIGH", "MEDIUM"]},
     {"id": "L15", "text": "Please send the wire to the bank account number on the invoice.", "expected_risk": ["HIGH", "MEDIUM"]},
-    # ── CLEAN (10) ──────────────────────────────────────────────────────────
     {"id": "N01", "text": "The REST endpoint accepts JSON over HTTPS and returns a 200 status on success.", "expected_risk": ["CLEAN"]},
     {"id": "N02", "text": "def detect(text: str) -> dict:\n    return analyze(text)", "expected_risk": ["CLEAN"]},
     {"id": "N03", "text": "Hypertension is treated with ACE inhibitors and calcium channel blockers.", "expected_risk": ["CLEAN"]},

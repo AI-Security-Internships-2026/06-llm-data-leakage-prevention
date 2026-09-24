@@ -1,0 +1,20 @@
+| Template | Prior (knowledge) | Candidate space | Attack | Exact recovery | Median queries | Time (s) |
+| --- | --- | --- | --- | --- | --- | --- |
+| T1_medical | K1 | 2000 (11.0 bits) | linear | 0.0% (0/30) | 40 | 134.19 |
+| T1_medical | K1 | 2000 (11.0 bits) | two_stage_adaptive | 0.0% (0/30) | 62 | 342.4 |
+| T1_medical | K2 | 44998 (15.5 bits) | linear | 3.3% (1/30) | 56 | 241.98 |
+| T1_medical | K2 | 44998 (15.5 bits) | two_stage_adaptive | 0.0% (0/30) | 56 | 261.96 |
+| T1_medical | K3 | 2000 (11.0 bits) | linear | 0.0% (0/30) | 4 | 20.15 |
+| T1_medical | K3 | 2000 (11.0 bits) | two_stage_adaptive | 0.0% (0/30) | 46 | 146.43 |
+| T2_financial | K1 | 2000 (11.0 bits) | linear | 0.0% (0/30) | 60 | 141.75 |
+| T2_financial | K1 | 2000 (11.0 bits) | two_stage_adaptive | 0.0% (0/30) | 35 | 269.8 |
+| T2_financial | K2 | 44998 (15.5 bits) | linear | 0.0% (0/30) | 44 | 254.66 |
+| T2_financial | K2 | 44998 (15.5 bits) | two_stage_adaptive | 0.0% (0/30) | 60 | 175.27 |
+| T2_financial | K3 | 2000 (11.0 bits) | linear | 0.0% (0/30) | 2 | 12.46 |
+| T2_financial | K3 | 2000 (11.0 bits) | two_stage_adaptive | 0.0% (0/30) | 23 | 60.77 |
+| T3_enterprise | K1 | 2000 (11.0 bits) | linear | 0.0% (0/30) | 100 | 252.82 |
+| T3_enterprise | K1 | 2000 (11.0 bits) | two_stage_adaptive | 0.0% (0/30) | 34 | 155.56 |
+| T3_enterprise | K2 | 44998 (15.5 bits) | linear | 0.0% (0/30) | 6 | 75.02 |
+| T3_enterprise | K2 | 44998 (15.5 bits) | two_stage_adaptive | 0.0% (0/30) | 53 | 165.39 |
+| T3_enterprise | K3 | 2000 (11.0 bits) | linear | 0.0% (0/30) | 6 | 31.43 |
+| T3_enterprise | K3 | 2000 (11.0 bits) | two_stage_adaptive | 0.0% (0/30) | 23 | 66.54 |

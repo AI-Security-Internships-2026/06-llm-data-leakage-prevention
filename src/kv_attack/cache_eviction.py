@@ -9,9 +9,6 @@ from openai import OpenAI
 
 from kv_attack import VLLM_BASE_URL, MODEL_ID, EVICT_REQUESTS, EVICT_TOKENS
 
-# Filler vocabulary: common English words with NO medical/legal/financial terms.
-# Using neutral words guarantees eviction prompts never accidentally collide
-# with any victim or attacker prefix in the cache.
 _FILLER_WORDS = [
     "the", "of", "and", "in", "to", "a", "is", "that", "for", "on",
     "are", "with", "as", "at", "be", "this", "from", "or", "by", "an",
@@ -45,13 +42,11 @@ def _get_cache_hit_rate(base_url: str = VLLM_BASE_URL) -> float | None:
     """
     try:
         parsed   = urllib.parse.urlparse(base_url)
-        # Replace path with /metrics regardless of what path was in base_url
         metrics_url = urllib.parse.urlunparse(
             parsed._replace(path="/metrics", query="", fragment="")
         )
         with urllib.request.urlopen(metrics_url, timeout=3) as resp:
             for line in resp.read().decode().splitlines():
-                # vLLM 0.27.x Prometheus metric name
                 if line.startswith("vllm:gpu_prefix_cache_hit_rate_perc"):
                     parts = line.split()
                     return float(parts[-1])

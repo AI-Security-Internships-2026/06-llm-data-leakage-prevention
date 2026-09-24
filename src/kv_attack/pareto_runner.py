@@ -81,41 +81,34 @@ except ImportError:
     _PRESIDIO_AVAILABLE = False
 
 
-# ── Empirical values from prior weeks ─────────────────────────────────────────
 
-# Week 10 baseline (kv_attack_results.json aggregate)
-W10_HIT_TTFT_MS   = 90.2     # unprotected cache hit
-W10_MISS_TTFT_MS  = 613.6    # unprotected cache miss
+W10_HIT_TTFT_MS   = 90.2
+W10_MISS_TTFT_MS  = 613.6
 W10_DELTA_MS      = 523.4
-W10_SR            = 1.0      # success rate (5/5)
+W10_SR            = 1.0
 
-# Week 11 full APC disable (kv_mitigation_results.json)
-W11_TTFT_MS       = 648.8    # all requests served at prefill cost
-W11_SR            = 0.0005   # 99.95% leak reduction
+W11_TTFT_MS       = 648.8
+W11_SR            = 0.0005
 W11_OVERHEAD_PCT  = round((W11_TTFT_MS - W10_HIT_TTFT_MS) / W10_HIT_TTFT_MS * 100, 1)
 W11_LEAK_RED_PCT  = round((1 - W11_SR / W10_SR) * 100, 2)
 
-# PrefixWall / CacheSolidarity (Pennas et al. 2026, Paper 8)
-# 70% cache reuse retained; 32 bytes metadata overhead per block; 0.007 ms/req
 PW_CACHE_REUSE    = 0.70
 PW_EXPECTED_TTFT  = PW_CACHE_REUSE * W10_HIT_TTFT_MS + (1 - PW_CACHE_REUSE) * W10_MISS_TTFT_MS + 0.007
 PW_OVERHEAD_PCT   = round((PW_EXPECTED_TTFT - W10_HIT_TTFT_MS) / W10_HIT_TTFT_MS * 100, 1)
 PW_SR             = 0.0005
 PW_LEAK_RED_PCT   = round((1 - PW_SR / W10_SR) * 100, 2)
 
-# M3 analytical estimate (Presidio-gated selective isolation)
-M3_PII_RATE       = 0.30     # fraction of prompts containing PII
+M3_PII_RATE       = 0.30
 M3_EXPECTED_TTFT  = (
     (1 - M3_PII_RATE) * W10_HIT_TTFT_MS +
     M3_PII_RATE       * W10_MISS_TTFT_MS +
-    3.5               # Presidio scan overhead (ms, conservative)
+    3.5
 )
 M3_OVERHEAD_PCT   = round((M3_EXPECTED_TTFT - W10_HIT_TTFT_MS) / W10_HIT_TTFT_MS * 100, 1)
-M3_SR             = 0.0005   # PII prompts fully isolated → attack impossible on those
+M3_SR             = 0.0005
 M3_LEAK_RED_PCT   = round((1 - M3_SR / W10_SR) * 100, 2)
 
 
-# ── Presidio-gated M3 mitigation ──────────────────────────────────────────────
 
 class PresidioGate:
     """
@@ -128,11 +121,8 @@ class PresidioGate:
     handler; here it is used to tag prompts for our experimental evaluation.
     """
 
-    # Entity types to flag as PII (triggers cache isolation)
     PII_ENTITIES = ["PERSON", "DATE_TIME", "MEDICAL_LICENSE", "US_DRIVER_LICENSE"]
 
-    # Regex fallback for medical conditions (Presidio does not have a built-in
-    # MEDICAL_CONDITION recogniser; we supplement with a keyword list).
     _CONDITION_PATTERN = re.compile(
         r"\b("
         + "|".join([
@@ -156,10 +146,8 @@ class PresidioGate:
 
     def is_pii(self, text: str) -> bool:
         """Return True if the prompt contains detectable PII."""
-        # Regex check for medical conditions (fast path)
         if self._CONDITION_PATTERN.search(text):
             return True
-        # Presidio NER check for names and dates
         if self._engine is not None:
             results = self._engine.analyze(text=text, language="en",
                                            entities=self.PII_ENTITIES)
@@ -172,7 +160,6 @@ class PresidioGate:
         return self.is_pii(prompt)
 
 
-# ── M3 empirical evaluation ───────────────────────────────────────────────────
 
 def run_m3_empirical(
     backend,
@@ -203,7 +190,6 @@ def run_m3_empirical(
     if gate is None:
         gate = PresidioGate()
 
-    # Measure detection rate on victim prompts
     detected = 0
     for rec in victim_records:
         gt = rec["ground_truth"]
@@ -216,22 +202,18 @@ def run_m3_empirical(
     print(f"[pareto_runner] M3 detection rate: {detection_rate:.2%} "
           f"({detected}/{len(victim_records)} victims)")
 
-    # Calibrate timing (isolated backend — APC disabled for flagged prompts)
-    # We simulate M3 by measuring timing on a MockBackend with isolation.
     from kv_attack.backends.mock_backend import MockBackend
     mock_m3 = MockBackend(
         hit_ttft_ms     = W10_HIT_TTFT_MS,
         miss_ttft_ms    = W10_MISS_TTFT_MS,
         apc_enabled     = True,
-        tenant_isolation= True,    # M3: isolated for PII prompts
+        tenant_isolation= True,
         seed            = 0,
     )
 
-    # Seed all victims into mock
     for rec in victim_records:
         mock_m3.seed_prompt(rec["prompt"], tenant_id=0)
 
-    # Measure attack SR under M3 (attacker is tenant=1, victims=tenant=0)
     results = []
     calib   = calibrate_threshold_backend(
         backend             = mock_m3,
@@ -255,9 +237,9 @@ def run_m3_empirical(
 
     sr = sum(1 for r in results if r.exact_match) / len(results)
     mean_ttft_m3 = (
-        detection_rate       * W10_MISS_TTFT_MS +   # isolated → miss cost
-        (1 - detection_rate) * W10_HIT_TTFT_MS  +   # not detected → hit
-        3.5                                          # Presidio overhead
+        detection_rate       * W10_MISS_TTFT_MS +
+        (1 - detection_rate) * W10_HIT_TTFT_MS  +
+        3.5
     )
     overhead_pct = round((mean_ttft_m3 - W10_HIT_TTFT_MS) / W10_HIT_TTFT_MS * 100, 1)
     leak_red_pct = round((1 - sr / W10_SR) * 100, 2)
@@ -273,7 +255,6 @@ def run_m3_empirical(
     }
 
 
-# ── Pareto curve builder ───────────────────────────────────────────────────────
 
 def build_pareto_curve(m3_empirical: dict | None = None) -> list[dict]:
     """
@@ -390,7 +371,6 @@ def compute_pareto_dominance(points: list[dict]) -> list[dict]:
     return points
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Week 13 Pareto curve runner")
@@ -417,7 +397,6 @@ def main() -> None:
     print(f"[pareto_runner] Output   : {args.output}")
     print("=" * 65 + "\n")
 
-    # Load prior results for context
     with open(args.baseline_results) as fh:
         w10_data = json.load(fh)
     with open(args.week11_results) as fh:
@@ -438,7 +417,6 @@ def main() -> None:
             tokenizer, has_bos=detect_has_bos(_m3_model_id)
         )
 
-        # Build victim records from Week 10 results if available
         victim_records = []
         for r in w10_data.get("results", [])[:args.n_victims]:
             gt = r["ground_truth"]
@@ -469,11 +447,9 @@ def main() -> None:
               f"overhead={m3_empirical['overhead_pct']}%  "
               f"leak_red={m3_empirical['leak_reduction_pct']}%")
 
-    # Build and annotate curve
     points = build_pareto_curve(m3_empirical)
     points = compute_pareto_dominance(points)
 
-    # Print summary table
     print("\n  {:40s}  {:>10s}  {:>12s}  {:>10s}  {:>10s}".format(
         "Mitigation", "TTFT (ms)", "Overhead (%)", "Leak Red %", "Pareto"
     ))
@@ -485,7 +461,6 @@ def main() -> None:
             "✓" if p["pareto_optimal"] else "✗",
         ))
 
-    # Build improvement table for paper
     m3 = next(p for p in points if p["id"] == "M3")
     m1 = next(p for p in points if p["id"] == "M1")
     improvement_vs_m1 = round(

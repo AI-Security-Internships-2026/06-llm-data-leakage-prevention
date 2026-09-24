@@ -1,0 +1,240 @@
+{
+  "fig1_median_queries_vs_entropy": [
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K1",
+      "algorithm": "linear",
+      "entropy_bits": 10.9658,
+      "median_queries": 40.5
+    },
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K1",
+      "algorithm": "two_stage_adaptive",
+      "entropy_bits": 10.9658,
+      "median_queries": 62.0
+    },
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K2",
+      "algorithm": "linear",
+      "entropy_bits": 15.4576,
+      "median_queries": 55.5
+    },
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K2",
+      "algorithm": "two_stage_adaptive",
+      "entropy_bits": 15.4576,
+      "median_queries": 56.0
+    },
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K3",
+      "algorithm": "linear",
+      "entropy_bits": 10.9658,
+      "median_queries": 4.0
+    },
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K3",
+      "algorithm": "two_stage_adaptive",
+      "entropy_bits": 10.9658,
+      "median_queries": 45.5
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K1",
+      "algorithm": "linear",
+      "entropy_bits": 10.9658,
+      "median_queries": 60.5
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K1",
+      "algorithm": "two_stage_adaptive",
+      "entropy_bits": 10.9658,
+      "median_queries": 35.0
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K2",
+      "algorithm": "linear",
+      "entropy_bits": 15.4576,
+      "median_queries": 44.0
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K2",
+      "algorithm": "two_stage_adaptive",
+      "entropy_bits": 15.4576,
+      "median_queries": 60.5
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K3",
+      "algorithm": "linear",
+      "entropy_bits": 10.9658,
+      "median_queries": 2.5
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K3",
+      "algorithm": "two_stage_adaptive",
+      "entropy_bits": 10.9658,
+      "median_queries": 23.0
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K1",
+      "algorithm": "linear",
+      "entropy_bits": 10.9658,
+      "median_queries": 100.0
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K1",
+      "algorithm": "two_stage_adaptive",
+      "entropy_bits": 10.9658,
+      "median_queries": 33.5
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K2",
+      "algorithm": "linear",
+      "entropy_bits": 15.4576,
+      "median_queries": 6.0
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K2",
+      "algorithm": "two_stage_adaptive",
+      "entropy_bits": 15.4576,
+      "median_queries": 53.0
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K3",
+      "algorithm": "linear",
+      "entropy_bits": 10.9658,
+      "median_queries": 6.0
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K3",
+      "algorithm": "two_stage_adaptive",
+      "entropy_bits": 10.9658,
+      "median_queries": 23.0
+    }
+  ],
+  "fig2_asr_by_scenario": [
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K1",
+      "algorithm": "linear",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K1",
+      "algorithm": "two_stage_adaptive",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K2",
+      "algorithm": "linear",
+      "asr": 0.03333333333333333
+    },
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K2",
+      "algorithm": "two_stage_adaptive",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K3",
+      "algorithm": "linear",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T1_medical",
+      "knowledge": "K3",
+      "algorithm": "two_stage_adaptive",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K1",
+      "algorithm": "linear",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K1",
+      "algorithm": "two_stage_adaptive",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K2",
+      "algorithm": "linear",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K2",
+      "algorithm": "two_stage_adaptive",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K3",
+      "algorithm": "linear",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T2_financial",
+      "knowledge": "K3",
+      "algorithm": "two_stage_adaptive",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K1",
+      "algorithm": "linear",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K1",
+      "algorithm": "two_stage_adaptive",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K2",
+      "algorithm": "linear",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K2",
+      "algorithm": "two_stage_adaptive",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K3",
+      "algorithm": "linear",
+      "asr": 0.0
+    },
+    {
+      "scenario": "T3_enterprise",
+      "knowledge": "K3",
+      "algorithm": "two_stage_adaptive",
+      "asr": 0.0
+    }
+  ]
+}

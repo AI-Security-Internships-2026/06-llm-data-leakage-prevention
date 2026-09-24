@@ -73,18 +73,16 @@ from pathlib import Path
 import numpy as np
 
 
-# ── Vocabulary constants ──────────────────────────────────────────────────────
 
-N_NAMES      = 100    # 10 first × 10 last
+N_NAMES      = 100
 N_CONDITIONS = 20
-VOCAB_SIZE   = N_NAMES * N_CONDITIONS   # 2 000
+VOCAB_SIZE   = N_NAMES * N_CONDITIONS
 
-H_PRIOR      = math.log2(VOCAB_SIZE)                  # H₀ ≈ 10.965
-H_NAME_KNOWN = math.log2(N_CONDITIONS)                 # log₂(20) ≈ 4.322
-H_BOTH_KNOWN = 0.0                                     # H₂ = 0
+H_PRIOR      = math.log2(VOCAB_SIZE)
+H_NAME_KNOWN = math.log2(N_CONDITIONS)
+H_BOTH_KNOWN = 0.0
 
 
-# ── Analytical BLQ for the two algorithms ────────────────────────────────────
 
 def analytical_linear_scan() -> dict:
     """
@@ -94,8 +92,8 @@ def analytical_linear_scan() -> dict:
     The hit position is uniform in [1, |V|], so E[Q] = (|V| + 1) / 2.
     """
     q_min      = 1
-    q_expected = (VOCAB_SIZE + 1) / 2   # ≈ 1000.5
-    q_max      = VOCAB_SIZE             # 2 000
+    q_expected = (VOCAB_SIZE + 1) / 2
+    q_max      = VOCAB_SIZE
 
     blq_min      = H_PRIOR / q_min
     blq_expected = H_PRIOR / q_expected
@@ -150,29 +148,27 @@ def analytical_adaptive_two_stage() -> dict:
 
     BLQ_expected = H₀ / E[Q] ≈ 10.97 / 79 ≈ 0.139 bits/query.
     """
-    # Stage 1 parameters
     reseed_every = 4
-    q1_scan_expected  = (N_NAMES + 1) / 2            # avg hit position in Stage 1
-    q1_reseed_expected= q1_scan_expected / reseed_every  # reseed calls
+    q1_scan_expected  = (N_NAMES + 1) / 2
+    q1_reseed_expected= q1_scan_expected / reseed_every
     q1_expected       = q1_scan_expected + q1_reseed_expected
     q1_max            = N_NAMES + N_NAMES // reseed_every
 
-    bits_after_stage1 = H_NAME_KNOWN   # log₂(20) — name known, condition unknown
+    bits_after_stage1 = H_NAME_KNOWN
 
-    # Stage 2 parameters
     q2_scan_expected  = (N_CONDITIONS + 1) / 2
     q2_reseed_expected= q2_scan_expected / reseed_every
     q2_expected       = q2_scan_expected + q2_reseed_expected
     q2_max            = N_CONDITIONS + N_CONDITIONS // reseed_every
 
-    confirm_calls  = 3   # N_REPEATS_CONFIRM
+    confirm_calls  = 3
     q_total_expected = q1_expected + q2_expected + confirm_calls
     q_total_max      = q1_max + q2_max + confirm_calls
 
     blq_stage1_expected   = (H_PRIOR - bits_after_stage1) / q1_expected
     blq_stage2_expected   = bits_after_stage1 / q2_expected
     blq_overall_expected  = H_PRIOR / q_total_expected
-    blq_overall_best_case = H_PRIOR / (1 + 1 + confirm_calls)   # first probe in each stage hits
+    blq_overall_best_case = H_PRIOR / (1 + 1 + confirm_calls)
 
     return {
         "algorithm"            : "adaptive_two_stage",
@@ -262,7 +258,6 @@ def improvement_table(
     }
 
 
-# ── Empirical BLQ from results JSON ──────────────────────────────────────────
 
 def empirical_blq_from_results(results_path: str) -> dict:
     """
@@ -276,12 +271,10 @@ def empirical_blq_from_results(results_path: str) -> dict:
     def _extract_calls(d: dict) -> list[int]:
         """Flatten all total_api_calls from any known results schema."""
         calls = []
-        # Week 10 flat format
         if "results" in d and isinstance(d["results"], list):
             for r in d["results"]:
                 if "total_api_calls" in r:
                     calls.append(r["total_api_calls"])
-        # Week 12 multi-backend format
         if "backends" in d:
             for bdata in d["backends"].values():
                 if isinstance(bdata, dict) and "results" in bdata:
@@ -297,7 +290,6 @@ def empirical_blq_from_results(results_path: str) -> dict:
     calls_arr = np.array(calls, dtype=float)
     blq_arr   = H_PRIOR / calls_arr
 
-    # CDF at standard budget points
     budget_points = [50, 100, 120, 200, 500, 762, 1000, 1303, 2000]
     cdf = {
         str(q): round(float(np.mean(calls_arr <= q)), 4)
@@ -328,7 +320,6 @@ def empirical_blq_from_results(results_path: str) -> dict:
     }
 
 
-# ── Main analysis runner ──────────────────────────────────────────────────────
 
 def run_bits_analysis(
     input_path  : str,
@@ -411,7 +402,6 @@ def run_bits_analysis(
     return output
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
 
 def main() -> None:
     p = argparse.ArgumentParser(

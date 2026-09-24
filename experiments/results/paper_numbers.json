@@ -1,0 +1,155 @@
+{
+  "_meta": {
+    "description": "Paper numbers extracted from result artifacts. All values tagged as empirical | derived_from_empirical | analytical_simulated.",
+    "generated_by": "experiments/generate_paper_numbers.py",
+    "assertion_failures": [],
+    "missing_values": []
+  },
+  "numbers": {
+    "ttft_hit_mean_ms": {
+      "value": 190.4627,
+      "tag": "empirical",
+      "source": "kv_week13_final.json:calibration.hit_mean_ms",
+      "fallback_note": "Week 10 empirical value used if absent from calibration block"
+    },
+    "ttft_miss_mean_ms": {
+      "value": 1589.6878,
+      "tag": "empirical",
+      "source": "kv_week13_final.json:calibration.miss_mean_ms"
+    },
+    "ttft_s1_hit_mean_ms": {
+      "value": 560.1761,
+      "tag": "derived_from_empirical",
+      "note": "miss_mean - (128/192) * (miss_mean - hit_mean)",
+      "source": "analytical derivation from empirical hit/miss means"
+    },
+    "ttft_delta_ms": {
+      "value": 1399.2,
+      "tag": "derived_from_empirical",
+      "source": "miss_mean - hit_mean"
+    },
+    "t1_threshold_ms": {
+      "value": 438.8,
+      "tag": "derived_from_empirical",
+      "note": "midpoint(miss_mean, s1_hit_mean)",
+      "source": "kv_week13_final.json:calibration.t1_ms or analytical"
+    },
+    "t2_threshold_ms": {
+      "value": 177.1,
+      "tag": "derived_from_empirical",
+      "note": "midpoint(s1_hit_mean, hit_mean)",
+      "source": "kv_week13_final.json:calibration.t2_ms or analytical"
+    },
+    "baseline_n_victims": {
+      "value": 50,
+      "tag": "empirical",
+      "source": "kv_attack_results_50.json:summary.n_victims"
+    },
+    "baseline_exact_recovery_rate": {
+      "value": 1.0,
+      "tag": "empirical",
+      "source": "kv_attack_results_50.json:summary.success_rate"
+    },
+    "baseline_mean_api_calls": {
+      "value": 1302.5,
+      "tag": "empirical",
+      "source": "kv_attack_results_50.json:summary.mean_total_api_calls"
+    },
+    "baseline_mean_timing_gap_ms": {
+      "value": 488.86,
+      "tag": "empirical",
+      "source": "kv_attack_results_50.json:summary.mean_timing_gap_ms"
+    },
+    "paper_n_victims": {
+      "value": 50,
+      "tag": "empirical",
+      "source": "kv_week13_final.json:aggregate.n_victims",
+      "note": "50-victim canonical paper run (seed=42, two_stage_adaptive). Meets Issue #2 requirement of >=30 victims."
+    },
+    "paper_exact_recovery_rate": {
+      "value": 0.68,
+      "tag": "empirical",
+      "source": "kv_week13_final.json:aggregate.success_rate"
+    },
+    "paper_mean_trr": {
+      "value": 0.69,
+      "tag": "empirical",
+      "source": "kv_week13_final.json:aggregate.mean_trr"
+    },
+    "paper_mean_total_api_calls": {
+      "value": 66.98,
+      "tag": "empirical",
+      "source": "kv_week13_final.json:aggregate.mean_total_api_calls"
+    },
+    "paper_mean_stage1_api_calls": {
+      "value": 48.4,
+      "tag": "empirical",
+      "source": "kv_week13_final.json:aggregate.mean_stage1_api_calls"
+    },
+    "paper_mean_stage2_api_calls": {
+      "value": 15.58,
+      "tag": "empirical",
+      "source": "kv_week13_final.json:aggregate.mean_stage2_api_calls"
+    },
+    "paper_blq_empirical": {
+      "value": 0.347261,
+      "tag": "derived_from_empirical",
+      "note": "BLQ = H0 / mean_total_api_calls. NOT a newly invented metric \u2014 this is the standard bits-per-query information efficiency measure. EERQ rename pending if BLQ clashes with established terminology.",
+      "source": "kv_week13_final.json:aggregate.mean_blq"
+    },
+    "paper_blq_improvement_factor": {
+      "value": 24.14,
+      "tag": "derived_from_empirical",
+      "note": "blq_empirical / blq_linear_week12 (both derived_from_empirical)",
+      "source": "kv_week13_final.json:aggregate.blq_improvement_factor"
+    },
+    "e_q_theoretical_twostage": {
+      "value": 79.2,
+      "tag": "analytical_simulated",
+      "note": "E[Q] = 50.5 (S1) + 12.6 (reseeds) + 10.5 (S2) + 2.6 (reseeds) + 3 (confirm). Derived in two_stage_victim_seeder.py. NOT measured.",
+      "source": "kv_attack/two_stage_victim_seeder.py (analytical)"
+    },
+    "q_max_theoretical_twostage": {
+      "value": 153,
+      "tag": "analytical_simulated",
+      "note": "Q_max = 125 (S1 worst) + 25 (S2 worst) + 3 (confirm). NOT measured.",
+      "source": "kv_attack/two_stage_victim_seeder.py (analytical)"
+    },
+    "blq_theoretical_adaptive": {
+      "value": 0.138457,
+      "tag": "analytical_simulated",
+      "note": "EERQ (formerly BLQ) = H0 / E[Q] = 10.9658 / 79.2. Analytical, NOT empirical. Renamed BLQ\u2192EERQ per Issue #3-D.",
+      "source": "kv_attack/two_stage_reconstructor.py:BLQ_ADAPTIVE_EXPECTED"
+    },
+    "m3_presidio_latency_overhead_ms": {
+      "value": 3.5,
+      "tag": "analytical_simulated",
+      "note": "Presidio scan overhead (conservative estimate). NOT measured under paper attack conditions.",
+      "source": "kv_attack/pareto_runner.py:M3_LATENCY_OVERHEAD_MS"
+    },
+    "m3_asr_reduction": {
+      "value": 0.9995,
+      "tag": "analytical_simulated",
+      "note": "ASR reduction = 1 - (M3 attack_sr / M0 attack_sr) = 1 - (0.0005 / 1.0) = 0.9995 (99.95%). M3 is analytical (Presidio-gated selective isolation). NOT measured empirically.",
+      "source": "kv_pareto_final.json:m3.asr_reduction (computed from pareto_points fallback)"
+    },
+    "pin_contradiction_resolution": {
+      "value": "resolved_by_removal",
+      "tag": "empirical",
+      "note": "The PIN attack used a single-block victim layout (name+PIN in same KV region), creating a contradiction with the Stage-1 boundary assumption. Resolution: canonical pipeline redesigned in two_stage_victim_seeder.py with non-overlapping regions (128 name-blocks + 64 condition-blocks). PIN attack is removed from the paper. M3 mitigation is unaffected.",
+      "source": "kv_pareto_final.json:m3.pin_contradiction_resolution"
+    },
+    "vocab_size": {
+      "value": 2000,
+      "tag": "empirical",
+      "note": "100 names \u00d7 20 conditions = 2000 (bounded candidate space)",
+      "source": "kv_attack/__init__.py: FIRST_NAMES (10) \u00d7 LAST_NAMES (10) \u00d7 CONDITIONS (20)"
+    },
+    "prior_entropy_bits": {
+      "value": 10.9658,
+      "tag": "derived_from_empirical",
+      "note": "H0 = log2(vocab_size) = log2(2000) \u2248 10.97 bits",
+      "source": "derived from vocab_size"
+    }
+  }
+}

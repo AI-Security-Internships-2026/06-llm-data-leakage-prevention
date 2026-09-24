@@ -1,0 +1,64 @@
+# configs/smoke_test.yaml
+# =============================================================================
+# Smoke-test configuration — runs in ~30 s with the mock backend (no GPU).
+#
+# Purpose:
+#   1. Pipeline-validation: confirm end-to-end code path works.
+#   2. Reproducibility: same seed → same victims & candidates every run.
+#   3. CI gate: run twice, assert victim/candidate sets are identical.
+#
+# Entry point:
+#   python experiments/run_kv_attack.py --config configs/smoke_test.yaml
+# =============================================================================
+
+run:
+  id_prefix: "smoke"
+  description: "3-victim mock-backend smoke test (pipeline validation)"
+  algorithm: "two_stage_adaptive"
+
+backend:
+  name: "mock"                        # no GPU required
+  # Mock backend parameters (match Week 10 empirical values)
+  mock_hit_ttft_ms: 87.6
+  mock_miss_ttft_ms: 576.1
+  mock_noise_std_ms: 4.7
+  model_id: "mock-deepseek-r1-distill-llama-8b"
+  block_size: 16
+
+victims:
+  n_victims: 3                        # enough for pipeline validation
+  seed: 42
+  first_names:
+    count: 10
+  last_names:
+    count: 10
+  conditions:
+    count: 20
+
+calibration:
+  n_samples: 20                       # reduced for speed
+  ks_alpha: 1.0e-8
+
+thresholds:
+  t1_ms: 438.8
+  t2_ms: 177.1
+
+probes:
+  n_repeats_stage1: 1
+  n_repeats_stage2: 1
+  n_repeats_confirm: 1
+  n_top_candidates: 3
+
+cache:
+  evict_requests: 10
+  evict_tokens: 220
+  reseed_every: 4
+
+concurrency:
+  workers: 1
+
+output:
+  dir: "experiments/results"
+  save_raw_probes: true
+  save_config: true
+  save_environment: true

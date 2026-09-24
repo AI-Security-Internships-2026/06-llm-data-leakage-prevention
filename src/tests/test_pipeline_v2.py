@@ -20,7 +20,6 @@ from llm_judge import JudgeResult
 client = TestClient(app)
 
 
-# ── /info/v2 ─────────────────────────────────────────────────────────────────
 
 class TestInfoV2:
     def test_info_v2_status_200(self):
@@ -41,7 +40,6 @@ class TestInfoV2:
         assert "bart-large-mnli" in data["stage2"]["model"]
 
 
-# ── /detect/v2 response schema ────────────────────────────────────────────────
 
 class TestDetectV2Schema:
     def test_returns_200(self):
@@ -73,7 +71,6 @@ class TestDetectV2Schema:
         assert r.status_code == 422
 
 
-# ── Stage 2 skip for HIGH risk ────────────────────────────────────────────────
 
 class TestStage2SkippedForHighRisk:
     def test_credit_card_stage2_not_flagged(self):
@@ -98,7 +95,6 @@ class TestStage2SkippedForHighRisk:
         assert data["stage2_flagged"] is False
 
 
-# ── Stage 2 invoked for CLEAN / LOW ──────────────────────────────────────────
 
 class TestStage2InvokedForLowRisk:
     def test_clean_text_stage2_used(self):
@@ -119,7 +115,6 @@ class TestStage2InvokedForLowRisk:
         assert data["stage2_flagged"] is False
 
 
-# ── Stage 2 escalation ────────────────────────────────────────────────────────
 
 class TestStage2Escalation:
     def test_inference_pii_escalated_by_stage2(self):
@@ -168,7 +163,6 @@ class TestStage2Escalation:
         assert data["stage2_flagged"] is False
 
 
-# ── v1 endpoint still works alongside v2 ─────────────────────────────────────
 
 class TestV1StillWorks:
     def test_v1_detect_still_200(self):

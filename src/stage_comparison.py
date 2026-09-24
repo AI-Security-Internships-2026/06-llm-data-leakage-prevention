@@ -15,39 +15,29 @@ from datetime import datetime, timezone
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
-from detector import detect_pii  # noqa: E402
+from detector import detect_pii
 
-# ── Adversarial cases (inline, no file needed) ────────────────────────────────
 _ADVERSARIAL_CASES = [
-    # Obfuscated emails
     {"text": "Send to alice [at] example [dot] com", "label": "LEAKING"},
     {"text": "Contact bob(at)company.org for details", "label": "LEAKING"},
     {"text": "Email jane AT example DOT com for the report", "label": "LEAKING"},
     {"text": "Reach me at carol AT example.com", "label": "LEAKING"},
-    # Spaced / formatted cards
     {"text": "Card: 4111 1111 1111 1111", "label": "LEAKING"},
     {"text": "Charge card 4111-1111-1111-1111 today", "label": "LEAKING"},
     {"text": "Card number: 4111.1111.1111.1111", "label": "LEAKING"},
-    # Formatted phones
     {"text": "Call 800.555.0199 for support", "label": "LEAKING"},
     {"text": "UK line: +44 20 7946 0958", "label": "LEAKING"},
-    # SSN / CNIC
     {"text": "Taxpayer ID: 078-05-1120", "label": "LEAKING"},
     {"text": "CNIC: 35202-1234567-8 verified", "label": "LEAKING"},
-    # IBAN
     {"text": "Wire to IBAN GB29NWBK60161331926819", "label": "LEAKING"},
     {"text": "Bank account: DE89370400440532013000", "label": "LEAKING"},
-    # PII embedded in structured text
     {"text": '{"email": "ops@company.org", "card": "4111111111111111"}', "label": "LEAKING"},
     {"text": "| Name | Email | Phone |\n| Alice | alice@example.com | 555-1234 |", "label": "LEAKING"},
-    # Multi-PII
     {"text": "John Smith SSN 078-05-1120 card 4111111111111111", "label": "LEAKING"},
     {"text": "Name: Dr. Sarah Connor. CNIC: 35202-9876543-1. Email: s.connor@example.com", "label": "LEAKING"},
-    # Inference-based (Stage 2 should help)
     {"text": "My home phone number is listed above", "label": "LEAKING"},
     {"text": "Please use the iban I provided earlier for the transfer", "label": "LEAKING"},
     {"text": "Contact me at my personal email for further discussion", "label": "LEAKING"},
-    # Clean
     {"text": "The REST API returns JSON with HTTP 200.", "label": "CLEAN"},
     {"text": "def add(x, y): return x + y", "label": "CLEAN"},
     {"text": "Gradient descent converged after 150 epochs.", "label": "CLEAN"},

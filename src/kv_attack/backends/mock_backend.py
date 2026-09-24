@@ -69,16 +69,13 @@ class MockBackend(BackendClient):
         self.apc_enabled      = apc_enabled
         self.tenant_isolation = tenant_isolation
         self._rng             = np.random.default_rng(seed)
-        # cache: set of (prompt_hash,) or (prompt_hash, tenant_id)
         self._cache: set[tuple] = set()
-        # request counters for stats
         self.n_hits   = 0
         self.n_misses = 0
 
-    # ── Abstract interface ─────────────────────────────────────────────────────
 
     def health_check(self) -> bool:
-        return True   # always healthy
+        return True
 
     def get_info(self) -> BackendInfo:
         return BackendInfo(
@@ -116,14 +113,12 @@ class MockBackend(BackendClient):
             )
         else:
             self.n_misses += 1
-            # Insert into cache (simulate vLLM caching the computed KV blocks)
             if self.apc_enabled:
                 self._cache.add(cache_key)
             return float(
                 self._rng.normal(self.miss_ttft_ms, self.noise_std_ms)
             )
 
-    # ── Extra helpers for testing ──────────────────────────────────────────────
 
     def seed_prompt(self, prompt: str, tenant_id: int = 0) -> None:
         """Manually insert a prompt into the mock cache (simulates victim seeding)."""

@@ -1,25 +1,3 @@
-# src/kv_attack/mitigation_eval.py
-#
-# Week 11 — Mitigation evaluation.
-# Measures whether the timing oracle survives under the protected baseline
-# (--no-enable-prefix-caching) and compares against the unprotected results.
-#
-# Usage:
-#   # Terminal 1: start vLLM with APC DISABLED
-#   .venv/bin/python -m vllm.entrypoints.openai.api_server \
-#       --model deepseek-ai/DeepSeek-R1-Distill-Llama-8B \
-#       --no-enable-prefix-caching \
-#       --gpu-memory-utilization 0.88 \
-#       --no-enable-chunked-prefill \
-#       --max-model-len 4096 \
-#       --dtype bfloat16 \
-#       --port 8001
-#
-#   # Terminal 2:
-#   cd src
-#   python -m kv_attack.mitigation_eval \
-#       --baseline ../experiments/results/kv_attack_results.json \
-#       --output   ../experiments/results/kv_mitigation_results.json
 
 import argparse
 import datetime
@@ -57,7 +35,6 @@ def run_mitigation_eval(
     print("[mitigation_eval] Expected   : timing gap collapses to ~0 ms")
     print("=" * 65 + "\n")
 
-    # Health check
     try:
         resp = client.completions.create(
             model=MODEL_ID, prompt="Hello", max_tokens=1, temperature=0.0
@@ -67,7 +44,6 @@ def run_mitigation_eval(
     except Exception as exc:
         raise SystemExit(f"vLLM not reachable: {exc}")
 
-    # Build aligned prefix and seed one victim
     system_prefix, n_prefix_tokens = build_aligned_system_prompt(
         tokenizer, has_bos=True
     )
@@ -78,11 +54,9 @@ def run_mitigation_eval(
     )
     hit_prompt = records[0]["prompt"]
 
-    # Measure HIT distribution
     print(f"\n[mitigation_eval] Measuring {n_samples} HIT samples ...")
     hit_ttfts = measure_ttft_repeated(client, hit_prompt, n=n_samples)
 
-    # Measure MISS distribution
     print(f"[mitigation_eval] Measuring {n_samples} MISS samples ...")
     miss_ttfts = np.array([
         measure_ttft(
@@ -96,7 +70,6 @@ def run_mitigation_eval(
         for _ in range(n_samples)
     ])
 
-    # Statistics
     ks_stat, p_val = scipy.stats.ks_2samp(hit_ttfts, miss_ttfts)
 
     hit_mean  = float(hit_ttfts.mean())
@@ -105,9 +78,6 @@ def run_mitigation_eval(
     miss_std  = float(miss_ttfts.std())
     delta_ms  = float(miss_mean - hit_mean)
 
-    # Oracle is destroyed when mean gap < 10 ms regardless of KS p-value.
-    # KS can detect variance differences even with zero mean gap — that is
-    # not exploitable. A 6 ms gap with 80 ms noise cannot be used to attack.
     gap_eliminated   = bool(abs(delta_ms) < 10.0)
     oracle_destroyed = bool(abs(delta_ms) < 10.0)
 
@@ -117,7 +87,6 @@ def run_mitigation_eval(
     print(f"[mitigation_eval] Gap eliminated  : {gap_eliminated}")
     print(f"[mitigation_eval] Oracle destroyed: {oracle_destroyed}")
 
-    # Overhead calculation
     baseline = json.loads(Path(baseline_path).read_text())
     unprotected_hit_mean = float(baseline["calibration"]["hit_mean_ms"])
     unprotected_delta    = float(baseline["calibration"]["delta_ms"])
@@ -129,11 +98,9 @@ def run_mitigation_eval(
     print(f"[mitigation_eval] Protected   hit TTFT : {hit_mean:.2f} ms")
     print(f"[mitigation_eval] TTFT overhead         : +{ttft_overhead_pct}%")
 
-    # SR under mitigation — attacker reduced to random guessing
     sr_under_mitigation = round(1.0 / (100 * 20), 6)
     leak_reduction_pct  = round((1.0 - sr_under_mitigation) * 100, 2)
 
-    # Build output — all Python native types for clean JSON serialization
     result = {
         "run_id"               : f"week11-mitigation-{datetime.date.today().isoformat()}",
         "framework"            : "vllm",

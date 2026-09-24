@@ -27,7 +27,6 @@ app = FastAPI(
 )
 
 
-# ── Request / Response models ─────────────────────────────────────────────────
 
 class DetectRequest(BaseModel):
     text: str = Field(..., min_length=1)
@@ -44,7 +43,6 @@ class BatchDetectRequest(BaseModel):
     language: Optional[str] = Field("en")
 
 
-# ── Health / Info ─────────────────────────────────────────────────────────────
 
 @app.get("/", tags=["Health"])
 def health_check():
@@ -95,7 +93,6 @@ def info_v2():
     }
 
 
-# ── Stage 1 only: /detect ─────────────────────────────────────────────────────
 
 @app.post("/detect", tags=["Detection"])
 def detect_endpoint(request: DetectRequest):
@@ -146,7 +143,6 @@ def detect_batch_endpoint(request: BatchDetectRequest):
     }
 
 
-# ── Stage 1 + Stage 2: /detect/v2 ────────────────────────────────────────────
 
 @app.post("/detect/v2", tags=["Detection v2"])
 def detect_v2_endpoint(request: DetectV2Request):

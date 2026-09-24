@@ -1,0 +1,18 @@
+# configs/load_test.yaml — Issue #5
+run:
+  id_prefix: "load-test"
+  description: "Multi-tenant load sweep L0-L4"
+
+backend:
+  name: "vllm"
+  base_url: "http://localhost:8001/v1"
+  model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+
+experiment:
+  load_levels: ["L0", "L1", "L2", "L3", "L4"]
+  n_victims: 30
+  n_calib: 50
+  seed: 42
+
+output:
+  dir: "experiments/results"

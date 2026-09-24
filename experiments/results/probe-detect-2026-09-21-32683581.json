@@ -1,0 +1,1187 @@
+{
+  "run_id": "probe-detect-2026-09-21-32683581",
+  "issue": 8,
+  "config": {
+    "backend": "mock",
+    "seed": 42,
+    "threshold_med": 0.4,
+    "threshold_high": 0.65,
+    "cooldown_probes": 10
+  },
+  "environment": {
+    "python": "3.12.3 (main, Nov  6 2025, 13:44:16) [GCC 13.3.0]",
+    "platform": "Linux-6.14.0-1013-nvidia-aarch64-with-glibc2.39",
+    "git": "7b08102"
+  },
+  "calibration": {
+    "hit_mean_ms": 87.96681214943779,
+    "miss_mean_ms": 576.0354826163101,
+    "threshold_ms": 332.00114738287397,
+    "gap_ms": 488.06867046687233
+  },
+  "workloads": {
+    "benign_repeated": {
+      "metrics": {
+        "n_attack": 0,
+        "n_benign": 30,
+        "tpr": 0.0,
+        "fpr": 0.0,
+        "first_alert_at": null,
+        "n_alerts": 0
+      },
+      "n_probes": 30,
+      "suspicion_trace": [
+        {
+          "idx": 0,
+          "score": 0.03,
+          "level": "OK"
+        },
+        {
+          "idx": 1,
+          "score": 0.26,
+          "level": "OK"
+        },
+        {
+          "idx": 2,
+          "score": 0.29,
+          "level": "OK"
+        },
+        {
+          "idx": 3,
+          "score": 0.32,
+          "level": "OK"
+        },
+        {
+          "idx": 4,
+          "score": 0.35,
+          "level": "OK"
+        },
+        {
+          "idx": 5,
+          "score": 0.35,
+          "level": "OK"
+        },
+        {
+          "idx": 6,
+          "score": 0.35,
+          "level": "OK"
+        },
+        {
+          "idx": 7,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 8,
+          "score": 0.23,
+          "level": "OK"
+        },
+        {
+          "idx": 9,
+          "score": 0.26,
+          "level": "OK"
+        },
+        {
+          "idx": 10,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 11,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 12,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 13,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 14,
+          "score": 0.23,
+          "level": "OK"
+        },
+        {
+          "idx": 15,
+          "score": 0.26,
+          "level": "OK"
+        },
+        {
+          "idx": 16,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 17,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 18,
+          "score": 0.23,
+          "level": "OK"
+        },
+        {
+          "idx": 19,
+          "score": 0.26,
+          "level": "OK"
+        },
+        {
+          "idx": 20,
+          "score": 0.29,
+          "level": "OK"
+        },
+        {
+          "idx": 21,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 22,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 23,
+          "score": 0.23,
+          "level": "OK"
+        },
+        {
+          "idx": 24,
+          "score": 0.26,
+          "level": "OK"
+        },
+        {
+          "idx": 25,
+          "score": 0.29,
+          "level": "OK"
+        },
+        {
+          "idx": 26,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 27,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 28,
+          "score": 0.2,
+          "level": "OK"
+        },
+        {
+          "idx": 29,
+          "score": 0.23,
+          "level": "OK"
+        }
+      ]
+    },
+    "benign_bursty": {
+      "metrics": {
+        "n_attack": 0,
+        "n_benign": 30,
+        "tpr": 0.0,
+        "fpr": 0.0,
+        "first_alert_at": null,
+        "n_alerts": 0
+      },
+      "n_probes": 30,
+      "suspicion_trace": [
+        {
+          "idx": 0,
+          "score": 0.03,
+          "level": "OK"
+        },
+        {
+          "idx": 1,
+          "score": 0.26,
+          "level": "OK"
+        },
+        {
+          "idx": 2,
+          "score": 0.29,
+          "level": "OK"
+        },
+        {
+          "idx": 3,
+          "score": 0.3,
+          "level": "OK"
+        },
+        {
+          "idx": 4,
+          "score": 0.275,
+          "level": "OK"
+        },
+        {
+          "idx": 5,
+          "score": 0.26,
+          "level": "OK"
+        },
+        {
+          "idx": 6,
+          "score": 0.25,
+          "level": "OK"
+        },
+        {
+          "idx": 7,
+          "score": 0.2729,
+          "level": "OK"
+        },
+        {
+          "idx": 8,
+          "score": 0.2975,
+          "level": "OK"
+        },
+        {
+          "idx": 9,
+          "score": 0.3233,
+          "level": "OK"
+        },
+        {
+          "idx": 10,
+          "score": 0.35,
+          "level": "OK"
+        },
+        {
+          "idx": 11,
+          "score": 0.3773,
+          "level": "OK"
+        },
+        {
+          "idx": 12,
+          "score": 0.225,
+          "level": "OK"
+        },
+        {
+          "idx": 13,
+          "score": 0.2762,
+          "level": "OK"
+        },
+        {
+          "idx": 14,
+          "score": 0.3029,
+          "level": "OK"
+        },
+        {
+          "idx": 15,
+          "score": 0.24,
+          "level": "OK"
+        },
+        {
+          "idx": 16,
+          "score": 0.2675,
+          "level": "OK"
+        },
+        {
+          "idx": 17,
+          "score": 0.2953,
+          "level": "OK"
+        },
+        {
+          "idx": 18,
+          "score": 0.2333,
+          "level": "OK"
+        },
+        {
+          "idx": 19,
+          "score": 0.2616,
+          "level": "OK"
+        },
+        {
+          "idx": 20,
+          "score": 0.2916,
+          "level": "OK"
+        },
+        {
+          "idx": 21,
+          "score": 0.3216,
+          "level": "OK"
+        },
+        {
+          "idx": 22,
+          "score": 0.3358,
+          "level": "OK"
+        },
+        {
+          "idx": 23,
+          "score": 0.3658,
+          "level": "OK"
+        },
+        {
+          "idx": 24,
+          "score": 0.2158,
+          "level": "OK"
+        },
+        {
+          "idx": 25,
+          "score": 0.2458,
+          "level": "OK"
+        },
+        {
+          "idx": 26,
+          "score": 0.2758,
+          "level": "OK"
+        },
+        {
+          "idx": 27,
+          "score": 0.3058,
+          "level": "OK"
+        },
+        {
+          "idx": 28,
+          "score": 0.2316,
+          "level": "OK"
+        },
+        {
+          "idx": 29,
+          "score": 0.2316,
+          "level": "OK"
+        }
+      ]
+    },
+    "linear_enum": {
+      "metrics": {
+        "n_attack": 60,
+        "n_benign": 0,
+        "tpr": 0.9833,
+        "fpr": 0.0,
+        "first_alert_at": 1,
+        "n_alerts": 6
+      },
+      "n_probes": 60,
+      "suspicion_trace": [
+        {
+          "idx": 0,
+          "score": 0.03,
+          "level": "OK"
+        },
+        {
+          "idx": 1,
+          "score": 0.91,
+          "level": "ALERT"
+        },
+        {
+          "idx": 2,
+          "score": 0.94,
+          "level": "WARN"
+        },
+        {
+          "idx": 3,
+          "score": 0.97,
+          "level": "WARN"
+        },
+        {
+          "idx": 4,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 5,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 6,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 7,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 8,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 9,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 10,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 11,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 12,
+          "score": 1.0,
+          "level": "ALERT"
+        },
+        {
+          "idx": 13,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 14,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 15,
+          "score": 0.85,
+          "level": "WARN"
+        },
+        {
+          "idx": 16,
+          "score": 0.88,
+          "level": "WARN"
+        },
+        {
+          "idx": 17,
+          "score": 0.85,
+          "level": "WARN"
+        },
+        {
+          "idx": 18,
+          "score": 0.88,
+          "level": "WARN"
+        },
+        {
+          "idx": 19,
+          "score": 0.91,
+          "level": "WARN"
+        },
+        {
+          "idx": 20,
+          "score": 0.94,
+          "level": "WARN"
+        },
+        {
+          "idx": 21,
+          "score": 0.85,
+          "level": "WARN"
+        },
+        {
+          "idx": 22,
+          "score": 0.88,
+          "level": "WARN"
+        },
+        {
+          "idx": 23,
+          "score": 0.91,
+          "level": "ALERT"
+        },
+        {
+          "idx": 24,
+          "score": 0.94,
+          "level": "WARN"
+        },
+        {
+          "idx": 25,
+          "score": 0.97,
+          "level": "WARN"
+        },
+        {
+          "idx": 26,
+          "score": 0.85,
+          "level": "WARN"
+        },
+        {
+          "idx": 27,
+          "score": 0.88,
+          "level": "WARN"
+        },
+        {
+          "idx": 28,
+          "score": 0.91,
+          "level": "WARN"
+        },
+        {
+          "idx": 29,
+          "score": 0.94,
+          "level": "WARN"
+        },
+        {
+          "idx": 30,
+          "score": 0.97,
+          "level": "WARN"
+        },
+        {
+          "idx": 31,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 32,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 33,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 34,
+          "score": 1.0,
+          "level": "ALERT"
+        },
+        {
+          "idx": 35,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 36,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 37,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 38,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 39,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 40,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 41,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 42,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 43,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 44,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 45,
+          "score": 1.0,
+          "level": "ALERT"
+        },
+        {
+          "idx": 46,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 47,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 48,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 49,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 50,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 51,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 52,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 53,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 54,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 55,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 56,
+          "score": 1.0,
+          "level": "ALERT"
+        },
+        {
+          "idx": 57,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 58,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 59,
+          "score": 1.0,
+          "level": "WARN"
+        }
+      ]
+    },
+    "two_stage": {
+      "metrics": {
+        "n_attack": 40,
+        "n_benign": 0,
+        "tpr": 0.975,
+        "fpr": 0.0,
+        "first_alert_at": 1,
+        "n_alerts": 4
+      },
+      "n_probes": 40,
+      "suspicion_trace": [
+        {
+          "idx": 0,
+          "score": 0.03,
+          "level": "OK"
+        },
+        {
+          "idx": 1,
+          "score": 0.91,
+          "level": "ALERT"
+        },
+        {
+          "idx": 2,
+          "score": 0.94,
+          "level": "WARN"
+        },
+        {
+          "idx": 3,
+          "score": 0.97,
+          "level": "WARN"
+        },
+        {
+          "idx": 4,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 5,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 6,
+          "score": 0.85,
+          "level": "WARN"
+        },
+        {
+          "idx": 7,
+          "score": 0.88,
+          "level": "WARN"
+        },
+        {
+          "idx": 8,
+          "score": 0.91,
+          "level": "WARN"
+        },
+        {
+          "idx": 9,
+          "score": 0.94,
+          "level": "WARN"
+        },
+        {
+          "idx": 10,
+          "score": 0.97,
+          "level": "WARN"
+        },
+        {
+          "idx": 11,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 12,
+          "score": 1.0,
+          "level": "ALERT"
+        },
+        {
+          "idx": 13,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 14,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 15,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 16,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 17,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 18,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 19,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 20,
+          "score": 0.9658,
+          "level": "WARN"
+        },
+        {
+          "idx": 21,
+          "score": 0.9658,
+          "level": "WARN"
+        },
+        {
+          "idx": 22,
+          "score": 0.9658,
+          "level": "WARN"
+        },
+        {
+          "idx": 23,
+          "score": 0.8158,
+          "level": "ALERT"
+        },
+        {
+          "idx": 24,
+          "score": 0.8458,
+          "level": "WARN"
+        },
+        {
+          "idx": 25,
+          "score": 0.8758,
+          "level": "WARN"
+        },
+        {
+          "idx": 26,
+          "score": 0.9058,
+          "level": "WARN"
+        },
+        {
+          "idx": 27,
+          "score": 0.9358,
+          "level": "WARN"
+        },
+        {
+          "idx": 28,
+          "score": 0.9658,
+          "level": "WARN"
+        },
+        {
+          "idx": 29,
+          "score": 0.8158,
+          "level": "WARN"
+        },
+        {
+          "idx": 30,
+          "score": 0.8458,
+          "level": "WARN"
+        },
+        {
+          "idx": 31,
+          "score": 0.8758,
+          "level": "WARN"
+        },
+        {
+          "idx": 32,
+          "score": 0.9058,
+          "level": "WARN"
+        },
+        {
+          "idx": 33,
+          "score": 0.9358,
+          "level": "WARN"
+        },
+        {
+          "idx": 34,
+          "score": 0.8158,
+          "level": "ALERT"
+        },
+        {
+          "idx": 35,
+          "score": 0.8458,
+          "level": "WARN"
+        },
+        {
+          "idx": 36,
+          "score": 0.8758,
+          "level": "WARN"
+        },
+        {
+          "idx": 37,
+          "score": 0.9058,
+          "level": "WARN"
+        },
+        {
+          "idx": 38,
+          "score": 0.9358,
+          "level": "WARN"
+        },
+        {
+          "idx": 39,
+          "score": 1.0,
+          "level": "WARN"
+        }
+      ]
+    },
+    "low_rate": {
+      "metrics": {
+        "n_attack": 40,
+        "n_benign": 0,
+        "tpr": 0.975,
+        "fpr": 0.0,
+        "first_alert_at": 1,
+        "n_alerts": 4
+      },
+      "n_probes": 40,
+      "suspicion_trace": [
+        {
+          "idx": 0,
+          "score": 0.03,
+          "level": "OK"
+        },
+        {
+          "idx": 1,
+          "score": 0.91,
+          "level": "ALERT"
+        },
+        {
+          "idx": 2,
+          "score": 0.94,
+          "level": "WARN"
+        },
+        {
+          "idx": 3,
+          "score": 0.97,
+          "level": "WARN"
+        },
+        {
+          "idx": 4,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 5,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 6,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 7,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 8,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 9,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 10,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 11,
+          "score": 0.85,
+          "level": "WARN"
+        },
+        {
+          "idx": 12,
+          "score": 0.88,
+          "level": "ALERT"
+        },
+        {
+          "idx": 13,
+          "score": 0.91,
+          "level": "WARN"
+        },
+        {
+          "idx": 14,
+          "score": 0.94,
+          "level": "WARN"
+        },
+        {
+          "idx": 15,
+          "score": 0.97,
+          "level": "WARN"
+        },
+        {
+          "idx": 16,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 17,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 18,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 19,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 20,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 21,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 22,
+          "score": 0.85,
+          "level": "WARN"
+        },
+        {
+          "idx": 23,
+          "score": 0.88,
+          "level": "ALERT"
+        },
+        {
+          "idx": 24,
+          "score": 0.91,
+          "level": "WARN"
+        },
+        {
+          "idx": 25,
+          "score": 0.94,
+          "level": "WARN"
+        },
+        {
+          "idx": 26,
+          "score": 0.97,
+          "level": "WARN"
+        },
+        {
+          "idx": 27,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 28,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 29,
+          "score": 1.0,
+          "level": "WARN"
+        },
+        {
+          "idx": 30,
+          "score": 0.85,
+          "level": "WARN"
+        },
+        {
+          "idx": 31,
+          "score": 0.88,
+          "level": "WARN"
+        },
+        {
+          "idx": 32,
+          "score": 0.91,
+          "level": "WARN"
+        },
+        {
+          "idx": 33,
+          "score": 0.94,
+          "level": "WARN"
+        },
+        {
+          "idx": 34,
+          "score": 0.97,
+          "level": "ALERT"
+        },
+        {
+          "idx": 35,
+          "score": 0.85,
+          "level": "WARN"
+        },
+        {
+          "idx": 36,
+          "score": 0.88,
+          "level": "WARN"
+        },
+        {
+          "idx": 37,
+          "score": 0.91,
+          "level": "WARN"
+        },
+        {
+          "idx": 38,
+          "score": 0.94,
+          "level": "WARN"
+        },
+        {
+          "idx": 39,
+          "score": 0.85,
+          "level": "WARN"
+        }
+      ]
+    }
+  },
+  "roc_data": [
+    {
+      "threshold": 0.2,
+      "n_attack": 140,
+      "n_benign": 60,
+      "tpr": 0.9786,
+      "fpr": 0.9667,
+      "first_alert_at": 1,
+      "n_alerts": 14
+    },
+    {
+      "threshold": 0.3,
+      "n_attack": 140,
+      "n_benign": 60,
+      "tpr": 0.9786,
+      "fpr": 0.2167,
+      "first_alert_at": 1,
+      "n_alerts": 14
+    },
+    {
+      "threshold": 0.4,
+      "n_attack": 140,
+      "n_benign": 60,
+      "tpr": 0.9786,
+      "fpr": 0.0,
+      "first_alert_at": 1,
+      "n_alerts": 14
+    },
+    {
+      "threshold": 0.5,
+      "n_attack": 140,
+      "n_benign": 60,
+      "tpr": 0.9786,
+      "fpr": 0.0,
+      "first_alert_at": 1,
+      "n_alerts": 14
+    },
+    {
+      "threshold": 0.6,
+      "n_attack": 140,
+      "n_benign": 60,
+      "tpr": 0.9786,
+      "fpr": 0.0,
+      "first_alert_at": 1,
+      "n_alerts": 14
+    },
+    {
+      "threshold": 0.7,
+      "n_attack": 140,
+      "n_benign": 60,
+      "tpr": 0.9786,
+      "fpr": 0.0,
+      "first_alert_at": 1,
+      "n_alerts": 14
+    },
+    {
+      "threshold": 0.8,
+      "n_attack": 140,
+      "n_benign": 60,
+      "tpr": 0.9786,
+      "fpr": 0.0,
+      "first_alert_at": 1,
+      "n_alerts": 14
+    },
+    {
+      "threshold": 0.9,
+      "n_attack": 140,
+      "n_benign": 60,
+      "tpr": 0.7786,
+      "fpr": 0.0,
+      "first_alert_at": 1,
+      "n_alerts": 14
+    }
+  ],
+  "asr_comparison": {
+    "linear_enum": {
+      "n_attack_probes": 60,
+      "first_alert_at": 1,
+      "static_asr": 0.68,
+      "dynamic_asr": 0.0113,
+      "asr_reduction": 0.6687
+    },
+    "two_stage": {
+      "n_attack_probes": 40,
+      "first_alert_at": 1,
+      "static_asr": 0.68,
+      "dynamic_asr": 0.017,
+      "asr_reduction": 0.663
+    },
+    "low_rate": {
+      "n_attack_probes": 40,
+      "first_alert_at": 1,
+      "static_asr": 0.68,
+      "dynamic_asr": 0.017,
+      "asr_reduction": 0.663
+    }
+  },
+  "command": "../experiments/run_probe_detection_eval.py --config ../configs/probe_detection_eval.yaml --backend mock"
+}

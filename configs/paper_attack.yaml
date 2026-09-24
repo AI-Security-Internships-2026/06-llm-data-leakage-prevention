@@ -1,0 +1,70 @@
+# configs/paper_attack.yaml
+# =============================================================================
+# Canonical paper attack configuration — KV-Cache Timing Attack (Week 13)
+#
+# Entry point: python experiments/run_kv_attack.py --config configs/paper_attack.yaml
+#
+# Pipeline stages:
+#   victim_seeding → calibration → stage1_probes → stage2_probes → verification → metrics
+# =============================================================================
+
+# ── Run identity ──────────────────────────────────────────────────────────────
+run:
+  id_prefix: "paper-kvcache"          # prepended to auto-generated run_id
+  description: "Canonical paper two-stage adaptive KV-cache timing attack"
+  algorithm: "two_stage_adaptive"     # paper pipeline
+
+# ── Model / backend ───────────────────────────────────────────────────────────
+backend:
+  name: "vllm"                        # vllm | tgi | mock
+  base_url: "http://localhost:8001/v1"
+  model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+  block_size: 16                      # KV-cache token block size
+
+# ── Victims ───────────────────────────────────────────────────────────────────
+victims:
+  n_victims: 50                       # 30 minimum; 50 preferred (Issue #2)
+  seed: 42                            # RNG seed — fix for reproducibility
+  # Candidate dictionaries (bounded search spaces)
+  first_names:                        # N_NAMES = 100 (10×10 cross-product)
+    count: 10
+  last_names:
+    count: 10
+  conditions:                         # N_CONDITIONS = 20
+    count: 20
+
+# ── Calibration ───────────────────────────────────────────────────────────────
+calibration:
+  n_samples: 200                      # samples per distribution (miss / s1-hit / hit)
+  ks_alpha: 1.0e-8                    # KS-test significance threshold
+
+# ── Attack thresholds (derived from calibration; overrides below are fallbacks) ──
+thresholds:
+  t1_ms: 952.0
+  t2_ms: 376.0
+
+# ── Probe timing ──────────────────────────────────────────────────────────────
+probes:
+  n_repeats_stage1: 3                 # averages per Stage 1 probe  (larger gap → 1 ok)
+  n_repeats_stage2: 1                 # averages per Stage 2 probe  (large gap → 1 ok)
+  n_repeats_confirm: 3                # confirmation probes
+  n_top_candidates: 3                 # top-k recorded in per-probe log
+
+# ── Cache eviction ────────────────────────────────────────────────────────────
+cache:
+  evict_requests: 100                 # filler requests to flush victim blocks
+  evict_tokens: 220                   # tokens per filler request
+  reseed_every: 4                     # victim re-seeding interval (self-eviction guard)
+
+# ── Concurrency ───────────────────────────────────────────────────────────────
+concurrency:
+  workers: 1                          # serial (paper condition; set >1 only for speed tests)
+
+# ── Output ────────────────────────────────────────────────────────────────────
+output:
+  dir: "experiments/results"
+  # Actual filename set at runtime to: <dir>/<run_id>.json
+  # Do NOT manually overwrite earlier runs; filenames include timestamps.
+  save_raw_probes: true               # save every probe: victim/stage/candidate/TTFT
+  save_config: true                   # embed resolved config in output JSON
+  save_environment: true             # embed Python, vLLM, torch versions

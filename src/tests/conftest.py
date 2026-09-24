@@ -18,14 +18,12 @@ fastapi_client   : FastAPI TestClient bound to the main app
 import sys
 import os
 
-# Make src/ importable from tests/
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import pytest
 from fastapi.testclient import TestClient
 
 
-# ── Text fixtures ─────────────────────────────────────────────────────────────
 
 @pytest.fixture
 def clean_texts():
@@ -79,7 +77,6 @@ def inference_texts():
     ]
 
 
-# ── FastAPI test client ────────────────────────────────────────────────────────
 
 @pytest.fixture(scope="session")
 def fastapi_client():

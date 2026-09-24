@@ -1,0 +1,5 @@
+| Cache state | TTFT (ms) | Gap vs hit | ROC-AUC | TPR @ 1% FPR | Source |
+| --- | --- | --- | --- | --- | --- |
+| Miss (0/192 blocks) | 576.1 ± 4.7 | +488.5 ms | 0.9998 | 0.994 | empirical |
+| S1-hit (128/192 blocks) | 264.0 ± 4.7 | +176.4 ms | 0.9971 | 0.972 | analytical/empirical |
+| Full hit (192/192 blocks) | 87.6 ± 4.7 | 0 ms (reference) | — | — | empirical |

@@ -21,13 +21,13 @@ class BackendInfo:
     Populated by BackendClient.get_info() and embedded in every results JSON
     so the reader knows exactly what was running during the experiment.
     """
-    backend_name   : str           # "vllm" | "tgi" | "mock"
-    framework      : str           # e.g. "vllm", "text-generation-inference"
-    framework_ver  : str           # e.g. "0.27.1", "2.1.4"
-    model_id       : str           # HuggingFace model string
-    base_url       : str           # server endpoint
-    apc_enabled    : bool          # Automatic Prefix Caching enabled?
-    extra          : dict          # backend-specific key-value pairs
+    backend_name   : str
+    framework      : str
+    framework_ver  : str
+    model_id       : str
+    base_url       : str
+    apc_enabled    : bool
+    extra          : dict
 
 
 class BackendClient(abc.ABC):
@@ -37,7 +37,6 @@ class BackendClient(abc.ABC):
     All timing methods return milliseconds (float).
     """
 
-    # ── Abstract interface ─────────────────────────────────────────────────────
 
     @abc.abstractmethod
     def health_check(self) -> bool:
@@ -56,7 +55,6 @@ class BackendClient(abc.ABC):
         Subclasses implement the transport-specific request here.
         """
 
-    # ── Concrete timing helpers ────────────────────────────────────────────────
 
     def measure_ttft(self, prompt: str) -> float:
         """Single TTFT measurement (ms). Delegates to _send_prompt."""

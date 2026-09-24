@@ -50,12 +50,9 @@ import importlib.metadata
 from statistics import median
 from typing import Callable
 
-# ── path setup ────────────────────────────────────────────────────────────────
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 
-# ── eval dataset (same 30 cases as src/tests/eval_suite.py E01–E30) ──────────
 EVAL_CASES = [
-    # ── LEAKING — verbatim PII (Week 03) ─────────────────────────────────
     {"id": "E01", "text": "Please contact john.doe@example.com for further information.",
      "label": "LEAKING", "description": "Email address in plain prose"},
     {"id": "E02", "text": "Payment processed with card number 4111111111111111.",
@@ -76,7 +73,6 @@ EVAL_CASES = [
      "label": "LEAKING", "description": "Pakistani CNIC number"},
     {"id": "E10", "text": '{"user": "alice", "email": "alice@internal.io", "card": "4111111111111111"}',
      "label": "LEAKING", "description": "PII in JSON-like payload"},
-    # ── CLEAN (Week 03) ───────────────────────────────────────────────────
     {"id": "E11", "text": "The REST endpoint accepts JSON over HTTPS and returns a 200 status on success.",
      "label": "CLEAN", "description": "Technical API documentation"},
     {"id": "E12", "text": "def detect(text: str) -> dict:\n    return analyze(text)",
@@ -93,7 +89,6 @@ EVAL_CASES = [
      "label": "CLEAN", "description": "Placeholder variable names (not real people)"},
     {"id": "E18", "text": "No personal information is collected or stored by this service.",
      "label": "CLEAN", "description": "Policy statement with no personal data"},
-    # ── LEAKING — inference-based / implicit PII (Week 05) ────────────────
     {"id": "E19", "text": "Please use the iban I provided earlier for the transfer.",
      "label": "LEAKING", "description": "Implicit IBAN reference (no literal IBAN)"},
     {"id": "E20", "text": "My credit card details are already saved in your system.",
@@ -108,7 +103,6 @@ EVAL_CASES = [
      "label": "LEAKING", "description": "Implicit phone reference"},
     {"id": "E25", "text": "My CNIC and passport details are attached to the form I submitted.",
      "label": "LEAKING", "description": "Implicit CNIC/passport reference"},
-    # ── CLEAN — FP regression cases (Week 06) ────────────────────────────
     {"id": "E26", "text": "The experiment reference code ABCDE1234F has been logged in the system.",
      "label": "CLEAN", "description": "Alphanumeric ref code (previously FP: IN_PAN)"},
     {"id": "E27", "text": "Your order number is D12345678. Expected delivery in 3-5 business days.",
@@ -122,7 +116,6 @@ EVAL_CASES = [
 ]
 
 
-# ── helpers ───────────────────────────────────────────────────────────────────
 
 def _metrics(results: list[dict]) -> dict:
     """Compute binary classification metrics from per-case results."""
@@ -135,8 +128,8 @@ def _metrics(results: list[dict]) -> dict:
     recall     = tp / (tp + fn) if (tp + fn) > 0 else 0.0
     f1         = (2 * precision * recall / (precision + recall)
                   if (precision + recall) > 0 else 0.0)
-    fpr        = fp / (fp + tn) if (fp + tn) > 0 else 0.0   # false-positive rate
-    fnr        = fn / (fn + tp) if (fn + tp) > 0 else 0.0   # false-negative rate
+    fpr        = fp / (fp + tn) if (fp + tn) > 0 else 0.0
+    fnr        = fn / (fn + tp) if (fn + tp) > 0 else 0.0
     accuracy   = (tp + tn) / len(results) if results else 0.0
 
     latencies  = [r["latency_ms"] for r in results]
@@ -198,7 +191,6 @@ def _run(name: str, fn: Callable[[str], bool], cases: list[dict]) -> dict:
     return {"metrics": m, "execution_failures": failures, "per_case": per_case}
 
 
-# ── Implementation A: Our detector (Stage 1) ─────────────────────────────────
 
 def _build_our_detector():
     from detector import detect_pii
@@ -208,14 +200,11 @@ def _build_our_detector():
     return _detect
 
 
-# ── Implementation B: scrubadub ───────────────────────────────────────────────
 
 def _build_scrubadub():
     import scrubadub
     import scrubadub_spacy
 
-    # TextBlobNameDetector excluded — requires NLTK punkt_tab corpus not available here.
-    # SpacyEntityDetector (en_core_web_lg) covers PERSON/ORG/LOC instead.
     scrubber = scrubadub.Scrubber(detector_list=[
         scrubadub.detectors.EmailDetector,
         scrubadub.detectors.PhoneDetector,
@@ -229,12 +218,11 @@ def _build_scrubadub():
 
     def _detect(text: str) -> bool:
         cleaned = scrubber.clean(text)
-        return "{{" in cleaned   # scrubadub wraps redacted tokens in {{ }}
+        return "{{" in cleaned
 
     return _detect
 
 
-# ── Implementation C: detect-secrets (Protect AI) ────────────────────────────
 
 def _build_detect_secrets():
     from detect_secrets import SecretsCollection
@@ -263,7 +251,6 @@ def _build_detect_secrets():
         with transient_settings(config):
             secrets = SecretsCollection()
             import tempfile, os
-            # detect-secrets works on files; write text to a temp file
             with tempfile.NamedTemporaryFile(
                 mode="w", suffix=".txt", delete=False, encoding="utf-8"
             ) as f:
@@ -278,7 +265,6 @@ def _build_detect_secrets():
     return _detect
 
 
-# ── Implementation D: llm-guard (Protect AI) — Anonymize scanner ─────────────
 
 def _build_llm_guard():
     """
@@ -296,20 +282,15 @@ def _build_llm_guard():
     from llm_guard.vault import Vault
 
     vault = Vault()
-    # entity_types=None → use all default Presidio entities
-    # use_transformers=False → pure rule-based, no model download, fully offline
     scanner = Anonymize(vault, entity_types=None, use_faker=False)
 
     def _detect(text: str) -> bool:
         sanitized, is_valid, risk_score = scanner.scan(text)
-        # is_valid=False  → scanner flagged PII  → LEAKING
-        # is_valid=True   → scanner passed clean → CLEAN
         return not is_valid
 
     return _detect
 
 
-# ── version helpers ───────────────────────────────────────────────────────────
 
 def _pkg_version(name: str) -> str:
     try:
@@ -318,7 +299,6 @@ def _pkg_version(name: str) -> str:
         return "unknown"
 
 
-# ── main ──────────────────────────────────────────────────────────────────────
 
 def main():
     out_path = os.path.join(
@@ -334,7 +314,6 @@ def main():
           f"CLEAN: {sum(1 for c in EVAL_CASES if c['label']=='CLEAN')}")
     print("=" * 60)
 
-    # ── build detectors ───────────────────────────────────────────────────
     print("\nLoading detectors...")
 
     our_fn = _build_our_detector()
@@ -349,13 +328,11 @@ def main():
     llm_guard_fn = _build_llm_guard()
     print("  [D] llm-guard          OK")
 
-    # ── run ───────────────────────────────────────────────────────────────
     results_our  = _run("A: Our detector (Stage 1)",    our_fn,        EVAL_CASES)
     results_scr  = _run("B: scrubadub 2.0.1",           scrubadub_fn,  EVAL_CASES)
     results_ds   = _run("C: detect-secrets 1.4.0",      ds_fn,         EVAL_CASES)
     results_llmg = _run("D: llm-guard 0.3.16",          llm_guard_fn,  EVAL_CASES)
 
-    # ── assemble output ───────────────────────────────────────────────────
     output = {
         "meta": {
             "benchmark": "Issue #6 — PII and secret leakage detection comparison",
@@ -512,7 +489,6 @@ def main():
         },
     }
 
-    # ── summary table ─────────────────────────────────────────────────────
     for key, impl in output["implementations"].items():
         m = impl["metrics"]
         output["summary_comparison"][key] = {
@@ -529,7 +505,6 @@ def main():
             "execution_failures": impl["execution_failures"],
         }
 
-    # ── print summary ─────────────────────────────────────────────────────
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)
@@ -551,7 +526,6 @@ def main():
             f"{s['latency_p50_ms']:>7.1f} {s['latency_p95_ms']:>7.1f}"
         )
 
-    # ── write JSON ────────────────────────────────────────────────────────
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
 

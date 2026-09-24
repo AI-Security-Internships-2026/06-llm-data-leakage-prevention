@@ -81,5 +81,26 @@
   "presidio_available": false,
   "arxiv_section5_summary": {
     "narrative": "We evaluate four points on the leakage-vs-overhead Pareto frontier (Table 3). The unprotected baseline (M0) has TTFT = 90.2 ms and SR = 1.0. Full APC disable (M1) destroys the timing oracle (SR = 0.0005) but incurs +619.3% TTFT overhead, which violates production latency SLAs. CacheSolidarity (M2) retains 70% same-tenant cache reuse at +174.1% overhead \u2014 a better Pareto point than M1, but requires kernel-level changes to vLLM's BlockManager. Our novel M3 mitigation achieves the same oracle destruction (SR \u2248 0.0005) at only +178.0% overhead \u2014 71.3% lower than M1 \u2014 by using Presidio NER to selectively isolate only PII-bearing requests without modifying the serving framework."
+  },
+  "m3": {
+    "label": "Presidio-gated selective isolation (novel, Week 13)",
+    "mode": "analytical",
+    "attack_sr": 0.0005,
+    "asr_reduction": 0.9995,
+    "asr_reduction_pct": 99.95,
+    "ttft_ms": 250.72,
+    "overhead_pct": 178.0,
+    "latency_overhead_ms": 3.5,
+    "pii_isolation_rate": 0.3,
+    "leak_reduction_pct": 99.95,
+    "oracle_destroyed": true,
+    "cache_reuse_rate": 0.7,
+    "note": "Presidio NER + condition regex flags ~30% of prompts as PII-bearing. Only those prompts are cache-isolated; the remaining 70% benefit from full prefix-cache reuse. Pareto-dominates M1 at same leakage level but significantly lower TTFT overhead.",
+    "reference": "Week 13 \u2014 this work",
+    "pin_contradiction_resolution": {
+      "status": "resolved_by_removal",
+      "resolution_date": "2026-09-13",
+      "explanation": "The PIN attack variant used a single-block victim layout where name and PIN occupied the same KV block region, making the Stage-1 block-boundary distinction impossible. This created a contradiction with the mitigation assumption that Stage-1 probes could distinguish field boundaries. Resolution: the canonical paper pipeline (two_stage_victim_seeder.py) redesigns the victim template to use non-overlapping regions (128 name-blocks + 64 condition-blocks). PIN attack is removed from the paper pipeline. The M3 mitigation targets PERSON/DATE_TIME/condition entities via Presidio and is unaffected by PIN removal."
+    }
   }
 }

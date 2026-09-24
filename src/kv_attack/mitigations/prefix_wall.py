@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 
-# ── Data structures ───────────────────────────────────────────────────────────
 
 @dataclass
 class KVBlock:
@@ -14,14 +13,11 @@ class KVBlock:
     In the real vLLM implementation this metadata lives inside BlockManager.
     Here we simulate it as a Python object for demonstration.
     """
-    block_hash  : str        # SHA-256 of token IDs in this block
-    owner_id    : int        # tenant ID that first computed this block
-    attack_flag : bool       # True if a second tenant has probed this block
-    ref_count   : int = 0    # how many active requests reference this block
+    block_hash  : str
+    owner_id    : int
+    attack_flag : bool
+    ref_count   : int = 0
 
-    # Memory cost of the metadata (32 bytes as reported in Paper 8):
-    # 4 bytes OwnerID (int32) + 4 bytes AttackFlag (int32/bool)
-    # + 24 bytes block_hash reference = 32 bytes total
     METADATA_BYTES: int = 32
 
 
@@ -33,10 +29,10 @@ class PrefixWallCache:
     Maintains a dictionary of block_hash → KVBlock and implements the
     CacheSolidarity access control policy.
     """
-    blocks: dict = field(default_factory=dict)   # hash → KVBlock
+    blocks: dict = field(default_factory=dict)
     n_hits: int  = 0
     n_misses: int = 0
-    n_flagged: int = 0   # cross-tenant probe detections
+    n_flagged: int = 0
 
     def lookup(self, block_hash: str, requesting_tenant: int) -> tuple[bool, bool]:
         """
@@ -55,17 +51,15 @@ class PrefixWallCache:
         block = self.blocks[block_hash]
 
         if block.owner_id == requesting_tenant:
-            # Same owner — clean hit, no flag
             self.n_hits += 1
             block.ref_count += 1
             return True, False
         else:
-            # Cross-tenant access — set AttackFlag
             if not block.attack_flag:
                 block.attack_flag = True
                 self.n_flagged += 1
             self.n_hits += 1
-            return True, True    # hit but flagged
+            return True, True
 
     def insert(self, block_hash: str, owner_id: int) -> KVBlock:
         """Insert a newly computed block into the cache."""
@@ -101,7 +95,6 @@ class PrefixWallCache:
         }
 
 
-# ── PrefixWall request handler ────────────────────────────────────────────────
 
 class PrefixWallHandler:
     """
@@ -115,11 +108,7 @@ class PrefixWallHandler:
     4. Records all decisions for evaluation
     """
 
-    # Artificial delay added to flagged responses to mask the cache hit.
-    # Set equal to the expected cold-prefill time so hit and miss are
-    # indistinguishable. Paper 8 uses 0.007 ms metadata overhead;
-    # the actual delay is calibrated to the observed hit/miss gap.
-    MASKING_DELAY_MS: float = 488.9   # calibrated to our Week 10 measurement
+    MASKING_DELAY_MS: float = 488.9
 
     def __init__(self, cache: PrefixWallCache, block_size: int = 16):
         self.cache      = cache
@@ -147,8 +136,8 @@ class PrefixWallHandler:
         self,
         prompt_tokens : list[int],
         tenant_id     : int,
-        base_ttft_ms  : float = 88.9,   # unprotected hit TTFT from Week 10
-        miss_ttft_ms  : float = 577.8,  # unprotected miss TTFT from Week 10
+        base_ttft_ms  : float = 88.9,
+        miss_ttft_ms  : float = 577.8,
     ) -> dict:
         """
         Process one request under PrefixWall enforcement.
@@ -171,25 +160,17 @@ class PrefixWallHandler:
                 n_misses += 1
                 if first_miss_block is None:
                     first_miss_block = i
-                # Insert computed block into cache
                 self.cache.insert(bh, tenant_id)
             elif is_flagged:
                 n_flagged_hits += 1
             else:
                 n_clean_hits += 1
 
-        # Compute effective TTFT under PrefixWall:
-        # - Clean hits: served at base_ttft_ms (no masking needed)
-        # - Flagged hits: delayed to miss_ttft_ms (masking applied)
-        # - Misses: naturally slow at miss_ttft_ms
-        # The effective TTFT is determined by the first non-clean-hit block.
         if n_flagged_hits > 0 or n_misses > 0:
-            # Add masking delay so attacker cannot distinguish flagged from miss
             effective_ttft_ms = miss_ttft_ms
         else:
             effective_ttft_ms = base_ttft_ms
 
-        # Metadata overhead per request (Paper 8: 0.007 ms)
         metadata_overhead_ms = 0.007
 
         result = {
@@ -206,13 +187,12 @@ class PrefixWallHandler:
         return result
 
 
-# ── Analytical overhead calculator ───────────────────────────────────────────
 
 def compute_prefixwall_overhead(
     unprotected_hit_ttft_ms    : float = 88.9,
     unprotected_miss_ttft_ms   : float = 577.8,
     full_disable_hit_ttft_ms   : float = 648.8,
-    cache_reuse_rate           : float = 0.70,   # Paper 8: 70% higher than full isolation
+    cache_reuse_rate           : float = 0.70,
 ) -> dict:
     """
     Analytically compute the PrefixWall operating point on the Pareto curve.
@@ -224,11 +204,10 @@ def compute_prefixwall_overhead(
 
     Returns expected TTFT and overhead vs unprotected baseline.
     """
-    # Expected TTFT under PrefixWall
     expected_ttft_ms = (
         cache_reuse_rate       * unprotected_hit_ttft_ms +
         (1 - cache_reuse_rate) * unprotected_miss_ttft_ms
-    ) + 0.007   # metadata overhead
+    ) + 0.007
 
     overhead_vs_unprotected_pct = round(
         (expected_ttft_ms - unprotected_hit_ttft_ms) / unprotected_hit_ttft_ms * 100, 1
@@ -258,7 +237,6 @@ def compute_prefixwall_overhead(
     }
 
 
-# ── Pareto curve data point ───────────────────────────────────────────────────
 
 def get_pareto_operating_points(
     unprotected_hit_ttft_ms  : float = 88.9,
@@ -310,7 +288,7 @@ def get_pareto_operating_points(
         },
         {
             "label"                : "Novel mitigation (Presidio + BART NLI, Week 13)",
-            "ttft_ms"              : None,   # to be filled in Week 13
+            "ttft_ms"              : None,
             "overhead_pct"         : None,
             "leak_reduction_pct"   : None,
             "sr"                   : None,
@@ -320,7 +298,6 @@ def get_pareto_operating_points(
     ]
 
 
-# ── Demo ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     import json
@@ -330,21 +307,18 @@ if __name__ == "__main__":
     cache   = PrefixWallCache()
     handler = PrefixWallHandler(cache)
 
-    # Victim (tenant 1) seeds the cache with a private prompt
-    victim_tokens = list(range(271)) + list(range(100, 116))  # system + 1 private block
+    victim_tokens = list(range(271)) + list(range(100, 116))
     print("[demo] Victim (tenant 1) sends prompt → caches blocks...")
     r1 = handler.handle_request(victim_tokens, tenant_id=1)
     print(f"       TTFT: {r1['effective_ttft_ms']:.1f} ms  "
           f"(clean hits={r1['n_clean_hits']}, misses={r1['n_misses']})")
 
-    # Attacker (tenant 2) probes with victim's exact tokens → cross-tenant hit
     print("\n[demo] Attacker (tenant 2) probes with same tokens → flagged!")
     r2 = handler.handle_request(victim_tokens, tenant_id=2)
     print(f"       TTFT: {r2['effective_ttft_ms']:.1f} ms  "
           f"(flagged_hits={r2['n_flagged_hits']}, masking_applied={r2['masking_applied']})")
     print(f"       → Attacker sees {r2['effective_ttft_ms']:.1f} ms (indistinguishable from miss)")
 
-    # Attacker probes with wrong tokens → normal miss
     wrong_tokens = list(range(271)) + list(range(200, 216))
     print("\n[demo] Attacker probes with wrong tokens → miss")
     r3 = handler.handle_request(wrong_tokens, tenant_id=2)
@@ -352,7 +326,6 @@ if __name__ == "__main__":
 
     print(f"\n[demo] Both flagged hit and miss return ~577 ms → oracle destroyed ✓")
 
-    # Pareto curve
     print("\n=== Pareto Curve Operating Points ===\n")
     points = get_pareto_operating_points()
     for p in points:
@@ -363,7 +336,6 @@ if __name__ == "__main__":
         print(f"    TTFT={ttft}  overhead={overhead}  leak_reduction={leak}")
     print()
 
-    # Analytical overhead for PrefixWall
     pw = compute_prefixwall_overhead()
     print("=== CacheSolidarity Analytical Overhead ===")
     print(json.dumps(pw, indent=2))

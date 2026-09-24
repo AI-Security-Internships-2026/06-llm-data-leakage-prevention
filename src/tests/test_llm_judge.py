@@ -17,14 +17,12 @@ import llm_judge as lj
 from llm_judge import judge_text, judge_batch, JudgeResult
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _no_model():
     """Patch _load_pipeline to simulate 'model unavailable'."""
     return patch("llm_judge._load_pipeline", return_value=None)
 
 
-# ── Return type and shape ─────────────────────────────────────────────────────
 
 class TestReturnShape:
     def test_judge_text_returns_dataclass(self):
@@ -61,7 +59,6 @@ class TestReturnShape:
         assert r.is_pii is False
 
 
-# ── Fallback keyword heuristic (model=None) ───────────────────────────────────
 
 class TestFallbackHeuristic:
     def test_at_dot_obfuscation_flagged(self):
@@ -117,7 +114,6 @@ class TestFallbackHeuristic:
         assert r.model is None
 
 
-# ── judge_batch ───────────────────────────────────────────────────────────────
 
 class TestJudgeBatch:
     def test_empty_list_returns_empty(self):
@@ -143,11 +139,6 @@ class TestJudgeBatch:
         assert results[0].is_pii is False
 
 
-# ── Integration with detect_pii (Stage 2 flag) ───────────────────────────────
-# Patch target is "llm_judge.judge_text" — NOT "detector.judge_text".
-# detector.py does a lazy import inside detect_pii(), so judge_text is never
-# a module-level attribute on detector. Patching llm_judge.judge_text replaces
-# the function at its source, which the lazy import then resolves to correctly.
 
 class TestPipelineIntegration:
     def test_use_stage2_adds_keys(self):
@@ -170,7 +161,6 @@ class TestPipelineIntegration:
             from detector import detect_pii
             r = detect_pii("Card: 4111111111111111", use_stage2=True)
 
-        # HIGH risk — Stage 2 must not have been called
         assert len(call_log) == 0
         assert r["risk_level"] == "HIGH"
         assert r["stage2_flagged"] is False
@@ -204,7 +194,6 @@ class TestPipelineIntegration:
         assert r["stage2_flagged"] is True
 
 
-# ── Optional: model-backed tests (xfail if model not cached) ─────────────────
 
 class TestWithRealModel:
     @pytest.mark.xfail(strict=False, reason="Requires bart-large-mnli model download")

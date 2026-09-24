@@ -18,29 +18,23 @@ from pathlib import Path
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
-from detector import detect_pii  # noqa: E402
+from detector import detect_pii
 
-# ── Label mapping: HF dataset label → Presidio entity type ───────────────────
-# Labels NOT in this map are "UNSUPPORTED" by the current detector.
 
 LABEL_MAP: dict[str, str] = {
-    # Identity
     "FIRSTNAME":          "PERSON",
     "LASTNAME":           "PERSON",
     "MIDDLENAME":         "PERSON",
     "PREFIX":             "PERSON",
     "USERNAME":           "PERSON",
 
-    # Contact
     "EMAIL":              "EMAIL_ADDRESS",
     "PHONENUMBER":        "PHONE_NUMBER",
 
-    # Financial
     "CREDITCARDNUMBER":   "CREDIT_CARD",
     "MASKEDNUMBER":       "CREDIT_CARD",
     "IBAN":               "IBAN_CODE",
 
-    # Location
     "STREET":             "LOCATION",
     "CITY":               "LOCATION",
     "STATE":              "LOCATION",
@@ -48,22 +42,10 @@ LABEL_MAP: dict[str, str] = {
     "ZIPCODE":            "LOCATION",
     "BUILDINGNUMBER":     "LOCATION",
 
-    # Identity documents
     "SSN":                "US_SSN",
 
-    # Not mapped (detector has no recogniser for these):
-    # AGE, DOB, DATE, TIME, GENDER, HEIGHT, EYECOLOR, SEX,
-    # PASSWORD, PIN, CREDITCARDCVV, CREDITCARDISSUER,
-    # IPV4, IPV6, IP, MAC, URL, USERAGENT,
-    # PHONEIMEI, VEHICLEVIN, VEHICLEVRM,
-    # BITCOINADDRESS, LITECOINADDRESS, ETHEREUMADDRESS,
-    # ACCOUNTNUMBER, ACCOUNTNAME,
-    # CURRENCYCODE, CURRENCYNAME, CURRENCYSYMBOL, CURRENCY, AMOUNT,
-    # JOBTITLE, JOBTYPE, JOBAREA, ORDINALDIRECTION,
-    # NEARBYGPSCOORDINATE, SECONDARYADDRESS, COMPANYNAME,
 }
 
-# Entity types the detector supports (used for coverage reporting)
 DETECTOR_ENTITIES = {
     "EMAIL_ADDRESS", "CREDIT_CARD", "PHONE_NUMBER", "PERSON",
     "US_SSN", "IBAN_CODE", "PK_CNIC", "LOCATION",
@@ -71,7 +53,6 @@ DETECTOR_ENTITIES = {
 }
 
 
-# ── Dataset loading ───────────────────────────────────────────────────────────
 
 def load_jsonl(path: str, n: int, seed: int = 42) -> list[dict]:
     """Load up to *n* English records from the JSONL file."""
@@ -95,7 +76,6 @@ def load_jsonl(path: str, n: int, seed: int = 42) -> list[dict]:
     return records
 
 
-# ── Span overlap matching ─────────────────────────────────────────────────────
 
 def _iou(a_start: int, a_end: int, b_start: int, b_end: int) -> float:
     """Character-level Intersection-over-Union of two spans."""
@@ -128,7 +108,6 @@ def match_spans(
         for gi, g in enumerate(gold_spans):
             if gi in matched_gold:
                 continue
-            # Only count as TP if entity types align OR gold label is unsupported
             if p["presidio_type"] != g["presidio_type"] and g["presidio_type"] != "UNSUPPORTED":
                 continue
             if _iou(p["start"], p["end"], g["start"], g["end"]) >= iou_threshold:
@@ -142,7 +121,6 @@ def match_spans(
     return tp, fp, fn
 
 
-# ── Per-entity-type tracking ──────────────────────────────────────────────────
 
 def _entity_match(
     pred_spans: list[dict],
@@ -186,7 +164,6 @@ def _entity_match(
     return counts
 
 
-# ── Main evaluation loop ──────────────────────────────────────────────────────
 
 def evaluate(records: list[dict]) -> tuple[list[dict], list[float]]:
     results = []
@@ -199,7 +176,6 @@ def evaluate(records: list[dict]) -> tuple[list[dict], list[float]]:
         if not text:
             continue
 
-        # Build gold spans
         gold_spans = []
         for mask in rec.get("privacy_mask", []):
             raw_label = mask.get("label", "")
@@ -214,13 +190,11 @@ def evaluate(records: list[dict]) -> tuple[list[dict], list[float]]:
                 "presidio_type": presidio_type,
             })
 
-        # Run detector
         t0 = time.perf_counter()
         detection = detect_pii(text)
         latency_ms = (time.perf_counter() - t0) * 1000
         latencies.append(latency_ms)
 
-        # Build predicted spans
         pred_spans = [
             {
                 "start":         e["start"],
@@ -231,7 +205,6 @@ def evaluate(records: list[dict]) -> tuple[list[dict], list[float]]:
             for e in detection.get("entities", [])
         ]
 
-        # Per-sample matching
         tp, fp, fn = match_spans(pred_spans, gold_spans)
         entity_counts = _entity_match(pred_spans, gold_spans)
 
@@ -253,7 +226,6 @@ def evaluate(records: list[dict]) -> tuple[list[dict], list[float]]:
     return results, latencies, dict(per_entity), dict(unsupported_labels)
 
 
-# ── Aggregation & metrics ─────────────────────────────────────────────────────
 
 def _prf(tp: int, fp: int, fn: int) -> dict:
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
@@ -288,7 +260,6 @@ def aggregate(
         for etype, c in sorted(per_entity.items())
     }
 
-    # Separate supported vs unsupported for clarity
     supported_metrics = {k: v for k, v in entity_metrics.items()
                          if k in DETECTOR_ENTITIES}
     unsupported_metrics = {k: v for k, v in entity_metrics.items()
@@ -310,7 +281,6 @@ def aggregate(
     }
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(
@@ -339,7 +309,6 @@ def main():
     results, latencies, per_entity, unsupported_labels = evaluate(records)
     summary = aggregate(results, latencies, per_entity, unsupported_labels)
 
-    # ── Console output ────────────────────────────────────────────────────────
     ov = summary["overall"]
     print(f"  Samples evaluated : {summary['total_samples']}")
     print(f"  Overall TP/FP/FN  : {ov['TP']} / {ov['FP']} / {ov['FN']}")
@@ -365,7 +334,6 @@ def main():
         remaining = len(summary["unsupported_label_counts"]) - 15
         print(f"    … and {remaining} more (see full results JSON)")
 
-    # ── Save outputs ──────────────────────────────────────────────────────────
     os.makedirs(args.output_dir, exist_ok=True)
 
     full_output = {

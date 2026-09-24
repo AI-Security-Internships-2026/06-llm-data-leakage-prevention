@@ -1,0 +1,24 @@
+# configs/realistic_attack.yaml — Issue #4
+run:
+  id_prefix: "realistic-eval"
+  description: "Realistic prompt layouts + attacker knowledge sweep"
+
+backend:
+  name: "vllm"
+  base_url: "http://localhost:8001/v1"
+  model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+
+experiment:
+  scenarios: ["T1_medical", "T2_financial", "T3_enterprise"]
+  knowledge_levels: ["K1", "K2", "K3"]
+  algorithms: ["linear", "two_stage_adaptive"]
+  n_victims: 30
+  seed: 42
+
+thresholds:
+  t1_ms: 1017.3
+  t2_ms: 377.2
+
+output:
+  dir: "experiments/results"
+  save_raw_probes: true

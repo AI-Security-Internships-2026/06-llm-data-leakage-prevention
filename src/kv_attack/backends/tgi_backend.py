@@ -70,12 +70,10 @@ class TGIBackend(BackendClient):
     FRAMEWORK_VER_FALLBACK = "2.x"
 
     def __init__(self, base_url: str, model_id: str):
-        # Normalize: strip trailing slash
         self.base_url = base_url.rstrip("/")
         self.model_id = model_id
-        self._framework_ver: str | None = None   # lazily fetched from /info
+        self._framework_ver: str | None = None
 
-    # ── Abstract interface ─────────────────────────────────────────────────────
 
     def health_check(self) -> bool:
         """GET /health — TGI returns 200 when ready."""
@@ -148,16 +146,12 @@ class TGIBackend(BackendClient):
                             except json.JSONDecodeError:
                                 pass
         except Exception as exc:
-            # Network errors are treated as very slow (miss-like) responses
-            # to avoid silently skipping probes.
             elapsed = (time.perf_counter() - t0) * 1_000.0
             print(f"[TGIBackend] _send_prompt error after {elapsed:.0f} ms: {exc}")
             return elapsed
 
-        # Fallback if stream ends without a token event (shouldn't happen)
         return (time.perf_counter() - t0) * 1_000.0
 
-    # ── Helpers ────────────────────────────────────────────────────────────────
 
     @staticmethod
     def _iter_sse_lines(resp: HTTPResponse) -> Iterator[str]:
@@ -188,4 +182,4 @@ class TGIBackend(BackendClient):
             apc = bool(info.get("prefix_caching", False))
             return ver, apc
         except Exception:
-            return self.FRAMEWORK_VER_FALLBACK, True   # assume APC on if unknown
+            return self.FRAMEWORK_VER_FALLBACK, True

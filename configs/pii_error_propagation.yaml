@@ -1,0 +1,41 @@
+# configs/pii_error_propagation.yaml
+# Issue #9 — PII Detector Errors → Cache Decision → Timing Leakage
+
+# ── Backend ───────────────────────────────────────────────────────────────────
+backend: vllm
+vllm_base_url: "http://localhost:8001/v1"
+model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+
+# ── Reproducibility ───────────────────────────────────────────────────────────
+seed: 42
+workload_version: "1.0"
+
+# ── Workload ──────────────────────────────────────────────────────────────────
+n_per_category: 10   # samples per category (5 categories)
+
+# ── Detector variants ─────────────────────────────────────────────────────────
+# P0: Presidio/regex only (use_stage2=False)
+# P1: Presidio + BART stage-2 (use_stage2=True)
+# P2: Full risk-signal + D4 adaptive policy (Issue 7 pipeline)
+detector_variants:
+  - P0
+  - P1
+  - P2
+
+# ── FNR sweep (false negative rate) ──────────────────────────────────────────
+fnr_levels: [0.0, 0.05, 0.10, 0.20, 0.30]
+
+# ── FPR sweep (false positive injection rate) ─────────────────────────────────
+fpr_levels: [0.0, 0.05, 0.10, 0.20, 0.30]
+
+# ── Empirical ASR (from paper-kvcache run, used as residual_asr when FN occurs)
+empirical_asr: 0.68      # from paper-kvcache-2026-09-13 (n=50 victims)
+empirical_asr_source: "paper-kvcache-2026-09-13-8285175f.json"
+empirical_asr_tag: "empirical"   # NOT analytical/simulated
+
+# ── Calibration ───────────────────────────────────────────────────────────────
+n_calibration: 30
+
+# ── Output ────────────────────────────────────────────────────────────────────
+output_dir: "experiments/results"
+figures_dir: "experiments/figures"

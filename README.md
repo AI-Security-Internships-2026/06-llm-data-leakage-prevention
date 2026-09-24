@@ -98,6 +98,58 @@ python src/main.py
 
 ---
 
+## Paper Pipeline (KV-Cache Timing Attack)
+
+> **This is the canonical entry point for all paper experiments.**
+> All results, figures and tables in the paper are produced from this pipeline.
+> Do not use `src/main.py` for paper experiments — that is the early-work baseline.
+
+### Requirements
+- vLLM server running with APC enabled (see below)
+- Model: `deepseek-ai/DeepSeek-R1-Distill-Llama-8B`
+
+### Start the vLLM server
+```bash
+python -m vllm.entrypoints.openai.api_server \
+    --model deepseek-ai/DeepSeek-R1-Distill-Llama-8B \
+    --port 8001 \
+    --enable-prefix-caching \
+    --gpu-memory-utilization 0.85
+```
+
+### Run the canonical paper attack
+```bash
+python experiments/run_kv_attack.py --config configs/paper_attack.yaml
+```
+
+All parameters (model, seed, victim count, candidate dictionary, cache settings,
+output paths) are controlled via `configs/paper_attack.yaml`.
+Every run saves config, environment, raw timings, per-victim results and a summary
+under `experiments/results/` with a unique run ID.
+
+### Smoke test (3 victims, same-seed reproducibility check)
+```bash
+python experiments/run_kv_attack.py \
+    --config configs/paper_attack.yaml \
+    --n-victims 3 \
+    --seed 42
+```
+
+### Module classification
+See `docs/paper/MODULE_CLASSIFICATION.md` for the full list of modules
+classified as `paper` / `baseline` / `legacy` / `experimental`.
+
+### Reproduce paper numbers
+```bash
+python experiments/generate_paper_numbers.py
+# Output: experiments/results/paper_numbers.json
+```
+
+### Claim-to-evidence traceability
+See `docs/paper/claim_evidence_matrix.md` — every quantitative claim in the
+manuscript is mapped to its code module and result artifact.
+
+
 ## Roadmap to September 8, 2026
 
 **Current state:** real Enron-corpus and HF-PII evaluation, benchmarked against scrubadub and detect-secrets. A Phase 2 research assignment already exists (issue #9): the KV-cache timing side-channel, flagged for "journal-track rigor" — this is the project's real novel-contribution track.

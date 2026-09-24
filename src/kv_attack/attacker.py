@@ -9,7 +9,6 @@ from openai import OpenAI
 from kv_attack import MODEL_ID, N_REPEATS_FAST, KS_ALPHA
 
 
-# ── TTFT measurement ─────────────────────────────────────────────────────────
 
 def measure_ttft(client: OpenAI, prompt: str) -> float:
     """
@@ -27,7 +26,7 @@ def measure_ttft(client: OpenAI, prompt: str) -> float:
     )
     for _ in stream:
         break
-    return (time.perf_counter() - t0) * 1_000.0   # ms
+    return (time.perf_counter() - t0) * 1_000.0
 
 
 def measure_ttft_repeated(client: OpenAI, prompt: str, n: int) -> np.ndarray:
@@ -35,7 +34,6 @@ def measure_ttft_repeated(client: OpenAI, prompt: str, n: int) -> np.ndarray:
     return np.array([measure_ttft(client, prompt) for _ in range(n)])
 
 
-# ── Threshold calibration ─────────────────────────────────────────────────────
 
 def calibrate_threshold(
     client               : OpenAI,
@@ -71,7 +69,6 @@ def calibrate_threshold(
         for _ in range(n_samples)
     ])
 
-    # ── KS test ──────────────────────────────────────────────────────────────
     ks_stat, p_val = scipy.stats.ks_2samp(hit_ttfts, miss_ttfts)
 
     hit_mean  = float(hit_ttfts.mean())
@@ -105,7 +102,6 @@ def calibrate_threshold(
         )
     print(f"[calibrate] ✓ Gap confirmed significant at p < {KS_ALPHA:.0e}")
 
-    # ── Youden-J threshold (O(n log n)) ──────────────────────────────────────
     all_vals   = np.concatenate([hit_ttfts,          miss_ttfts       ])
     all_labels = np.concatenate([np.ones(n_samples), np.zeros(n_samples)])
 
@@ -124,7 +120,6 @@ def calibrate_threshold(
     best_idx  = int(np.argmax(j_scores))
     threshold = float((sorted_vals[best_idx] + sorted_vals[best_idx + 1]) / 2.0)
 
-    # ── Recommended N_REPEATS ─────────────────────────────────────────────────
     n_candidates  = 2000
     pooled_sigma  = float(np.sqrt((hit_std**2 + miss_std**2) / 2))
     recommended_n = None
@@ -158,7 +153,6 @@ def calibrate_threshold(
     }
 
 
-# ── Per-probe classification ──────────────────────────────────────────────────
 
 def measure_mean_ttft(
     client: OpenAI,

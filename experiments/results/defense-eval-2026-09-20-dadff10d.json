@@ -1,0 +1,2559 @@
+{
+  "run_id": "defense-eval-2026-09-20-dadff10d",
+  "issue": 7,
+  "config": {
+    "backend": "vllm",
+    "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+    "n_victims": 5,
+    "n_workload": 5,
+    "seed": 42
+  },
+  "environment": {
+    "python": "3.12.3 (main, Nov  6 2025, 13:44:16) [GCC 13.3.0]",
+    "platform": "Linux-6.14.0-1013-nvidia-aarch64-with-glibc2.39",
+    "gpu": "NVIDIA GB10, [N/A]",
+    "git_hash": "7b08102"
+  },
+  "backend_info": {
+    "backend_name": "vllm",
+    "framework": "vllm",
+    "framework_ver": "0.27.1",
+    "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+    "base_url": "http://localhost:8001/v1",
+    "apc_enabled": false,
+    "extra": {
+      "apc_metric_found": false
+    }
+  },
+  "calibration": {
+    "hit_mean_ms": 177.9476107202936,
+    "hit_p50_ms": 197.47640000423416,
+    "hit_p95_ms": 205.2093508944381,
+    "miss_mean_ms": 139.15937071898952,
+    "miss_p50_ms": 114.0040039899759,
+    "miss_p95_ms": 204.9803842950496,
+    "threshold_ms": 158.55349071964156,
+    "n_samples": 50
+  },
+  "workload": {
+    "total_samples": 25,
+    "by_category": {
+      "MEDICAL": 5,
+      "FINANCIAL": 5,
+      "ENTERPRISE": 5,
+      "CONTACT": 5,
+      "NON_SENSITIVE": 5
+    },
+    "samples": [
+      {
+        "sample_id": "medi-001",
+        "category": "MEDICAL",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Record update for James Williams (DOB 1962-11-08): severe hypertension; prescribed lisinopril 10 mg daily.",
+        "ground_truth_entities": [
+          "PERSON",
+          "MEDICAL_LICENSE"
+        ]
+      },
+      {
+        "sample_id": "fina-004",
+        "category": "FINANCIAL",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Mortgage disbursement to account ES9121000418450200051332; loan ID LN-9982; monthly instalment EUR 1,456.",
+        "ground_truth_entities": [
+          "CREDIT_CARD",
+          "IBAN_CODE",
+          "US_SSN"
+        ]
+      },
+      {
+        "sample_id": "ente-001",
+        "category": "ENTERPRISE",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "INTERNAL ONLY: Sandra Kowalski (Warsaw) has admin rights to the zero-trust policy engine; rotation overdue.",
+        "ground_truth_entities": [
+          "PERSON",
+          "LOCATION"
+        ]
+      },
+      {
+        "sample_id": "fina-000",
+        "category": "FINANCIAL",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Wire USD 8,000 to IBAN DE89370400440532013000; SSN of account holder: 078-05-1120; confirm receipt.",
+        "ground_truth_entities": [
+          "CREDIT_CARD",
+          "IBAN_CODE",
+          "US_SSN"
+        ]
+      },
+      {
+        "sample_id": "medi-000",
+        "category": "MEDICAL",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Patient Kevin Clark (DOB 2001-08-09): asthma exacerbation; salbutamol nebuliser administered in ED.",
+        "ground_truth_entities": [
+          "PERSON",
+          "MEDICAL_LICENSE"
+        ]
+      },
+      {
+        "sample_id": "medi-002",
+        "category": "MEDICAL",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Charles Lee (DOB 1985-02-28): anxiety disorder and major depressive episode; starting sertraline 50 mg.",
+        "ground_truth_entities": [
+          "PERSON",
+          "MEDICAL_LICENSE"
+        ]
+      },
+      {
+        "sample_id": "ente-003",
+        "category": "ENTERPRISE",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Project Orion CLASSIFIED: Christopher Evans (Berlin) holds master credentials for DataVault production environment.",
+        "ground_truth_entities": [
+          "PERSON",
+          "LOCATION"
+        ]
+      },
+      {
+        "sample_id": "cont-001",
+        "category": "CONTACT",
+        "expected_risk_level": "MEDIUM",
+        "should_isolate": false,
+        "text": "The new hire, Michael Anderson, starts Monday \u2014 his email is m.anderson@newco.com.",
+        "ground_truth_entities": [
+          "PERSON",
+          "EMAIL_ADDRESS",
+          "PHONE_NUMBER"
+        ]
+      },
+      {
+        "sample_id": "cont-004",
+        "category": "CONTACT",
+        "expected_risk_level": "MEDIUM",
+        "should_isolate": false,
+        "text": "Please contact John Smith at john.smith@acme.com or call +1-555-234-5678 to schedule a meeting.",
+        "ground_truth_entities": [
+          "PERSON",
+          "EMAIL_ADDRESS",
+          "PHONE_NUMBER"
+        ]
+      },
+      {
+        "sample_id": "non_-001",
+        "category": "NON_SENSITIVE",
+        "expected_risk_level": "LOW",
+        "should_isolate": false,
+        "text": "What are the main differences between supervised and unsupervised learning?",
+        "ground_truth_entities": []
+      },
+      {
+        "sample_id": "ente-000",
+        "category": "ENTERPRISE",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Project Falcon (CONFIDENTIAL): lead engineer Robert Chen in Austin is targeting Q4 revenue of $8.2M; do not distribute.",
+        "ground_truth_entities": [
+          "PERSON",
+          "LOCATION"
+        ]
+      },
+      {
+        "sample_id": "non_-003",
+        "category": "NON_SENSITIVE",
+        "expected_risk_level": "LOW",
+        "should_isolate": false,
+        "text": "List the main programming paradigms and give one example of each.",
+        "ground_truth_entities": []
+      },
+      {
+        "sample_id": "non_-002",
+        "category": "NON_SENSITIVE",
+        "expected_risk_level": "LOW",
+        "should_isolate": false,
+        "text": "Explain the concept of transformer attention mechanisms in machine learning.",
+        "ground_truth_entities": []
+      },
+      {
+        "sample_id": "non_-004",
+        "category": "NON_SENSITIVE",
+        "expected_risk_level": "LOW",
+        "should_isolate": false,
+        "text": "What is the capital city of Argentina, and what is it known for?",
+        "ground_truth_entities": []
+      },
+      {
+        "sample_id": "fina-001",
+        "category": "FINANCIAL",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Bank transfer pending: source IBAN FR7630006000011234567890189; destination account US54BB8901023456789012.",
+        "ground_truth_entities": [
+          "CREDIT_CARD",
+          "IBAN_CODE",
+          "US_SSN"
+        ]
+      },
+      {
+        "sample_id": "ente-004",
+        "category": "ENTERPRISE",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Restricted: Nancy Yamamoto (Tokyo) is the sole signatory for account APAC-EAST-2026; limit: \u00a585,000,000.",
+        "ground_truth_entities": [
+          "PERSON",
+          "LOCATION"
+        ]
+      },
+      {
+        "sample_id": "cont-000",
+        "category": "CONTACT",
+        "expected_risk_level": "MEDIUM",
+        "should_isolate": false,
+        "text": "The project lead is Emily Chen \u2014 email her at e.chen@techinc.net or ring +44 20 7946 0234.",
+        "ground_truth_entities": [
+          "PERSON",
+          "EMAIL_ADDRESS",
+          "PHONE_NUMBER"
+        ]
+      },
+      {
+        "sample_id": "non_-000",
+        "category": "NON_SENSITIVE",
+        "expected_risk_level": "LOW",
+        "should_isolate": false,
+        "text": "What is quantum entanglement and why does it matter for computing?",
+        "ground_truth_entities": []
+      },
+      {
+        "sample_id": "cont-003",
+        "category": "CONTACT",
+        "expected_risk_level": "MEDIUM",
+        "should_isolate": false,
+        "text": "CC the legal team at legal@lawfirm.co.uk; primary contact: David Wilson, +1 415 555 0187.",
+        "ground_truth_entities": [
+          "PERSON",
+          "EMAIL_ADDRESS",
+          "PHONE_NUMBER"
+        ]
+      },
+      {
+        "sample_id": "fina-003",
+        "category": "FINANCIAL",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Invoice settled via card number 4111111111111111; billing reference BR-2026-0094; amount: \u00a33,750.",
+        "ground_truth_entities": [
+          "CREDIT_CARD",
+          "IBAN_CODE",
+          "US_SSN"
+        ]
+      },
+      {
+        "sample_id": "medi-004",
+        "category": "MEDICAL",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Dorothy Harris, born 1958-12-17, presents with new-onset atrial fibrillation; anticoagulation therapy initiated.",
+        "ground_truth_entities": [
+          "PERSON",
+          "MEDICAL_LICENSE"
+        ]
+      },
+      {
+        "sample_id": "cont-002",
+        "category": "CONTACT",
+        "expected_risk_level": "MEDIUM",
+        "should_isolate": false,
+        "text": "Forward this invoice to billing@globalcorp.io; for questions, call Robert Davis at 212-555-0198.",
+        "ground_truth_entities": [
+          "PERSON",
+          "EMAIL_ADDRESS",
+          "PHONE_NUMBER"
+        ]
+      },
+      {
+        "sample_id": "medi-003",
+        "category": "MEDICAL",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Patient Mary Johnson, DOB 1975-04-22, presents with a confirmed diagnosis of Type 2 diabetes mellitus requiring insulin therapy.",
+        "ground_truth_entities": [
+          "PERSON",
+          "MEDICAL_LICENSE"
+        ]
+      },
+      {
+        "sample_id": "fina-002",
+        "category": "FINANCIAL",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "Refund authorised to card 371449635398431 (Amex); transaction ID TX-88234; net: $1,840.",
+        "ground_truth_entities": [
+          "CREDIT_CARD",
+          "IBAN_CODE",
+          "US_SSN"
+        ]
+      },
+      {
+        "sample_id": "ente-002",
+        "category": "ENTERPRISE",
+        "expected_risk_level": "HIGH",
+        "should_isolate": true,
+        "text": "HR CONFIDENTIAL: Patricia Nguyen (London) flagged for PIP; manager review with Michael Torres scheduled this Friday.",
+        "ground_truth_entities": [
+          "PERSON",
+          "LOCATION"
+        ]
+      }
+    ]
+  },
+  "detector_eval": {
+    "overall_recall": 0.68,
+    "category_recall": {
+      "NON_SENSITIVE": 1.0,
+      "CONTACT": 1.0,
+      "MEDICAL": 0.0,
+      "FINANCIAL": 1.0,
+      "ENTERPRISE": 0.4
+    },
+    "per_sample": [
+      {
+        "sample_id": "medi-001",
+        "category": "MEDICAL",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "MEDIUM",
+        "correct": false,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "CONTACT",
+        "entity_types": [
+          "PERSON"
+        ],
+        "risk_score": 0.52,
+        "reason": "Detected CONTACT PII [PERSON] at 85.0% confidence; classified as medium-risk.",
+        "latency_ms": 15206.31
+      },
+      {
+        "sample_id": "fina-004",
+        "category": "FINANCIAL",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "HIGH",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 1.0,
+        "semantic_sensitivity": "FINANCIAL",
+        "entity_types": [
+          "IBAN_CODE"
+        ],
+        "risk_score": 1.0,
+        "reason": "Detected FINANCIAL PII [IBAN_CODE] at 100.0% confidence; classified as high-risk.",
+        "latency_ms": 5.37
+      },
+      {
+        "sample_id": "ente-001",
+        "category": "ENTERPRISE",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "MEDIUM",
+        "correct": false,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "ENTERPRISE",
+        "entity_types": [
+          "PERSON",
+          "LOCATION"
+        ],
+        "risk_score": 0.52,
+        "reason": "Detected ENTERPRISE PII [PERSON, LOCATION] at 85.0% confidence; classified as medium-risk.",
+        "latency_ms": 5.03
+      },
+      {
+        "sample_id": "fina-000",
+        "category": "FINANCIAL",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "HIGH",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 1.0,
+        "semantic_sensitivity": "FINANCIAL",
+        "entity_types": [
+          "IBAN_CODE",
+          "US_SSN",
+          "PHONE_NUMBER"
+        ],
+        "risk_score": 1.0,
+        "reason": "Detected FINANCIAL PII [IBAN_CODE, US_SSN, PHONE_NUMBER] at 100.0% confidence; classified as high-risk.",
+        "latency_ms": 4.69
+      },
+      {
+        "sample_id": "medi-000",
+        "category": "MEDICAL",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "MEDIUM",
+        "correct": false,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "ENTERPRISE",
+        "entity_types": [
+          "PERSON",
+          "LOCATION"
+        ],
+        "risk_score": 0.52,
+        "reason": "Detected ENTERPRISE PII [PERSON, LOCATION] at 85.0% confidence; classified as medium-risk.",
+        "latency_ms": 3.78
+      },
+      {
+        "sample_id": "medi-002",
+        "category": "MEDICAL",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "MEDIUM",
+        "correct": false,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "CONTACT",
+        "entity_types": [
+          "PERSON"
+        ],
+        "risk_score": 0.52,
+        "reason": "Detected CONTACT PII [PERSON] at 85.0% confidence; classified as medium-risk.",
+        "latency_ms": 3.58
+      },
+      {
+        "sample_id": "ente-003",
+        "category": "ENTERPRISE",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "MEDIUM",
+        "correct": false,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "ENTERPRISE",
+        "entity_types": [
+          "PERSON",
+          "LOCATION"
+        ],
+        "risk_score": 0.52,
+        "reason": "Detected ENTERPRISE PII [PERSON, LOCATION] at 85.0% confidence; classified as medium-risk.",
+        "latency_ms": 3.25
+      },
+      {
+        "sample_id": "cont-001",
+        "category": "CONTACT",
+        "expected_risk_level": "MEDIUM",
+        "detected_risk_level": "MEDIUM",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 1.0,
+        "semantic_sensitivity": "CONTACT",
+        "entity_types": [
+          "EMAIL_ADDRESS",
+          "PERSON"
+        ],
+        "risk_score": 0.55,
+        "reason": "Detected CONTACT PII [EMAIL_ADDRESS, PERSON] at 100.0% confidence; classified as medium-risk.",
+        "latency_ms": 269.14
+      },
+      {
+        "sample_id": "cont-004",
+        "category": "CONTACT",
+        "expected_risk_level": "MEDIUM",
+        "detected_risk_level": "MEDIUM",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "CONTACT",
+        "entity_types": [
+          "PERSON"
+        ],
+        "risk_score": 0.52,
+        "reason": "Detected CONTACT PII [PERSON] at 85.0% confidence; classified as medium-risk.",
+        "latency_ms": 7.36
+      },
+      {
+        "sample_id": "non_-001",
+        "category": "NON_SENSITIVE",
+        "expected_risk_level": "LOW",
+        "detected_risk_level": "LOW",
+        "correct": true,
+        "pii_flag": false,
+        "detector_confidence": 0.0,
+        "semantic_sensitivity": "NONE",
+        "entity_types": [],
+        "risk_score": 0.0,
+        "reason": "No PII entities detected; prompt classified as clean.",
+        "latency_ms": 4.25
+      },
+      {
+        "sample_id": "ente-000",
+        "category": "ENTERPRISE",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "HIGH",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "ENTERPRISE",
+        "entity_types": [
+          "PERSON",
+          "LOCATION"
+        ],
+        "risk_score": 0.9475,
+        "reason": "Detected ENTERPRISE PII [PERSON, LOCATION] at 85.0% confidence; classified as high-risk.",
+        "latency_ms": 4.75
+      },
+      {
+        "sample_id": "non_-003",
+        "category": "NON_SENSITIVE",
+        "expected_risk_level": "LOW",
+        "detected_risk_level": "LOW",
+        "correct": true,
+        "pii_flag": false,
+        "detector_confidence": 0.0,
+        "semantic_sensitivity": "NONE",
+        "entity_types": [],
+        "risk_score": 0.0,
+        "reason": "No PII entities detected; prompt classified as clean.",
+        "latency_ms": 4.03
+      },
+      {
+        "sample_id": "non_-002",
+        "category": "NON_SENSITIVE",
+        "expected_risk_level": "LOW",
+        "detected_risk_level": "LOW",
+        "correct": true,
+        "pii_flag": false,
+        "detector_confidence": 0.0,
+        "semantic_sensitivity": "NONE",
+        "entity_types": [],
+        "risk_score": 0.0,
+        "reason": "No PII entities detected; prompt classified as clean.",
+        "latency_ms": 2.95
+      },
+      {
+        "sample_id": "non_-004",
+        "category": "NON_SENSITIVE",
+        "expected_risk_level": "LOW",
+        "detected_risk_level": "MEDIUM",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "CONTACT",
+        "entity_types": [
+          "LOCATION"
+        ],
+        "risk_score": 0.52,
+        "reason": "Detected CONTACT PII [LOCATION] at 85.0% confidence; classified as medium-risk.",
+        "latency_ms": 3.01
+      },
+      {
+        "sample_id": "fina-001",
+        "category": "FINANCIAL",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "HIGH",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 1.0,
+        "semantic_sensitivity": "FINANCIAL",
+        "entity_types": [
+          "IBAN_CODE"
+        ],
+        "risk_score": 1.0,
+        "reason": "Detected FINANCIAL PII [IBAN_CODE] at 100.0% confidence; classified as high-risk.",
+        "latency_ms": 3.54
+      },
+      {
+        "sample_id": "ente-004",
+        "category": "ENTERPRISE",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "MEDIUM",
+        "correct": false,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "ENTERPRISE",
+        "entity_types": [
+          "PERSON",
+          "LOCATION"
+        ],
+        "risk_score": 0.52,
+        "reason": "Detected ENTERPRISE PII [PERSON, LOCATION] at 85.0% confidence; classified as medium-risk.",
+        "latency_ms": 4.05
+      },
+      {
+        "sample_id": "cont-000",
+        "category": "CONTACT",
+        "expected_risk_level": "MEDIUM",
+        "detected_risk_level": "MEDIUM",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "CONTACT",
+        "entity_types": [
+          "PERSON",
+          "PHONE_NUMBER"
+        ],
+        "risk_score": 0.52,
+        "reason": "Detected CONTACT PII [PERSON, PHONE_NUMBER] at 85.0% confidence; classified as medium-risk.",
+        "latency_ms": 4.71
+      },
+      {
+        "sample_id": "non_-000",
+        "category": "NON_SENSITIVE",
+        "expected_risk_level": "LOW",
+        "detected_risk_level": "LOW",
+        "correct": true,
+        "pii_flag": false,
+        "detector_confidence": 0.0,
+        "semantic_sensitivity": "NONE",
+        "entity_types": [],
+        "risk_score": 0.0,
+        "reason": "No PII entities detected; prompt classified as clean.",
+        "latency_ms": 2.31
+      },
+      {
+        "sample_id": "cont-003",
+        "category": "CONTACT",
+        "expected_risk_level": "MEDIUM",
+        "detected_risk_level": "HIGH",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 1.0,
+        "semantic_sensitivity": "CONTACT",
+        "entity_types": [
+          "EMAIL_ADDRESS",
+          "PERSON",
+          "PHONE_NUMBER"
+        ],
+        "risk_score": 1.0,
+        "reason": "Detected CONTACT PII [EMAIL_ADDRESS, PERSON, PHONE_NUMBER] at 100.0% confidence; classified as high-risk.",
+        "latency_ms": 3.26
+      },
+      {
+        "sample_id": "fina-003",
+        "category": "FINANCIAL",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "HIGH",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 1.0,
+        "semantic_sensitivity": "FINANCIAL",
+        "entity_types": [
+          "CREDIT_CARD"
+        ],
+        "risk_score": 1.0,
+        "reason": "Detected FINANCIAL PII [CREDIT_CARD] at 100.0% confidence; classified as high-risk.",
+        "latency_ms": 3.51
+      },
+      {
+        "sample_id": "medi-004",
+        "category": "MEDICAL",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "MEDIUM",
+        "correct": false,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "CONTACT",
+        "entity_types": [
+          "PERSON"
+        ],
+        "risk_score": 0.52,
+        "reason": "Detected CONTACT PII [PERSON] at 85.0% confidence; classified as medium-risk.",
+        "latency_ms": 3.29
+      },
+      {
+        "sample_id": "cont-002",
+        "category": "CONTACT",
+        "expected_risk_level": "MEDIUM",
+        "detected_risk_level": "HIGH",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 1.0,
+        "semantic_sensitivity": "CONTACT",
+        "entity_types": [
+          "EMAIL_ADDRESS",
+          "PERSON",
+          "PHONE_NUMBER"
+        ],
+        "risk_score": 1.0,
+        "reason": "Detected CONTACT PII [EMAIL_ADDRESS, PERSON, PHONE_NUMBER] at 100.0% confidence; classified as high-risk.",
+        "latency_ms": 6.83
+      },
+      {
+        "sample_id": "medi-003",
+        "category": "MEDICAL",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "MEDIUM",
+        "correct": false,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "CONTACT",
+        "entity_types": [
+          "PERSON"
+        ],
+        "risk_score": 0.52,
+        "reason": "Detected CONTACT PII [PERSON] at 85.0% confidence; classified as medium-risk.",
+        "latency_ms": 3.7
+      },
+      {
+        "sample_id": "fina-002",
+        "category": "FINANCIAL",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "HIGH",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 1.0,
+        "semantic_sensitivity": "FINANCIAL",
+        "entity_types": [
+          "CREDIT_CARD"
+        ],
+        "risk_score": 1.0,
+        "reason": "Detected FINANCIAL PII [CREDIT_CARD] at 100.0% confidence; classified as high-risk.",
+        "latency_ms": 3.28
+      },
+      {
+        "sample_id": "ente-002",
+        "category": "ENTERPRISE",
+        "expected_risk_level": "HIGH",
+        "detected_risk_level": "HIGH",
+        "correct": true,
+        "pii_flag": true,
+        "detector_confidence": 0.85,
+        "semantic_sensitivity": "ENTERPRISE",
+        "entity_types": [
+          "PERSON",
+          "LOCATION"
+        ],
+        "risk_score": 0.9475,
+        "reason": "Detected ENTERPRISE PII [PERSON, LOCATION] at 85.0% confidence; classified as high-risk.",
+        "latency_ms": 3.27
+      }
+    ]
+  },
+  "policy_isolation": {
+    "D0_no_defense": {
+      "aggregate": {
+        "policy": "D0_no_defense",
+        "n_total": 25,
+        "n_sensitive": 15,
+        "n_clean": 10,
+        "sensitive_isolation_rate": 0.8,
+        "non_sensitive_sharing_rate": 0.1,
+        "hit_rate": 0.12,
+        "isolation_fraction": 0.84,
+        "ttft_overhead_pct": 4.77,
+        "victim_ttft_p50_ms": 197.77078501647338,
+        "victim_ttft_p95_ms": 201.12266420037486,
+        "victim_ttft_p99_ms": 202.94336855760776,
+        "attacker_ttft_p50_ms": 197.3461259913165,
+        "attacker_ttft_p95_ms": 201.74488378688693
+      },
+      "audit_summary": {
+        "total_decisions": 50,
+        "share_count": 50,
+        "restrict_count": 0,
+        "isolate_count": 0,
+        "isolation_fraction": 0.0
+      },
+      "per_sample": [
+        {
+          "sample_id": "medi-001",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 197.26,
+          "attacker_ttft_ms": 199.37,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-004",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 198.03,
+          "attacker_ttft_ms": 195.36,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-001",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 197.03,
+          "attacker_ttft_ms": 200.89,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-000",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 196.93,
+          "attacker_ttft_ms": 197.35,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-000",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 198.85,
+          "attacker_ttft_ms": 199.98,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-002",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 199.49,
+          "attacker_ttft_ms": 199.68,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-003",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 198.29,
+          "attacker_ttft_ms": 196.43,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-001",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 193.71,
+          "attacker_ttft_ms": 192.46,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-004",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 198.3,
+          "attacker_ttft_ms": 201.96,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-001",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 194.09,
+          "attacker_ttft_ms": 194.25,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-000",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 196.94,
+          "attacker_ttft_ms": 195.26,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-003",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 200.95,
+          "attacker_ttft_ms": 197.68,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-002",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 197.78,
+          "attacker_ttft_ms": 194.18,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-004",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 197.77,
+          "attacker_ttft_ms": 197.73,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-001",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 198.43,
+          "attacker_ttft_ms": 199.63,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-004",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 194.33,
+          "attacker_ttft_ms": 192.84,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-000",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 199.24,
+          "attacker_ttft_ms": 198.39,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-000",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 201.17,
+          "attacker_ttft_ms": 197.46,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-003",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "HIGH",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 197.13,
+          "attacker_ttft_ms": 194.92,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-003",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 203.5,
+          "attacker_ttft_ms": 207.26,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-004",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 199.81,
+          "attacker_ttft_ms": 197.9,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-002",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "HIGH",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 174.06,
+          "attacker_ttft_ms": 112.46,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "medi-003",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 109.04,
+          "attacker_ttft_ms": 110.08,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "fina-002",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 108.93,
+          "attacker_ttft_ms": 107.09,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "ente-002",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 109.76,
+          "attacker_ttft_ms": 110.4,
+          "attacker_sees_hit": true,
+          "isolated": false
+        }
+      ]
+    },
+    "D1_full_isolation": {
+      "aggregate": {
+        "policy": "D1_full_isolation",
+        "n_total": 25,
+        "n_sensitive": 15,
+        "n_clean": 10,
+        "sensitive_isolation_rate": 0.4667,
+        "non_sensitive_sharing_rate": 0.4,
+        "hit_rate": 0.48,
+        "isolation_fraction": 0.52,
+        "ttft_overhead_pct": -7.47,
+        "victim_ttft_p50_ms": 202.54098900477402,
+        "victim_ttft_p95_ms": 211.11262260819785,
+        "victim_ttft_p99_ms": 215.48116664518602,
+        "attacker_ttft_p50_ms": 195.34708300489,
+        "attacker_ttft_p95_ms": 203.73829040909186
+      },
+      "audit_summary": {
+        "total_decisions": 50,
+        "share_count": 0,
+        "restrict_count": 0,
+        "isolate_count": 50,
+        "isolation_fraction": 1.0
+      },
+      "per_sample": [
+        {
+          "sample_id": "medi-001",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 116.24,
+          "attacker_ttft_ms": 112.01,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "fina-004",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 117.45,
+          "attacker_ttft_ms": 111.19,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "ente-001",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 121.64,
+          "attacker_ttft_ms": 110.45,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "fina-000",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 118.23,
+          "attacker_ttft_ms": 108.21,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "medi-000",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 116.87,
+          "attacker_ttft_ms": 110.53,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "medi-002",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 117.75,
+          "attacker_ttft_ms": 113.38,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "ente-003",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 119.12,
+          "attacker_ttft_ms": 110.33,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "cont-001",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 116.69,
+          "attacker_ttft_ms": 111.05,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "cont-004",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 116.23,
+          "attacker_ttft_ms": 110.61,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "non_-001",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 116.41,
+          "attacker_ttft_ms": 109.04,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "ente-000",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 118.38,
+          "attacker_ttft_ms": 108.27,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "non_-003",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 116.54,
+          "attacker_ttft_ms": 115.34,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "non_-002",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 216.85,
+          "attacker_ttft_ms": 206.21,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-004",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 205.45,
+          "attacker_ttft_ms": 197.05,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-001",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 211.02,
+          "attacker_ttft_ms": 200.05,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-004",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 207.41,
+          "attacker_ttft_ms": 200.05,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-000",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 211.14,
+          "attacker_ttft_ms": 197.75,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-000",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 206.27,
+          "attacker_ttft_ms": 195.86,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-003",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 206.04,
+          "attacker_ttft_ms": 199.4,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-003",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 209.26,
+          "attacker_ttft_ms": 204.66,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-004",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 206.66,
+          "attacker_ttft_ms": 198.49,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-002",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 204.59,
+          "attacker_ttft_ms": 197.74,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-003",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 208.1,
+          "attacker_ttft_ms": 197.71,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-002",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 202.54,
+          "attacker_ttft_ms": 195.35,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-002",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 209.6,
+          "attacker_ttft_ms": 196.77,
+          "attacker_sees_hit": false,
+          "isolated": true
+        }
+      ]
+    },
+    "D2_tenant_salt": {
+      "aggregate": {
+        "policy": "D2_tenant_salt",
+        "n_total": 25,
+        "n_sensitive": 15,
+        "n_clean": 10,
+        "sensitive_isolation_rate": 1.0,
+        "non_sensitive_sharing_rate": 0.0,
+        "hit_rate": 0.0,
+        "isolation_fraction": 1.0,
+        "ttft_overhead_pct": 10.96,
+        "victim_ttft_p50_ms": 196.98595500085503,
+        "victim_ttft_p95_ms": 202.81907940516248,
+        "victim_ttft_p99_ms": 204.5952910091728,
+        "attacker_ttft_p50_ms": 196.37328200042248,
+        "attacker_ttft_p95_ms": 199.64286040049046
+      },
+      "audit_summary": {
+        "total_decisions": 50,
+        "share_count": 0,
+        "restrict_count": 50,
+        "isolate_count": 0,
+        "isolation_fraction": 1.0
+      },
+      "per_sample": [
+        {
+          "sample_id": "medi-001",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 194.83,
+          "attacker_ttft_ms": 198.55,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-004",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 196.99,
+          "attacker_ttft_ms": 194.49,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-001",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 198.16,
+          "attacker_ttft_ms": 197.72,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-000",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 195.42,
+          "attacker_ttft_ms": 192.9,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-000",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 192.99,
+          "attacker_ttft_ms": 197.95,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-002",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 197.49,
+          "attacker_ttft_ms": 195.94,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-003",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 197.52,
+          "attacker_ttft_ms": 195.85,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-001",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 196.27,
+          "attacker_ttft_ms": 192.86,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-004",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 195.32,
+          "attacker_ttft_ms": 195.72,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-001",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 199.9,
+          "attacker_ttft_ms": 196.06,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-000",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 196.13,
+          "attacker_ttft_ms": 195.09,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-003",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 193.43,
+          "attacker_ttft_ms": 198.37,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-002",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 195.23,
+          "attacker_ttft_ms": 197.75,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-004",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 196.28,
+          "attacker_ttft_ms": 197.95,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-001",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 203.03,
+          "attacker_ttft_ms": 196.37,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-004",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 201.99,
+          "attacker_ttft_ms": 192.52,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-000",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 205.09,
+          "attacker_ttft_ms": 196.53,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-000",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 198.31,
+          "attacker_ttft_ms": 195.82,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-003",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "HIGH",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 199.94,
+          "attacker_ttft_ms": 195.5,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-003",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 197.07,
+          "attacker_ttft_ms": 200.31,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-004",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 199.72,
+          "attacker_ttft_ms": 196.63,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-002",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "HIGH",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 194.93,
+          "attacker_ttft_ms": 199.71,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-003",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 195.61,
+          "attacker_ttft_ms": 199.39,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-002",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 200.28,
+          "attacker_ttft_ms": 197.96,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-002",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 194.57,
+          "attacker_ttft_ms": 195.08,
+          "attacker_sees_hit": false,
+          "isolated": true
+        }
+      ]
+    },
+    "D3_binary_pii": {
+      "aggregate": {
+        "policy": "D3_binary_pii",
+        "n_total": 25,
+        "n_sensitive": 15,
+        "n_clean": 10,
+        "sensitive_isolation_rate": 1.0,
+        "non_sensitive_sharing_rate": 0.0,
+        "hit_rate": 0.0,
+        "isolation_fraction": 1.0,
+        "ttft_overhead_pct": 15.0,
+        "victim_ttft_p50_ms": 204.7538360056933,
+        "victim_ttft_p95_ms": 209.77992221014574,
+        "victim_ttft_p99_ms": 210.16459530801512,
+        "attacker_ttft_p50_ms": 197.84188398625702,
+        "attacker_ttft_p95_ms": 202.8449118079152
+      },
+      "audit_summary": {
+        "total_decisions": 50,
+        "share_count": 8,
+        "restrict_count": 0,
+        "isolate_count": 42,
+        "isolation_fraction": 0.84
+      },
+      "per_sample": [
+        {
+          "sample_id": "medi-001",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 204.75,
+          "attacker_ttft_ms": 197.89,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-004",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 206.54,
+          "attacker_ttft_ms": 195.16,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-001",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 210.29,
+          "attacker_ttft_ms": 195.68,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-000",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 205.09,
+          "attacker_ttft_ms": 197.23,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-000",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 206.25,
+          "attacker_ttft_ms": 199.18,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-002",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 209.78,
+          "attacker_ttft_ms": 196.48,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-003",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 205.05,
+          "attacker_ttft_ms": 198.43,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-001",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 200.85,
+          "attacker_ttft_ms": 194.45,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-004",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 202.14,
+          "attacker_ttft_ms": 196.23,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-001",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 192.64,
+          "attacker_ttft_ms": 197.84,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-000",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 202.39,
+          "attacker_ttft_ms": 199.24,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-003",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 201.0,
+          "attacker_ttft_ms": 197.19,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-002",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 195.34,
+          "attacker_ttft_ms": 198.24,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-004",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 204.72,
+          "attacker_ttft_ms": 196.81,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-001",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 209.28,
+          "attacker_ttft_ms": 196.54,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-004",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 208.82,
+          "attacker_ttft_ms": 203.43,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-000",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 209.78,
+          "attacker_ttft_ms": 198.24,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-000",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 200.3,
+          "attacker_ttft_ms": 199.13,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-003",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 204.31,
+          "attacker_ttft_ms": 195.41,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-003",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 208.61,
+          "attacker_ttft_ms": 207.21,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-004",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 206.44,
+          "attacker_ttft_ms": 197.81,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-002",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 203.98,
+          "attacker_ttft_ms": 199.95,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-003",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 208.9,
+          "attacker_ttft_ms": 200.49,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-002",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 204.57,
+          "attacker_ttft_ms": 200.08,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-002",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 204.26,
+          "attacker_ttft_ms": 197.01,
+          "attacker_sees_hit": false,
+          "isolated": true
+        }
+      ]
+    },
+    "D4_risk_adaptive": {
+      "aggregate": {
+        "policy": "D4_risk_adaptive",
+        "n_total": 25,
+        "n_sensitive": 15,
+        "n_clean": 10,
+        "sensitive_isolation_rate": 0.6,
+        "non_sensitive_sharing_rate": 0.4,
+        "hit_rate": 0.4,
+        "isolation_fraction": 0.6,
+        "ttft_overhead_pct": -7.05,
+        "victim_ttft_p50_ms": 193.4882820060011,
+        "victim_ttft_p95_ms": 208.93449240829796,
+        "victim_ttft_p99_ms": 210.2605456917081,
+        "attacker_ttft_p50_ms": 195.37600400508381,
+        "attacker_ttft_p95_ms": 199.90891140769236
+      },
+      "audit_summary": {
+        "total_decisions": 50,
+        "share_count": 8,
+        "restrict_count": 24,
+        "isolate_count": 18,
+        "isolation_fraction": 0.84
+      },
+      "per_sample": [
+        {
+          "sample_id": "medi-001",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 197.31,
+          "attacker_ttft_ms": 198.51,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-004",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 206.79,
+          "attacker_ttft_ms": 194.8,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-001",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 193.49,
+          "attacker_ttft_ms": 198.54,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-000",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 207.53,
+          "attacker_ttft_ms": 199.91,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-000",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 194.27,
+          "attacker_ttft_ms": 197.23,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "medi-002",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 198.58,
+          "attacker_ttft_ms": 199.89,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-003",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 200.12,
+          "attacker_ttft_ms": 196.19,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-001",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 198.26,
+          "attacker_ttft_ms": 198.41,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "cont-004",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 192.7,
+          "attacker_ttft_ms": 197.71,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-001",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 193.32,
+          "attacker_ttft_ms": 195.14,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-000",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 210.57,
+          "attacker_ttft_ms": 195.38,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-003",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 197.35,
+          "attacker_ttft_ms": 278.09,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-002",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 196.29,
+          "attacker_ttft_ms": 199.73,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "non_-004",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 199.28,
+          "attacker_ttft_ms": 199.08,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "fina-001",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 209.29,
+          "attacker_ttft_ms": 198.1,
+          "attacker_sees_hit": false,
+          "isolated": true
+        },
+        {
+          "sample_id": "ente-004",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 109.45,
+          "attacker_ttft_ms": 107.93,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "cont-000",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 112.69,
+          "attacker_ttft_ms": 104.93,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "non_-000",
+          "category": "NON_SENSITIVE",
+          "expected_risk_level": "LOW",
+          "should_isolate": false,
+          "detected_risk_level": "LOW",
+          "cache_action": "SHARE",
+          "salt_applied": false,
+          "victim_ttft_ms": 109.96,
+          "attacker_ttft_ms": 108.48,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "cont-003",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 115.41,
+          "attacker_ttft_ms": 110.39,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "fina-003",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 118.23,
+          "attacker_ttft_ms": 115.19,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "medi-004",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 110.13,
+          "attacker_ttft_ms": 108.42,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "cont-002",
+          "category": "CONTACT",
+          "expected_risk_level": "MEDIUM",
+          "should_isolate": false,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 117.64,
+          "attacker_ttft_ms": 112.18,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "medi-003",
+          "category": "MEDICAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "MEDIUM",
+          "cache_action": "RESTRICT",
+          "salt_applied": true,
+          "victim_ttft_ms": 111.33,
+          "attacker_ttft_ms": 108.79,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "fina-002",
+          "category": "FINANCIAL",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 115.83,
+          "attacker_ttft_ms": 111.91,
+          "attacker_sees_hit": true,
+          "isolated": false
+        },
+        {
+          "sample_id": "ente-002",
+          "category": "ENTERPRISE",
+          "expected_risk_level": "HIGH",
+          "should_isolate": true,
+          "detected_risk_level": "HIGH",
+          "cache_action": "ISOLATE",
+          "salt_applied": true,
+          "victim_ttft_ms": 119.37,
+          "attacker_ttft_ms": 109.81,
+          "attacker_sees_hit": true,
+          "isolated": false
+        }
+      ]
+    }
+  },
+  "residual_asr": {},
+  "command": "../experiments/run_defense_eval.py --config ../configs/defense_eval.yaml --n-victims 5 --n-workload 5 --skip-asr",
+  "summary_table": [
+    {
+      "policy": "D0_no_defense",
+      "residual_asr": "n/a",
+      "sensitive_isolation_rate": 0.8,
+      "non_sensitive_sharing_rate": 0.1,
+      "hit_rate": 0.12,
+      "ttft_overhead_pct": 4.77,
+      "victim_ttft_p50_ms": 197.77078501647338,
+      "victim_ttft_p95_ms": 201.12266420037486,
+      "victim_ttft_p99_ms": 202.94336855760776
+    },
+    {
+      "policy": "D1_full_isolation",
+      "residual_asr": "n/a",
+      "sensitive_isolation_rate": 0.4667,
+      "non_sensitive_sharing_rate": 0.4,
+      "hit_rate": 0.48,
+      "ttft_overhead_pct": -7.47,
+      "victim_ttft_p50_ms": 202.54098900477402,
+      "victim_ttft_p95_ms": 211.11262260819785,
+      "victim_ttft_p99_ms": 215.48116664518602
+    },
+    {
+      "policy": "D2_tenant_salt",
+      "residual_asr": "n/a",
+      "sensitive_isolation_rate": 1.0,
+      "non_sensitive_sharing_rate": 0.0,
+      "hit_rate": 0.0,
+      "ttft_overhead_pct": 10.96,
+      "victim_ttft_p50_ms": 196.98595500085503,
+      "victim_ttft_p95_ms": 202.81907940516248,
+      "victim_ttft_p99_ms": 204.5952910091728
+    },
+    {
+      "policy": "D3_binary_pii",
+      "residual_asr": "n/a",
+      "sensitive_isolation_rate": 1.0,
+      "non_sensitive_sharing_rate": 0.0,
+      "hit_rate": 0.0,
+      "ttft_overhead_pct": 15.0,
+      "victim_ttft_p50_ms": 204.7538360056933,
+      "victim_ttft_p95_ms": 209.77992221014574,
+      "victim_ttft_p99_ms": 210.16459530801512
+    },
+    {
+      "policy": "D4_risk_adaptive",
+      "residual_asr": "n/a",
+      "sensitive_isolation_rate": 0.6,
+      "non_sensitive_sharing_rate": 0.4,
+      "hit_rate": 0.4,
+      "ttft_overhead_pct": -7.05,
+      "victim_ttft_p50_ms": 193.4882820060011,
+      "victim_ttft_p95_ms": 208.93449240829796,
+      "victim_ttft_p99_ms": 210.2605456917081
+    }
+  ]
+}

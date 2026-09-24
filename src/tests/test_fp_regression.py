@@ -18,7 +18,6 @@ def detected_types(result: dict) -> set:
     return {e["type"] for e in result["entities"]}
 
 
-# ── IN_PAN suppression ────────────────────────────────────────────────────────
 
 class TestINPANSuppressed:
     """IN_PAN is excluded from SUPPORTED_ENTITIES — must never appear in output."""
@@ -50,7 +49,6 @@ class TestINPANSuppressed:
         assert r["risk_level"] == "CLEAN"
 
 
-# ── US_DRIVER_LICENSE suppression ─────────────────────────────────────────────
 
 class TestUSDriverLicenseSuppressed:
     """US_DRIVER_LICENSE is excluded from SUPPORTED_ENTITIES — must never appear."""
@@ -82,7 +80,6 @@ class TestUSDriverLicenseSuppressed:
         assert r["risk_level"] == "CLEAN"
 
 
-# ── US_BANK_NUMBER score gate ─────────────────────────────────────────────────
 
 class TestUSBankNumberScoreGate:
     """US_BANK_NUMBER results below score 0.80 must be dropped."""
@@ -109,9 +106,6 @@ class TestUSBankNumberScoreGate:
             "Please credit the payment to US bank account number 123456789012 "
             "at First National Bank, routing number 021000021."
         )
-        # With strong context the score should clear the 0.80 gate.
-        # If Presidio scores it below 0.80, the test is marked xfail so the
-        # suite does not block CI — this is a known Presidio limitation.
         types = detected_types(r)
         if "US_BANK_NUMBER" not in types:
             pytest.xfail(
@@ -122,6 +116,5 @@ class TestUSBankNumberScoreGate:
     def test_risk_clean_on_suppressed_fp(self):
         """End-to-end: previously FP texts must return CLEAN risk after gating."""
         r = detect_pii("The batch process completed with job ID 9900112233445 successfully.")
-        # No high-risk entity should be present from the old FP burst
         assert r["risk_level"] in ("CLEAN", "LOW")
         assert "US_BANK_NUMBER" not in detected_types(r)
