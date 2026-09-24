@@ -1,0 +1,1457 @@
+{
+  "run_id": "load-test-2026-09-22-ddd807bd",
+  "backend": "vllm",
+  "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+  "n_victims_per_level": 30,
+  "seed": 42,
+  "n_levels_done": 5,
+  "levels": [
+    {
+      "level": "L0",
+      "n_tenants": 0,
+      "oracle": {
+        "hit_p50_ms": 99.4,
+        "s1_hit_p50_ms": 288.7,
+        "miss_p50_ms": 818.2,
+        "t1_threshold_ms": 544.8,
+        "t2_threshold_ms": 194.4,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_hit_vs_s1hit_p": 1.9823306042836678e-29,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 0.9,
+        "exact_recovery_count": 27,
+        "n_victims": 30,
+        "asr_ci_95_lo": 0.7438,
+        "asr_ci_95_hi": 0.9654,
+        "median_api_calls": 79.0,
+        "p95_api_calls": 151.0
+      },
+      "loader_stats": {
+        "n_tenants": 0,
+        "total_requests": 0,
+        "total_errors": 0,
+        "mean_latency_s": 0.0,
+        "aggregate_rps": 0,
+        "per_tenant": []
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 110,
+          "stage1_api_calls": 89,
+          "stage2_api_calls": 18
+        },
+        {
+          "victim_id": 1,
+          "exact_match": false,
+          "total_api_calls": 151,
+          "stage1_api_calls": 124,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 2,
+          "exact_match": false,
+          "total_api_calls": 151,
+          "stage1_api_calls": 124,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 84,
+          "stage1_api_calls": 72,
+          "stage2_api_calls": 9
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 73,
+          "stage1_api_calls": 61,
+          "stage2_api_calls": 9
+        },
+        {
+          "victim_id": 5,
+          "exact_match": true,
+          "total_api_calls": 130,
+          "stage1_api_calls": 121,
+          "stage2_api_calls": 6
+        },
+        {
+          "victim_id": 6,
+          "exact_match": true,
+          "total_api_calls": 85,
+          "stage1_api_calls": 63,
+          "stage2_api_calls": 19
+        },
+        {
+          "victim_id": 7,
+          "exact_match": true,
+          "total_api_calls": 55,
+          "stage1_api_calls": 39,
+          "stage2_api_calls": 13
+        },
+        {
+          "victim_id": 8,
+          "exact_match": true,
+          "total_api_calls": 79,
+          "stage1_api_calls": 68,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 9,
+          "exact_match": true,
+          "total_api_calls": 33,
+          "stage1_api_calls": 9,
+          "stage2_api_calls": 21
+        },
+        {
+          "victim_id": 10,
+          "exact_match": true,
+          "total_api_calls": 108,
+          "stage1_api_calls": 96,
+          "stage2_api_calls": 9
+        },
+        {
+          "victim_id": 11,
+          "exact_match": true,
+          "total_api_calls": 121,
+          "stage1_api_calls": 97,
+          "stage2_api_calls": 21
+        },
+        {
+          "victim_id": 12,
+          "exact_match": true,
+          "total_api_calls": 128,
+          "stage1_api_calls": 116,
+          "stage2_api_calls": 9
+        },
+        {
+          "victim_id": 13,
+          "exact_match": true,
+          "total_api_calls": 78,
+          "stage1_api_calls": 58,
+          "stage2_api_calls": 17
+        },
+        {
+          "victim_id": 14,
+          "exact_match": false,
+          "total_api_calls": 151,
+          "stage1_api_calls": 124,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 15,
+          "exact_match": true,
+          "total_api_calls": 58,
+          "stage1_api_calls": 38,
+          "stage2_api_calls": 17
+        },
+        {
+          "victim_id": 16,
+          "exact_match": true,
+          "total_api_calls": 79,
+          "stage1_api_calls": 57,
+          "stage2_api_calls": 19
+        },
+        {
+          "victim_id": 17,
+          "exact_match": true,
+          "total_api_calls": 120,
+          "stage1_api_calls": 99,
+          "stage2_api_calls": 18
+        },
+        {
+          "victim_id": 18,
+          "exact_match": true,
+          "total_api_calls": 103,
+          "stage1_api_calls": 76,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 19,
+          "exact_match": true,
+          "total_api_calls": 46,
+          "stage1_api_calls": 26,
+          "stage2_api_calls": 17
+        },
+        {
+          "victim_id": 20,
+          "exact_match": true,
+          "total_api_calls": 36,
+          "stage1_api_calls": 12,
+          "stage2_api_calls": 21
+        },
+        {
+          "victim_id": 21,
+          "exact_match": true,
+          "total_api_calls": 70,
+          "stage1_api_calls": 44,
+          "stage2_api_calls": 23
+        },
+        {
+          "victim_id": 22,
+          "exact_match": true,
+          "total_api_calls": 31,
+          "stage1_api_calls": 16,
+          "stage2_api_calls": 12
+        },
+        {
+          "victim_id": 23,
+          "exact_match": true,
+          "total_api_calls": 70,
+          "stage1_api_calls": 56,
+          "stage2_api_calls": 11
+        },
+        {
+          "victim_id": 24,
+          "exact_match": true,
+          "total_api_calls": 32,
+          "stage1_api_calls": 22,
+          "stage2_api_calls": 7
+        },
+        {
+          "victim_id": 25,
+          "exact_match": true,
+          "total_api_calls": 63,
+          "stage1_api_calls": 46,
+          "stage2_api_calls": 14
+        },
+        {
+          "victim_id": 26,
+          "exact_match": true,
+          "total_api_calls": 112,
+          "stage1_api_calls": 88,
+          "stage2_api_calls": 21
+        },
+        {
+          "victim_id": 27,
+          "exact_match": true,
+          "total_api_calls": 34,
+          "stage1_api_calls": 27,
+          "stage2_api_calls": 4
+        },
+        {
+          "victim_id": 28,
+          "exact_match": true,
+          "total_api_calls": 101,
+          "stage1_api_calls": 92,
+          "stage2_api_calls": 6
+        },
+        {
+          "victim_id": 29,
+          "exact_match": true,
+          "total_api_calls": 59,
+          "stage1_api_calls": 49,
+          "stage2_api_calls": 7
+        }
+      ]
+    },
+    {
+      "level": "L1",
+      "n_tenants": 2,
+      "oracle": {
+        "hit_p50_ms": 244.5,
+        "s1_hit_p50_ms": 406.4,
+        "miss_p50_ms": 955.5,
+        "t1_threshold_ms": 667.6,
+        "t2_threshold_ms": 322.2,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_hit_vs_s1hit_p": 1.9823306042836678e-29,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 1.0,
+        "exact_recovery_count": 30,
+        "n_victims": 30,
+        "asr_ci_95_lo": 0.8865,
+        "asr_ci_95_hi": 1.0,
+        "median_api_calls": 80.0,
+        "p95_api_calls": 136.04999999999995
+      },
+      "loader_stats": {
+        "n_tenants": 2,
+        "total_requests": 35897,
+        "total_errors": 0,
+        "mean_latency_s": 1.5342621682249895,
+        "aggregate_rps": 1.3035510036943152,
+        "per_tenant": [
+          {
+            "tenant_id": 0,
+            "n_requests": 17947,
+            "n_errors": 0,
+            "throughput_rps": 0.6517210244491849
+          },
+          {
+            "tenant_id": 1,
+            "n_requests": 17950,
+            "n_errors": 0,
+            "throughput_rps": 0.651829979216916
+          }
+        ]
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 38,
+          "stage1_api_calls": 34,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 117,
+          "stage1_api_calls": 113,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 130,
+          "stage1_api_calls": 119,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 79,
+          "stage1_api_calls": 57,
+          "stage2_api_calls": 19
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 92,
+          "stage1_api_calls": 73,
+          "stage2_api_calls": 16
+        },
+        {
+          "victim_id": 5,
+          "exact_match": true,
+          "total_api_calls": 31,
+          "stage1_api_calls": 27,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 6,
+          "exact_match": true,
+          "total_api_calls": 18,
+          "stage1_api_calls": 14,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 7,
+          "exact_match": true,
+          "total_api_calls": 113,
+          "stage1_api_calls": 109,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 8,
+          "exact_match": true,
+          "total_api_calls": 81,
+          "stage1_api_calls": 64,
+          "stage2_api_calls": 14
+        },
+        {
+          "victim_id": 9,
+          "exact_match": true,
+          "total_api_calls": 36,
+          "stage1_api_calls": 24,
+          "stage2_api_calls": 9
+        },
+        {
+          "victim_id": 10,
+          "exact_match": true,
+          "total_api_calls": 124,
+          "stage1_api_calls": 97,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 11,
+          "exact_match": true,
+          "total_api_calls": 98,
+          "stage1_api_calls": 81,
+          "stage2_api_calls": 14
+        },
+        {
+          "victim_id": 12,
+          "exact_match": true,
+          "total_api_calls": 87,
+          "stage1_api_calls": 82,
+          "stage2_api_calls": 2
+        },
+        {
+          "victim_id": 13,
+          "exact_match": true,
+          "total_api_calls": 102,
+          "stage1_api_calls": 97,
+          "stage2_api_calls": 2
+        },
+        {
+          "victim_id": 14,
+          "exact_match": true,
+          "total_api_calls": 66,
+          "stage1_api_calls": 59,
+          "stage2_api_calls": 4
+        },
+        {
+          "victim_id": 15,
+          "exact_match": true,
+          "total_api_calls": 141,
+          "stage1_api_calls": 124,
+          "stage2_api_calls": 14
+        },
+        {
+          "victim_id": 16,
+          "exact_match": true,
+          "total_api_calls": 17,
+          "stage1_api_calls": 11,
+          "stage2_api_calls": 3
+        },
+        {
+          "victim_id": 17,
+          "exact_match": true,
+          "total_api_calls": 73,
+          "stage1_api_calls": 52,
+          "stage2_api_calls": 18
+        },
+        {
+          "victim_id": 18,
+          "exact_match": true,
+          "total_api_calls": 40,
+          "stage1_api_calls": 29,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 19,
+          "exact_match": true,
+          "total_api_calls": 68,
+          "stage1_api_calls": 41,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 20,
+          "exact_match": true,
+          "total_api_calls": 96,
+          "stage1_api_calls": 72,
+          "stage2_api_calls": 21
+        },
+        {
+          "victim_id": 21,
+          "exact_match": true,
+          "total_api_calls": 144,
+          "stage1_api_calls": 119,
+          "stage2_api_calls": 22
+        },
+        {
+          "victim_id": 22,
+          "exact_match": true,
+          "total_api_calls": 26,
+          "stage1_api_calls": 9,
+          "stage2_api_calls": 14
+        },
+        {
+          "victim_id": 23,
+          "exact_match": true,
+          "total_api_calls": 38,
+          "stage1_api_calls": 24,
+          "stage2_api_calls": 11
+        },
+        {
+          "victim_id": 24,
+          "exact_match": true,
+          "total_api_calls": 36,
+          "stage1_api_calls": 12,
+          "stage2_api_calls": 21
+        },
+        {
+          "victim_id": 25,
+          "exact_match": true,
+          "total_api_calls": 105,
+          "stage1_api_calls": 89,
+          "stage2_api_calls": 13
+        },
+        {
+          "victim_id": 26,
+          "exact_match": true,
+          "total_api_calls": 86,
+          "stage1_api_calls": 64,
+          "stage2_api_calls": 19
+        },
+        {
+          "victim_id": 27,
+          "exact_match": true,
+          "total_api_calls": 108,
+          "stage1_api_calls": 87,
+          "stage2_api_calls": 18
+        },
+        {
+          "victim_id": 28,
+          "exact_match": true,
+          "total_api_calls": 27,
+          "stage1_api_calls": 16,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 29,
+          "exact_match": true,
+          "total_api_calls": 58,
+          "stage1_api_calls": 54,
+          "stage2_api_calls": 1
+        }
+      ]
+    },
+    {
+      "level": "L2",
+      "n_tenants": 5,
+      "oracle": {
+        "hit_p50_ms": 239.2,
+        "s1_hit_p50_ms": 394.1,
+        "miss_p50_ms": 931.5,
+        "t1_threshold_ms": 659.8,
+        "t2_threshold_ms": 312.8,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_hit_vs_s1hit_p": 1.9823306042836678e-29,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 0.9,
+        "exact_recovery_count": 27,
+        "n_victims": 30,
+        "asr_ci_95_lo": 0.7438,
+        "asr_ci_95_hi": 0.9654,
+        "median_api_calls": 95.5,
+        "p95_api_calls": 136.75
+      },
+      "loader_stats": {
+        "n_tenants": 5,
+        "total_requests": 93826,
+        "total_errors": 0,
+        "mean_latency_s": 1.511313103206835,
+        "aggregate_rps": 3.3083553207822223,
+        "per_tenant": [
+          {
+            "tenant_id": 0,
+            "n_requests": 18766,
+            "n_errors": 0,
+            "throughput_rps": 0.6616992551171267
+          },
+          {
+            "tenant_id": 1,
+            "n_requests": 18767,
+            "n_errors": 0,
+            "throughput_rps": 0.6617345241832268
+          },
+          {
+            "tenant_id": 2,
+            "n_requests": 18761,
+            "n_errors": 0,
+            "throughput_rps": 0.6615229708296322
+          },
+          {
+            "tenant_id": 3,
+            "n_requests": 18764,
+            "n_errors": 0,
+            "throughput_rps": 0.6616287597773423
+          },
+          {
+            "tenant_id": 4,
+            "n_requests": 18768,
+            "n_errors": 0,
+            "throughput_rps": 0.6617698107469558
+          }
+        ]
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 79,
+          "stage1_api_calls": 68,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 93,
+          "stage1_api_calls": 87,
+          "stage2_api_calls": 3
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 51,
+          "stage1_api_calls": 34,
+          "stage2_api_calls": 14
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 124,
+          "stage1_api_calls": 108,
+          "stage2_api_calls": 13
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 123,
+          "stage1_api_calls": 119,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 5,
+          "exact_match": true,
+          "total_api_calls": 74,
+          "stage1_api_calls": 48,
+          "stage2_api_calls": 23
+        },
+        {
+          "victim_id": 6,
+          "exact_match": true,
+          "total_api_calls": 89,
+          "stage1_api_calls": 68,
+          "stage2_api_calls": 18
+        },
+        {
+          "victim_id": 7,
+          "exact_match": true,
+          "total_api_calls": 67,
+          "stage1_api_calls": 61,
+          "stage2_api_calls": 3
+        },
+        {
+          "victim_id": 8,
+          "exact_match": true,
+          "total_api_calls": 130,
+          "stage1_api_calls": 121,
+          "stage2_api_calls": 6
+        },
+        {
+          "victim_id": 9,
+          "exact_match": true,
+          "total_api_calls": 20,
+          "stage1_api_calls": 8,
+          "stage2_api_calls": 9
+        },
+        {
+          "victim_id": 10,
+          "exact_match": true,
+          "total_api_calls": 64,
+          "stage1_api_calls": 38,
+          "stage2_api_calls": 23
+        },
+        {
+          "victim_id": 11,
+          "exact_match": true,
+          "total_api_calls": 84,
+          "stage1_api_calls": 62,
+          "stage2_api_calls": 19
+        },
+        {
+          "victim_id": 12,
+          "exact_match": true,
+          "total_api_calls": 73,
+          "stage1_api_calls": 69,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 13,
+          "exact_match": true,
+          "total_api_calls": 124,
+          "stage1_api_calls": 97,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 14,
+          "exact_match": true,
+          "total_api_calls": 151,
+          "stage1_api_calls": 124,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 15,
+          "exact_match": true,
+          "total_api_calls": 106,
+          "stage1_api_calls": 101,
+          "stage2_api_calls": 2
+        },
+        {
+          "victim_id": 16,
+          "exact_match": true,
+          "total_api_calls": 43,
+          "stage1_api_calls": 17,
+          "stage2_api_calls": 23
+        },
+        {
+          "victim_id": 17,
+          "exact_match": true,
+          "total_api_calls": 94,
+          "stage1_api_calls": 73,
+          "stage2_api_calls": 18
+        },
+        {
+          "victim_id": 18,
+          "exact_match": true,
+          "total_api_calls": 101,
+          "stage1_api_calls": 74,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 19,
+          "exact_match": true,
+          "total_api_calls": 112,
+          "stage1_api_calls": 101,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 20,
+          "exact_match": true,
+          "total_api_calls": 134,
+          "stage1_api_calls": 107,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 21,
+          "exact_match": true,
+          "total_api_calls": 70,
+          "stage1_api_calls": 59,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 22,
+          "exact_match": true,
+          "total_api_calls": 105,
+          "stage1_api_calls": 98,
+          "stage2_api_calls": 4
+        },
+        {
+          "victim_id": 23,
+          "exact_match": true,
+          "total_api_calls": 120,
+          "stage1_api_calls": 101,
+          "stage2_api_calls": 16
+        },
+        {
+          "victim_id": 24,
+          "exact_match": true,
+          "total_api_calls": 99,
+          "stage1_api_calls": 73,
+          "stage2_api_calls": 23
+        },
+        {
+          "victim_id": 25,
+          "exact_match": true,
+          "total_api_calls": 123,
+          "stage1_api_calls": 112,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 26,
+          "exact_match": false,
+          "total_api_calls": 15,
+          "stage1_api_calls": 9,
+          "stage2_api_calls": 3
+        },
+        {
+          "victim_id": 27,
+          "exact_match": false,
+          "total_api_calls": 139,
+          "stage1_api_calls": 122,
+          "stage2_api_calls": 14
+        },
+        {
+          "victim_id": 28,
+          "exact_match": true,
+          "total_api_calls": 97,
+          "stage1_api_calls": 83,
+          "stage2_api_calls": 11
+        },
+        {
+          "victim_id": 29,
+          "exact_match": false,
+          "total_api_calls": 54,
+          "stage1_api_calls": 49,
+          "stage2_api_calls": 2
+        }
+      ]
+    },
+    {
+      "level": "L3",
+      "n_tenants": 10,
+      "oracle": {
+        "hit_p50_ms": 207.3,
+        "s1_hit_p50_ms": 338.9,
+        "miss_p50_ms": 784.7,
+        "t1_threshold_ms": 562.7,
+        "t2_threshold_ms": 268.3,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_hit_vs_s1hit_p": 1.9823306042836678e-29,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 1.0,
+        "exact_recovery_count": 30,
+        "n_victims": 30,
+        "asr_ci_95_lo": 0.8865,
+        "asr_ci_95_hi": 1.0,
+        "median_api_calls": 87.5,
+        "p95_api_calls": 133.55
+      },
+      "loader_stats": {
+        "n_tenants": 10,
+        "total_requests": 211263,
+        "total_errors": 0,
+        "mean_latency_s": 1.1066066837114623,
+        "aggregate_rps": 9.036499296117979,
+        "per_tenant": [
+          {
+            "tenant_id": 0,
+            "n_requests": 21127,
+            "n_errors": 0,
+            "throughput_rps": 0.9036797777618772
+          },
+          {
+            "tenant_id": 1,
+            "n_requests": 21126,
+            "n_errors": 0,
+            "throughput_rps": 0.9036370571415799
+          },
+          {
+            "tenant_id": 2,
+            "n_requests": 21127,
+            "n_errors": 0,
+            "throughput_rps": 0.9036798498936756
+          },
+          {
+            "tenant_id": 3,
+            "n_requests": 21127,
+            "n_errors": 0,
+            "throughput_rps": 0.903679860851222
+          },
+          {
+            "tenant_id": 4,
+            "n_requests": 21126,
+            "n_errors": 0,
+            "throughput_rps": 0.9036370980668617
+          },
+          {
+            "tenant_id": 5,
+            "n_requests": 21127,
+            "n_errors": 0,
+            "throughput_rps": 0.9036798808770834
+          },
+          {
+            "tenant_id": 6,
+            "n_requests": 21126,
+            "n_errors": 0,
+            "throughput_rps": 0.9036371219990761
+          },
+          {
+            "tenant_id": 7,
+            "n_requests": 21126,
+            "n_errors": 0,
+            "throughput_rps": 0.9036371305785494
+          },
+          {
+            "tenant_id": 8,
+            "n_requests": 21125,
+            "n_errors": 0,
+            "throughput_rps": 0.9035943670912863
+          },
+          {
+            "tenant_id": 9,
+            "n_requests": 21126,
+            "n_errors": 0,
+            "throughput_rps": 0.903637150603465
+          }
+        ]
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 101,
+          "stage1_api_calls": 89,
+          "stage2_api_calls": 9
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 22,
+          "stage1_api_calls": 8,
+          "stage2_api_calls": 11
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 94,
+          "stage1_api_calls": 69,
+          "stage2_api_calls": 22
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 98,
+          "stage1_api_calls": 83,
+          "stage2_api_calls": 12
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 49,
+          "stage1_api_calls": 44,
+          "stage2_api_calls": 2
+        },
+        {
+          "victim_id": 5,
+          "exact_match": true,
+          "total_api_calls": 12,
+          "stage1_api_calls": 8,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 6,
+          "exact_match": true,
+          "total_api_calls": 98,
+          "stage1_api_calls": 82,
+          "stage2_api_calls": 13
+        },
+        {
+          "victim_id": 7,
+          "exact_match": true,
+          "total_api_calls": 110,
+          "stage1_api_calls": 99,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 8,
+          "exact_match": true,
+          "total_api_calls": 125,
+          "stage1_api_calls": 111,
+          "stage2_api_calls": 11
+        },
+        {
+          "victim_id": 9,
+          "exact_match": true,
+          "total_api_calls": 111,
+          "stage1_api_calls": 86,
+          "stage2_api_calls": 22
+        },
+        {
+          "victim_id": 10,
+          "exact_match": true,
+          "total_api_calls": 140,
+          "stage1_api_calls": 124,
+          "stage2_api_calls": 13
+        },
+        {
+          "victim_id": 11,
+          "exact_match": true,
+          "total_api_calls": 57,
+          "stage1_api_calls": 32,
+          "stage2_api_calls": 22
+        },
+        {
+          "victim_id": 12,
+          "exact_match": true,
+          "total_api_calls": 81,
+          "stage1_api_calls": 61,
+          "stage2_api_calls": 17
+        },
+        {
+          "victim_id": 13,
+          "exact_match": true,
+          "total_api_calls": 101,
+          "stage1_api_calls": 77,
+          "stage2_api_calls": 21
+        },
+        {
+          "victim_id": 14,
+          "exact_match": true,
+          "total_api_calls": 133,
+          "stage1_api_calls": 116,
+          "stage2_api_calls": 14
+        },
+        {
+          "victim_id": 15,
+          "exact_match": true,
+          "total_api_calls": 52,
+          "stage1_api_calls": 27,
+          "stage2_api_calls": 22
+        },
+        {
+          "victim_id": 16,
+          "exact_match": true,
+          "total_api_calls": 134,
+          "stage1_api_calls": 117,
+          "stage2_api_calls": 14
+        },
+        {
+          "victim_id": 17,
+          "exact_match": true,
+          "total_api_calls": 48,
+          "stage1_api_calls": 21,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 18,
+          "exact_match": true,
+          "total_api_calls": 61,
+          "stage1_api_calls": 52,
+          "stage2_api_calls": 6
+        },
+        {
+          "victim_id": 19,
+          "exact_match": true,
+          "total_api_calls": 50,
+          "stage1_api_calls": 36,
+          "stage2_api_calls": 11
+        },
+        {
+          "victim_id": 20,
+          "exact_match": true,
+          "total_api_calls": 76,
+          "stage1_api_calls": 61,
+          "stage2_api_calls": 12
+        },
+        {
+          "victim_id": 21,
+          "exact_match": true,
+          "total_api_calls": 101,
+          "stage1_api_calls": 81,
+          "stage2_api_calls": 17
+        },
+        {
+          "victim_id": 22,
+          "exact_match": true,
+          "total_api_calls": 23,
+          "stage1_api_calls": 12,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 23,
+          "exact_match": true,
+          "total_api_calls": 70,
+          "stage1_api_calls": 56,
+          "stage2_api_calls": 11
+        },
+        {
+          "victim_id": 24,
+          "exact_match": true,
+          "total_api_calls": 109,
+          "stage1_api_calls": 88,
+          "stage2_api_calls": 18
+        },
+        {
+          "victim_id": 25,
+          "exact_match": true,
+          "total_api_calls": 72,
+          "stage1_api_calls": 61,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 26,
+          "exact_match": true,
+          "total_api_calls": 125,
+          "stage1_api_calls": 106,
+          "stage2_api_calls": 16
+        },
+        {
+          "victim_id": 27,
+          "exact_match": true,
+          "total_api_calls": 122,
+          "stage1_api_calls": 116,
+          "stage2_api_calls": 3
+        },
+        {
+          "victim_id": 28,
+          "exact_match": true,
+          "total_api_calls": 76,
+          "stage1_api_calls": 56,
+          "stage2_api_calls": 17
+        },
+        {
+          "victim_id": 29,
+          "exact_match": true,
+          "total_api_calls": 43,
+          "stage1_api_calls": 24,
+          "stage2_api_calls": 16
+        }
+      ]
+    },
+    {
+      "level": "L4",
+      "n_tenants": 20,
+      "oracle": {
+        "hit_p50_ms": 214.6,
+        "s1_hit_p50_ms": 366.7,
+        "miss_p50_ms": 801.0,
+        "t1_threshold_ms": 600.6,
+        "t2_threshold_ms": 293.9,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_hit_vs_s1hit_p": 1.9823306042836678e-29,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 0.9667,
+        "exact_recovery_count": 29,
+        "n_victims": 30,
+        "asr_ci_95_lo": 0.8333,
+        "asr_ci_95_hi": 0.9941,
+        "median_api_calls": 97.5,
+        "p95_api_calls": 137.75
+      },
+      "loader_stats": {
+        "n_tenants": 20,
+        "total_requests": 428351,
+        "total_errors": 0,
+        "mean_latency_s": 1.1325269986241049,
+        "aggregate_rps": 17.65924319658109,
+        "per_tenant": [
+          {
+            "tenant_id": 0,
+            "n_requests": 21419,
+            "n_errors": 0,
+            "throughput_rps": 0.8830217607301727
+          },
+          {
+            "tenant_id": 1,
+            "n_requests": 21416,
+            "n_errors": 0,
+            "throughput_rps": 0.8828981448793812
+          },
+          {
+            "tenant_id": 2,
+            "n_requests": 21415,
+            "n_errors": 0,
+            "throughput_rps": 0.8828569452815518
+          },
+          {
+            "tenant_id": 3,
+            "n_requests": 21417,
+            "n_errors": 0,
+            "throughput_rps": 0.8829394114465
+          },
+          {
+            "tenant_id": 4,
+            "n_requests": 21418,
+            "n_errors": 0,
+            "throughput_rps": 0.8829806520501996
+          },
+          {
+            "tenant_id": 5,
+            "n_requests": 21416,
+            "n_errors": 0,
+            "throughput_rps": 0.8828982105115988
+          },
+          {
+            "tenant_id": 6,
+            "n_requests": 21418,
+            "n_errors": 0,
+            "throughput_rps": 0.8829806746933914
+          },
+          {
+            "tenant_id": 7,
+            "n_requests": 21417,
+            "n_errors": 0,
+            "throughput_rps": 0.8829394640120077
+          },
+          {
+            "tenant_id": 8,
+            "n_requests": 21418,
+            "n_errors": 0,
+            "throughput_rps": 0.8829807000964678
+          },
+          {
+            "tenant_id": 9,
+            "n_requests": 21417,
+            "n_errors": 0,
+            "throughput_rps": 0.8829394833042536
+          },
+          {
+            "tenant_id": 10,
+            "n_requests": 21416,
+            "n_errors": 0,
+            "throughput_rps": 0.882898266502492
+          },
+          {
+            "tenant_id": 11,
+            "n_requests": 21418,
+            "n_errors": 0,
+            "throughput_rps": 0.882980730481222
+          },
+          {
+            "tenant_id": 12,
+            "n_requests": 21419,
+            "n_errors": 0,
+            "throughput_rps": 0.8830219691023846
+          },
+          {
+            "tenant_id": 13,
+            "n_requests": 21416,
+            "n_errors": 0,
+            "throughput_rps": 0.8828983043649058
+          },
+          {
+            "tenant_id": 14,
+            "n_requests": 21420,
+            "n_errors": 0,
+            "throughput_rps": 0.8830632244591586
+          },
+          {
+            "tenant_id": 15,
+            "n_requests": 21419,
+            "n_errors": 0,
+            "throughput_rps": 0.8830220079595428
+          },
+          {
+            "tenant_id": 16,
+            "n_requests": 21419,
+            "n_errors": 0,
+            "throughput_rps": 0.8830220237384836
+          },
+          {
+            "tenant_id": 17,
+            "n_requests": 21416,
+            "n_errors": 0,
+            "throughput_rps": 0.8828983544200111
+          },
+          {
+            "tenant_id": 18,
+            "n_requests": 21419,
+            "n_errors": 0,
+            "throughput_rps": 0.8830220416612086
+          },
+          {
+            "tenant_id": 19,
+            "n_requests": 21418,
+            "n_errors": 0,
+            "throughput_rps": 0.8829808238572909
+          }
+        ]
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 24,
+          "stage1_api_calls": 9,
+          "stage2_api_calls": 12
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 140,
+          "stage1_api_calls": 124,
+          "stage2_api_calls": 13
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 93,
+          "stage1_api_calls": 79,
+          "stage2_api_calls": 11
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 106,
+          "stage1_api_calls": 99,
+          "stage2_api_calls": 4
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 86,
+          "stage1_api_calls": 81,
+          "stage2_api_calls": 2
+        },
+        {
+          "victim_id": 5,
+          "exact_match": true,
+          "total_api_calls": 18,
+          "stage1_api_calls": 9,
+          "stage2_api_calls": 6
+        },
+        {
+          "victim_id": 6,
+          "exact_match": false,
+          "total_api_calls": 151,
+          "stage1_api_calls": 124,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 7,
+          "exact_match": true,
+          "total_api_calls": 52,
+          "stage1_api_calls": 27,
+          "stage2_api_calls": 22
+        },
+        {
+          "victim_id": 8,
+          "exact_match": true,
+          "total_api_calls": 125,
+          "stage1_api_calls": 118,
+          "stage2_api_calls": 4
+        },
+        {
+          "victim_id": 9,
+          "exact_match": true,
+          "total_api_calls": 31,
+          "stage1_api_calls": 19,
+          "stage2_api_calls": 9
+        },
+        {
+          "victim_id": 10,
+          "exact_match": true,
+          "total_api_calls": 113,
+          "stage1_api_calls": 92,
+          "stage2_api_calls": 18
+        },
+        {
+          "victim_id": 11,
+          "exact_match": true,
+          "total_api_calls": 104,
+          "stage1_api_calls": 78,
+          "stage2_api_calls": 23
+        },
+        {
+          "victim_id": 12,
+          "exact_match": true,
+          "total_api_calls": 102,
+          "stage1_api_calls": 78,
+          "stage2_api_calls": 21
+        },
+        {
+          "victim_id": 13,
+          "exact_match": true,
+          "total_api_calls": 68,
+          "stage1_api_calls": 46,
+          "stage2_api_calls": 19
+        },
+        {
+          "victim_id": 14,
+          "exact_match": true,
+          "total_api_calls": 48,
+          "stage1_api_calls": 39,
+          "stage2_api_calls": 6
+        },
+        {
+          "victim_id": 15,
+          "exact_match": true,
+          "total_api_calls": 95,
+          "stage1_api_calls": 91,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 16,
+          "exact_match": true,
+          "total_api_calls": 100,
+          "stage1_api_calls": 73,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 17,
+          "exact_match": true,
+          "total_api_calls": 61,
+          "stage1_api_calls": 57,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 18,
+          "exact_match": true,
+          "total_api_calls": 126,
+          "stage1_api_calls": 104,
+          "stage2_api_calls": 19
+        },
+        {
+          "victim_id": 19,
+          "exact_match": true,
+          "total_api_calls": 111,
+          "stage1_api_calls": 86,
+          "stage2_api_calls": 22
+        },
+        {
+          "victim_id": 20,
+          "exact_match": true,
+          "total_api_calls": 113,
+          "stage1_api_calls": 89,
+          "stage2_api_calls": 21
+        },
+        {
+          "victim_id": 21,
+          "exact_match": true,
+          "total_api_calls": 87,
+          "stage1_api_calls": 81,
+          "stage2_api_calls": 3
+        },
+        {
+          "victim_id": 22,
+          "exact_match": true,
+          "total_api_calls": 73,
+          "stage1_api_calls": 58,
+          "stage2_api_calls": 12
+        },
+        {
+          "victim_id": 23,
+          "exact_match": true,
+          "total_api_calls": 51,
+          "stage1_api_calls": 24,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 24,
+          "exact_match": true,
+          "total_api_calls": 113,
+          "stage1_api_calls": 89,
+          "stage2_api_calls": 21
+        },
+        {
+          "victim_id": 25,
+          "exact_match": true,
+          "total_api_calls": 135,
+          "stage1_api_calls": 109,
+          "stage2_api_calls": 23
+        },
+        {
+          "victim_id": 26,
+          "exact_match": true,
+          "total_api_calls": 83,
+          "stage1_api_calls": 69,
+          "stage2_api_calls": 11
+        },
+        {
+          "victim_id": 27,
+          "exact_match": true,
+          "total_api_calls": 45,
+          "stage1_api_calls": 31,
+          "stage2_api_calls": 11
+        },
+        {
+          "victim_id": 28,
+          "exact_match": true,
+          "total_api_calls": 126,
+          "stage1_api_calls": 99,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 29,
+          "exact_match": true,
+          "total_api_calls": 103,
+          "stage1_api_calls": 87,
+          "stage2_api_calls": 13
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-09-24T07:30:42.954686+00:00"
+}

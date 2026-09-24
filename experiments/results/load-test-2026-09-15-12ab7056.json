@@ -1,0 +1,162 @@
+{
+  "run_id": "load-test-2026-09-15-12ab7056",
+  "backend": "vllm",
+  "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+  "n_victims_per_level": 5,
+  "seed": 42,
+  "n_levels_done": 2,
+  "levels": [
+    {
+      "level": "L0",
+      "n_tenants": 0,
+      "oracle": {
+        "hit_p50_ms": 160.0,
+        "s1_hit_p50_ms": 470.4,
+        "miss_p50_ms": 1349.3,
+        "t1_threshold_ms": 665.2,
+        "t2_threshold_ms": 233.5,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_hit_vs_s1hit_p": 1.9823306042836678e-29,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 1.0,
+        "exact_recovery_count": 5,
+        "n_victims": 5,
+        "asr_ci_95_lo": 0.5655,
+        "asr_ci_95_hi": 1.0,
+        "median_api_calls": 108.0,
+        "p95_api_calls": 132.79999999999998
+      },
+      "loader_stats": {
+        "n_tenants": 0,
+        "total_requests": 0,
+        "total_errors": 0,
+        "mean_latency_s": 0.0,
+        "aggregate_rps": 0,
+        "per_tenant": []
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 69,
+          "stage1_api_calls": 62,
+          "stage2_api_calls": 4
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 108,
+          "stage1_api_calls": 101,
+          "stage2_api_calls": 4
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 108,
+          "stage1_api_calls": 81,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 107,
+          "stage1_api_calls": 102,
+          "stage2_api_calls": 2
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 139,
+          "stage1_api_calls": 124,
+          "stage2_api_calls": 12
+        }
+      ]
+    },
+    {
+      "level": "L1",
+      "n_tenants": 2,
+      "oracle": {
+        "hit_p50_ms": 448.5,
+        "s1_hit_p50_ms": 689.1,
+        "miss_p50_ms": 1543.3,
+        "t1_threshold_ms": 780.0,
+        "t2_threshold_ms": 490.6,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836677e-27,
+        "ks_hit_vs_s1hit_p": 2.3630419544297964e-20,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 0.2,
+        "exact_recovery_count": 1,
+        "n_victims": 5,
+        "asr_ci_95_lo": 0.0362,
+        "asr_ci_95_hi": 0.6245,
+        "median_api_calls": 25.0,
+        "p95_api_calls": 33.2
+      },
+      "loader_stats": {
+        "n_tenants": 2,
+        "total_requests": 6101,
+        "total_errors": 0,
+        "mean_latency_s": 1.7319839349747135,
+        "aggregate_rps": 1.1547072156601152,
+        "per_tenant": [
+          {
+            "tenant_id": 0,
+            "n_requests": 3051,
+            "n_errors": 0,
+            "throughput_rps": 0.5774480346325663
+          },
+          {
+            "tenant_id": 1,
+            "n_requests": 3050,
+            "n_errors": 0,
+            "throughput_rps": 0.5772591808972896
+          }
+        ]
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": false,
+          "total_api_calls": 25,
+          "stage1_api_calls": 21,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 1,
+          "exact_match": false,
+          "total_api_calls": 6,
+          "stage1_api_calls": 2,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 2,
+          "exact_match": false,
+          "total_api_calls": 8,
+          "stage1_api_calls": 4,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 3,
+          "exact_match": false,
+          "total_api_calls": 30,
+          "stage1_api_calls": 26,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 34,
+          "stage1_api_calls": 29,
+          "stage2_api_calls": 2
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-09-15T14:14:42.806832+00:00"
+}

@@ -1,0 +1,582 @@
+{
+  "run_id": "load-test-2026-09-15-68b50862",
+  "backend": "vllm",
+  "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+  "n_victims_per_level": 5,
+  "seed": 42,
+  "n_levels_done": 5,
+  "levels": [
+    {
+      "level": "L0",
+      "n_tenants": 0,
+      "oracle": {
+        "hit_p50_ms": 87.5,
+        "s1_hit_p50_ms": 253.6,
+        "miss_p50_ms": 697.9,
+        "t1_threshold_ms": 522.2,
+        "t2_threshold_ms": 195.4,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_hit_vs_s1hit_p": 1.9823306042836678e-29,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 1.0,
+        "exact_recovery_count": 5,
+        "n_victims": 5,
+        "asr_ci_95_lo": 0.5655,
+        "asr_ci_95_hi": 1.0,
+        "median_api_calls": 93.0,
+        "p95_api_calls": 135.0
+      },
+      "loader_stats": {
+        "n_tenants": 0,
+        "total_requests": 0,
+        "total_errors": 0,
+        "mean_latency_s": 0.0,
+        "aggregate_rps": 0,
+        "per_tenant": []
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 123,
+          "stage1_api_calls": 116,
+          "stage2_api_calls": 4
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 138,
+          "stage1_api_calls": 122,
+          "stage2_api_calls": 13
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 57,
+          "stage1_api_calls": 42,
+          "stage2_api_calls": 12
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 93,
+          "stage1_api_calls": 76,
+          "stage2_api_calls": 14
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 30,
+          "stage1_api_calls": 23,
+          "stage2_api_calls": 4
+        }
+      ]
+    },
+    {
+      "level": "L1",
+      "n_tenants": 2,
+      "oracle": {
+        "hit_p50_ms": 206.3,
+        "s1_hit_p50_ms": 350.7,
+        "miss_p50_ms": 810.0,
+        "t1_threshold_ms": 603.8,
+        "t2_threshold_ms": 263.3,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_hit_vs_s1hit_p": 1.9823306042836678e-29,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 1.0,
+        "exact_recovery_count": 5,
+        "n_victims": 5,
+        "asr_ci_95_lo": 0.5655,
+        "asr_ci_95_hi": 1.0,
+        "median_api_calls": 56.0,
+        "p95_api_calls": 101.6
+      },
+      "loader_stats": {
+        "n_tenants": 2,
+        "total_requests": 8578,
+        "total_errors": 0,
+        "mean_latency_s": 1.0405619036322462,
+        "aggregate_rps": 1.9219561961089742,
+        "per_tenant": [
+          {
+            "tenant_id": 0,
+            "n_requests": 4290,
+            "n_errors": 0,
+            "throughput_rps": 0.9612020772163352
+          },
+          {
+            "tenant_id": 1,
+            "n_requests": 4288,
+            "n_errors": 0,
+            "throughput_rps": 0.9607541185333082
+          }
+        ]
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 16,
+          "stage1_api_calls": 12,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 76,
+          "stage1_api_calls": 49,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 43,
+          "stage1_api_calls": 34,
+          "stage2_api_calls": 6
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 108,
+          "stage1_api_calls": 81,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 56,
+          "stage1_api_calls": 39,
+          "stage2_api_calls": 14
+        }
+      ]
+    },
+    {
+      "level": "L2",
+      "n_tenants": 5,
+      "oracle": {
+        "hit_p50_ms": 210.7,
+        "s1_hit_p50_ms": 350.9,
+        "miss_p50_ms": 812.8,
+        "t1_threshold_ms": 613.0,
+        "t2_threshold_ms": 326.4,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_hit_vs_s1hit_p": 1.9823306042836678e-29,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 0.6,
+        "exact_recovery_count": 3,
+        "n_victims": 5,
+        "asr_ci_95_lo": 0.2307,
+        "asr_ci_95_hi": 0.8824,
+        "median_api_calls": 53.0,
+        "p95_api_calls": 114.8
+      },
+      "loader_stats": {
+        "n_tenants": 5,
+        "total_requests": 24127,
+        "total_errors": 0,
+        "mean_latency_s": 0.9989721508643097,
+        "aggregate_rps": 5.005088319475592,
+        "per_tenant": [
+          {
+            "tenant_id": 0,
+            "n_requests": 4826,
+            "n_errors": 0,
+            "throughput_rps": 1.0011417585270308
+          },
+          {
+            "tenant_id": 1,
+            "n_requests": 4826,
+            "n_errors": 0,
+            "throughput_rps": 1.0011419361898062
+          },
+          {
+            "tenant_id": 2,
+            "n_requests": 4825,
+            "n_errors": 0,
+            "throughput_rps": 1.0009347365513637
+          },
+          {
+            "tenant_id": 3,
+            "n_requests": 4825,
+            "n_errors": 0,
+            "throughput_rps": 1.0009347737300682
+          },
+          {
+            "tenant_id": 4,
+            "n_requests": 4825,
+            "n_errors": 0,
+            "throughput_rps": 1.0009351133386029
+          }
+        ]
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 53,
+          "stage1_api_calls": 32,
+          "stage2_api_calls": 18
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 82,
+          "stage1_api_calls": 73,
+          "stage2_api_calls": 6
+        },
+        {
+          "victim_id": 2,
+          "exact_match": false,
+          "total_api_calls": 50,
+          "stage1_api_calls": 41,
+          "stage2_api_calls": 6
+        },
+        {
+          "victim_id": 3,
+          "exact_match": false,
+          "total_api_calls": 52,
+          "stage1_api_calls": 48,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 123,
+          "stage1_api_calls": 111,
+          "stage2_api_calls": 9
+        }
+      ]
+    },
+    {
+      "level": "L3",
+      "n_tenants": 10,
+      "oracle": {
+        "hit_p50_ms": 208.3,
+        "s1_hit_p50_ms": 358.6,
+        "miss_p50_ms": 809.0,
+        "t1_threshold_ms": 612.7,
+        "t2_threshold_ms": 268.6,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_hit_vs_s1hit_p": 1.9823306042836678e-29,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 1.0,
+        "exact_recovery_count": 5,
+        "n_victims": 5,
+        "asr_ci_95_lo": 0.5655,
+        "asr_ci_95_hi": 1.0,
+        "median_api_calls": 79.0,
+        "p95_api_calls": 137.39999999999998
+      },
+      "loader_stats": {
+        "n_tenants": 10,
+        "total_requests": 48597,
+        "total_errors": 0,
+        "mean_latency_s": 1.0040905062528123,
+        "aggregate_rps": 9.959108769079876,
+        "per_tenant": [
+          {
+            "tenant_id": 0,
+            "n_requests": 4860,
+            "n_errors": 0,
+            "throughput_rps": 0.9959715566016887
+          },
+          {
+            "tenant_id": 1,
+            "n_requests": 4859,
+            "n_errors": 0,
+            "throughput_rps": 0.9957668782965597
+          },
+          {
+            "tenant_id": 2,
+            "n_requests": 4859,
+            "n_errors": 0,
+            "throughput_rps": 0.9957669540004461
+          },
+          {
+            "tenant_id": 3,
+            "n_requests": 4860,
+            "n_errors": 0,
+            "throughput_rps": 0.9959719312085846
+          },
+          {
+            "tenant_id": 4,
+            "n_requests": 4859,
+            "n_errors": 0,
+            "throughput_rps": 0.9957670721783225
+          },
+          {
+            "tenant_id": 5,
+            "n_requests": 4860,
+            "n_errors": 0,
+            "throughput_rps": 0.9959720507246919
+          },
+          {
+            "tenant_id": 6,
+            "n_requests": 4860,
+            "n_errors": 0,
+            "throughput_rps": 0.9959723754037727
+          },
+          {
+            "tenant_id": 7,
+            "n_requests": 4859,
+            "n_errors": 0,
+            "throughput_rps": 0.9957680884411032
+          },
+          {
+            "tenant_id": 8,
+            "n_requests": 4860,
+            "n_errors": 0,
+            "throughput_rps": 0.995973402339016
+          },
+          {
+            "tenant_id": 9,
+            "n_requests": 4861,
+            "n_errors": 0,
+            "throughput_rps": 0.9961784552629801
+          }
+        ]
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 22,
+          "stage1_api_calls": 11,
+          "stage2_api_calls": 8
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 151,
+          "stage1_api_calls": 124,
+          "stage2_api_calls": 24
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 30,
+          "stage1_api_calls": 26,
+          "stage2_api_calls": 1
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 79,
+          "stage1_api_calls": 54,
+          "stage2_api_calls": 22
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 83,
+          "stage1_api_calls": 69,
+          "stage2_api_calls": 11
+        }
+      ]
+    },
+    {
+      "level": "L4",
+      "n_tenants": 20,
+      "oracle": {
+        "hit_p50_ms": 217.8,
+        "s1_hit_p50_ms": 353.6,
+        "miss_p50_ms": 826.9,
+        "t1_threshold_ms": 590.7,
+        "t2_threshold_ms": 303.8,
+        "ks_hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_s1hit_vs_miss_p": 1.9823306042836678e-29,
+        "ks_hit_vs_s1hit_p": 1.9823306042836677e-27,
+        "intermediate_feasible": true
+      },
+      "attack": {
+        "asr": 1.0,
+        "exact_recovery_count": 5,
+        "n_victims": 5,
+        "asr_ci_95_lo": 0.5655,
+        "asr_ci_95_hi": 1.0,
+        "median_api_calls": 62.0,
+        "p95_api_calls": 96.8
+      },
+      "loader_stats": {
+        "n_tenants": 20,
+        "total_requests": 91147,
+        "total_errors": 0,
+        "mean_latency_s": 1.0415412108895798,
+        "aggregate_rps": 19.201808131948354,
+        "per_tenant": [
+          {
+            "tenant_id": 0,
+            "n_requests": 4558,
+            "n_errors": 0,
+            "throughput_rps": 0.9602251054936253
+          },
+          {
+            "tenant_id": 1,
+            "n_requests": 4558,
+            "n_errors": 0,
+            "throughput_rps": 0.960225271065195
+          },
+          {
+            "tenant_id": 2,
+            "n_requests": 4558,
+            "n_errors": 0,
+            "throughput_rps": 0.9602254810561347
+          },
+          {
+            "tenant_id": 3,
+            "n_requests": 4558,
+            "n_errors": 0,
+            "throughput_rps": 0.9602255093668174
+          },
+          {
+            "tenant_id": 4,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.96001492587123
+          },
+          {
+            "tenant_id": 5,
+            "n_requests": 4558,
+            "n_errors": 0,
+            "throughput_rps": 0.9602261977461615
+          },
+          {
+            "tenant_id": 6,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.9600156832456341
+          },
+          {
+            "tenant_id": 7,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.9600157409154982
+          },
+          {
+            "tenant_id": 8,
+            "n_requests": 4558,
+            "n_errors": 0,
+            "throughput_rps": 0.9602270575344579
+          },
+          {
+            "tenant_id": 9,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.960016632870517
+          },
+          {
+            "tenant_id": 10,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.9600167875090111
+          },
+          {
+            "tenant_id": 11,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.9600170978951877
+          },
+          {
+            "tenant_id": 12,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.9600172382127578
+          },
+          {
+            "tenant_id": 13,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.9600176112841047
+          },
+          {
+            "tenant_id": 14,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.9600179338702647
+          },
+          {
+            "tenant_id": 15,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.9600183201542163
+          },
+          {
+            "tenant_id": 16,
+            "n_requests": 4558,
+            "n_errors": 0,
+            "throughput_rps": 0.9602290560767521
+          },
+          {
+            "tenant_id": 17,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.9600185844437897
+          },
+          {
+            "tenant_id": 18,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.9600188777132879
+          },
+          {
+            "tenant_id": 19,
+            "n_requests": 4557,
+            "n_errors": 0,
+            "throughput_rps": 0.9600190035173745
+          }
+        ]
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 40,
+          "stage1_api_calls": 33,
+          "stage2_api_calls": 4
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 68,
+          "stage1_api_calls": 53,
+          "stage2_api_calls": 12
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 62,
+          "stage1_api_calls": 37,
+          "stage2_api_calls": 22
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 104,
+          "stage1_api_calls": 99,
+          "stage2_api_calls": 2
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 44,
+          "stage1_api_calls": 18,
+          "stage2_api_calls": 23
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-09-15T22:38:54.859219+00:00"
+}

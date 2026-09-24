@@ -3,7 +3,7 @@
     {
       "level": "L0",
       "n_tenants": 0,
-      "asr": 1.0
+      "asr": 0.9
     },
     {
       "level": "L1",
@@ -13,7 +13,7 @@
     {
       "level": "L2",
       "n_tenants": 5,
-      "asr": 0.6
+      "asr": 0.9
     },
     {
       "level": "L3",
@@ -23,7 +23,7 @@
     {
       "level": "L4",
       "n_tenants": 20,
-      "asr": 1.0
+      "asr": 0.9667
     }
   ]
 }

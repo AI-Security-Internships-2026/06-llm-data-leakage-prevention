@@ -1,0 +1,82 @@
+{
+  "run_id": "load-test-2026-09-15-963f972a",
+  "backend": "mock",
+  "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+  "n_victims": 5,
+  "seed": 42,
+  "levels": [
+    {
+      "level": "L0",
+      "n_tenants": 0,
+      "oracle": {
+        "hit_p50_ms": 88.2,
+        "hit_p95_ms": 91.9,
+        "hit_p99_ms": 92.9,
+        "miss_p50_ms": 575.7,
+        "miss_p95_ms": 581.4,
+        "miss_p99_ms": 584.7,
+        "roc_auc": 1.0,
+        "tpr_at_1pct_fpr": 1.0,
+        "tpr_at_5pct_fpr": 1.0,
+        "ks_stat": 1.0,
+        "n_hit_samples": 48,
+        "n_miss_samples": 48
+      },
+      "attack": {
+        "asr": 1.0,
+        "exact_recovery_count": 5,
+        "n_victims": 5,
+        "median_api_calls": 34.0,
+        "p95_api_calls": 80.19999999999999,
+        "wall_clock_s": 0.0,
+        "t1_adaptive_ms": 332.0
+      },
+      "loader_stats": {
+        "n_tenants": 0,
+        "total_requests": 0,
+        "total_errors": 0,
+        "mean_latency_s": 0.0,
+        "aggregate_rps": 0,
+        "per_tenant": []
+      },
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 20,
+          "stage1_api_calls": 11,
+          "stage2_api_calls": 9
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 37,
+          "stage1_api_calls": 33,
+          "stage2_api_calls": 4
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 34,
+          "stage1_api_calls": 20,
+          "stage2_api_calls": 14
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 9,
+          "stage1_api_calls": 2,
+          "stage2_api_calls": 7
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 91,
+          "stage1_api_calls": 90,
+          "stage2_api_calls": 1
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-09-15T03:23:46.636050Z"
+}
