@@ -1,0 +1,40 @@
+# configs/d5_defense_eval.yaml
+# Issue #10 — D5: Risk + Behavior Adaptive defense evaluation
+# D5 = D4 (risk-adaptive cache isolation) + Issue-8 probe behavior detection
+#
+# Entry point:
+#   python experiments/run_defense_eval.py --config configs/d5_defense_eval.yaml
+
+backend: vllm
+vllm_base_url:   "http://localhost:8001/v1"
+sglang_base_url: "http://localhost:8002/v1"
+model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+
+seed: 42
+
+# Workload: same synthetic sensitivity workload as Issue #7 and #9
+n_workload_per_category: 10   # 5 categories × 10 = 50 prompts total
+
+# Attack: two-stage adaptive (A2) for residual ASR measurement
+n_victims_per_policy: 30
+n_calibration: 50
+
+victim_tenant_id:   "tenant-victim"
+attacker_tenant_id: "tenant-attacker"
+
+# ── D5-specific settings ───────────────────────────────────────────────────────
+# D5 uses DynamicPolicyEngine from kv_attack.dynamic_policy
+# which combines risk_signal (D4) + probe_detector (Issue #8)
+policies:
+  - D0_no_defense          # baseline: no cache protection
+  - D4_risk_adaptive       # Issue #7 novel defense (for comparison)
+  - D5_risk_behavior       # Issue #10 proposed final: risk + behavior detection
+
+# Behavior detector thresholds (from Issue #8 probe_detection_eval config)
+behavior_detector:
+  threshold_med:      0.40   # suspicion score → MEDIUM alert
+  threshold_high:     0.65   # suspicion score → HIGH alert → immediate ISOLATE
+  cooldown_probes:    10     # probes to stay in ISOLATE after HIGH alert
+
+output:
+  dir: "experiments/results"

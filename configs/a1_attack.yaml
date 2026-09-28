@@ -1,0 +1,30 @@
+# configs/a1_attack.yaml
+# Issue #10 — A1: Existing Adaptive Attack (Week-12 algorithm)
+# Contrast with A2 (two_stage_adaptive) in configs/paper_attack.yaml
+#
+# Entry point:
+#   python experiments/run_kv_attack.py --config configs/a1_attack.yaml
+
+run:
+  description: "A1 existing adaptive attack (Week-12 adaptive_reconstructor)"
+  algorithm:   "adaptive"          # uses kv_attack.adaptive_reconstructor
+
+backend:
+  name:     "vllm"
+  base_url: "http://localhost:8001/v1"
+  model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+
+cache:
+  block_size:         16
+  enable_prefix_caching: true
+
+victims:
+  n_victims: 30
+  seed:      42
+
+calibration:
+  n_samples: 50
+
+output:
+  dir: "experiments/results"
+  tag: "a1_adaptive"

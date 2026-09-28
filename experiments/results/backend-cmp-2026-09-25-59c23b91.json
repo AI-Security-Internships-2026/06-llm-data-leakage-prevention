@@ -1,0 +1,738 @@
+{
+  "run_id": "backend-cmp-2026-09-25-59c23b91",
+  "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+  "n_victims": 30,
+  "seed": 42,
+  "backend_a": "vllm",
+  "backend_b": "sglang",
+  "status": "complete",
+  "characterizations": [
+    {
+      "backend": "vllm",
+      "framework_version": "vllm",
+      "hit_distribution": {
+        "mean_ms": 83.5
+      },
+      "miss_distribution": {
+        "mean_ms": 704.5
+      },
+      "s1_hit_mean_ms": 254.6,
+      "roc_auc": 0.9999,
+      "t1_empirical_ms": 476.8,
+      "t2_empirical_ms": 163.7,
+      "timing_gap_ms": 621.1,
+      "intermediate_feasible": "True",
+      "ks_hit_vs_miss_p": 1.9823306042836678e-29
+    },
+    {
+      "backend": "sglang",
+      "framework_version": "0.5.20",
+      "hit_distribution": {
+        "mean_ms": 167.6
+      },
+      "miss_distribution": {
+        "mean_ms": 725.5
+      },
+      "s1_hit_mean_ms": 256.8,
+      "roc_auc": 0.9999,
+      "t1_empirical_ms": 454.2,
+      "t2_empirical_ms": 205.7,
+      "timing_gap_ms": 557.9,
+      "intermediate_feasible": "True",
+      "ks_hit_vs_miss_p": 1.9823306042836678e-29
+    }
+  ],
+  "attack_summaries": [
+    {
+      "backend": "vllm",
+      "n_victims": 30,
+      "exact_recovery_count": 29,
+      "asr": 0.9667,
+      "asr_ci_95_lo": 0.8333,
+      "asr_ci_95_hi": 0.9941,
+      "median_api_calls": 79.5,
+      "p95_api_calls": 132.1,
+      "mean_api_calls": 75.2
+    },
+    {
+      "backend": "sglang",
+      "n_victims": 30,
+      "exact_recovery_count": 2,
+      "asr": 0.0667,
+      "asr_ci_95_lo": 0.0185,
+      "asr_ci_95_hi": 0.2132,
+      "median_api_calls": 59.5,
+      "p95_api_calls": 113.64999999999999,
+      "mean_api_calls": 57.5
+    }
+  ],
+  "raw_results": [
+    {
+      "backend": "vllm",
+      "results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 95
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 83
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 133
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 45
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 43
+        },
+        {
+          "victim_id": 5,
+          "exact_match": true,
+          "total_api_calls": 69
+        },
+        {
+          "victim_id": 6,
+          "exact_match": true,
+          "total_api_calls": 66
+        },
+        {
+          "victim_id": 7,
+          "exact_match": true,
+          "total_api_calls": 81
+        },
+        {
+          "victim_id": 8,
+          "exact_match": true,
+          "total_api_calls": 115
+        },
+        {
+          "victim_id": 9,
+          "exact_match": true,
+          "total_api_calls": 86
+        },
+        {
+          "victim_id": 10,
+          "exact_match": true,
+          "total_api_calls": 111
+        },
+        {
+          "victim_id": 11,
+          "exact_match": true,
+          "total_api_calls": 41
+        },
+        {
+          "victim_id": 12,
+          "exact_match": true,
+          "total_api_calls": 15
+        },
+        {
+          "victim_id": 13,
+          "exact_match": true,
+          "total_api_calls": 60
+        },
+        {
+          "victim_id": 14,
+          "exact_match": true,
+          "total_api_calls": 14
+        },
+        {
+          "victim_id": 15,
+          "exact_match": true,
+          "total_api_calls": 41
+        },
+        {
+          "victim_id": 16,
+          "exact_match": true,
+          "total_api_calls": 127
+        },
+        {
+          "victim_id": 17,
+          "exact_match": true,
+          "total_api_calls": 98
+        },
+        {
+          "victim_id": 18,
+          "exact_match": true,
+          "total_api_calls": 131
+        },
+        {
+          "victim_id": 19,
+          "exact_match": true,
+          "total_api_calls": 95
+        },
+        {
+          "victim_id": 20,
+          "exact_match": true,
+          "total_api_calls": 80
+        },
+        {
+          "victim_id": 21,
+          "exact_match": false,
+          "total_api_calls": 151
+        },
+        {
+          "victim_id": 22,
+          "exact_match": true,
+          "total_api_calls": 30
+        },
+        {
+          "victim_id": 23,
+          "exact_match": true,
+          "total_api_calls": 28
+        },
+        {
+          "victim_id": 24,
+          "exact_match": true,
+          "total_api_calls": 95
+        },
+        {
+          "victim_id": 25,
+          "exact_match": true,
+          "total_api_calls": 55
+        },
+        {
+          "victim_id": 26,
+          "exact_match": true,
+          "total_api_calls": 63
+        },
+        {
+          "victim_id": 27,
+          "exact_match": true,
+          "total_api_calls": 46
+        },
+        {
+          "victim_id": 28,
+          "exact_match": true,
+          "total_api_calls": 80
+        },
+        {
+          "victim_id": 29,
+          "exact_match": true,
+          "total_api_calls": 79
+        }
+      ]
+    },
+    {
+      "backend": "sglang",
+      "results": [
+        {
+          "victim_id": 0,
+          "exact_match": false,
+          "total_api_calls": 92
+        },
+        {
+          "victim_id": 1,
+          "exact_match": false,
+          "total_api_calls": 62
+        },
+        {
+          "victim_id": 2,
+          "exact_match": false,
+          "total_api_calls": 123
+        },
+        {
+          "victim_id": 3,
+          "exact_match": false,
+          "total_api_calls": 24
+        },
+        {
+          "victim_id": 4,
+          "exact_match": false,
+          "total_api_calls": 20
+        },
+        {
+          "victim_id": 5,
+          "exact_match": false,
+          "total_api_calls": 48
+        },
+        {
+          "victim_id": 6,
+          "exact_match": false,
+          "total_api_calls": 62
+        },
+        {
+          "victim_id": 7,
+          "exact_match": false,
+          "total_api_calls": 61
+        },
+        {
+          "victim_id": 8,
+          "exact_match": false,
+          "total_api_calls": 92
+        },
+        {
+          "victim_id": 9,
+          "exact_match": false,
+          "total_api_calls": 72
+        },
+        {
+          "victim_id": 10,
+          "exact_match": false,
+          "total_api_calls": 96
+        },
+        {
+          "victim_id": 11,
+          "exact_match": false,
+          "total_api_calls": 30
+        },
+        {
+          "victim_id": 12,
+          "exact_match": true,
+          "total_api_calls": 15
+        },
+        {
+          "victim_id": 13,
+          "exact_match": false,
+          "total_api_calls": 48
+        },
+        {
+          "victim_id": 14,
+          "exact_match": false,
+          "total_api_calls": 11
+        },
+        {
+          "victim_id": 15,
+          "exact_match": false,
+          "total_api_calls": 35
+        },
+        {
+          "victim_id": 16,
+          "exact_match": false,
+          "total_api_calls": 112
+        },
+        {
+          "victim_id": 17,
+          "exact_match": false,
+          "total_api_calls": 87
+        },
+        {
+          "victim_id": 18,
+          "exact_match": false,
+          "total_api_calls": 115
+        },
+        {
+          "victim_id": 19,
+          "exact_match": true,
+          "total_api_calls": 95
+        },
+        {
+          "victim_id": 20,
+          "exact_match": false,
+          "total_api_calls": 67
+        },
+        {
+          "victim_id": 21,
+          "exact_match": false,
+          "total_api_calls": 12
+        },
+        {
+          "victim_id": 22,
+          "exact_match": false,
+          "total_api_calls": 25
+        },
+        {
+          "victim_id": 23,
+          "exact_match": false,
+          "total_api_calls": 14
+        },
+        {
+          "victim_id": 24,
+          "exact_match": false,
+          "total_api_calls": 82
+        },
+        {
+          "victim_id": 25,
+          "exact_match": false,
+          "total_api_calls": 25
+        },
+        {
+          "victim_id": 26,
+          "exact_match": false,
+          "total_api_calls": 58
+        },
+        {
+          "victim_id": 27,
+          "exact_match": false,
+          "total_api_calls": 23
+        },
+        {
+          "victim_id": 28,
+          "exact_match": false,
+          "total_api_calls": 61
+        },
+        {
+          "victim_id": 29,
+          "exact_match": false,
+          "total_api_calls": 57
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-09-26T05:17:59.100894+00:00",
+  "partial_vllm": {
+    "characterization": {
+      "backend": "vllm",
+      "framework_version": "vllm",
+      "hit_distribution": {
+        "mean_ms": 83.5
+      },
+      "miss_distribution": {
+        "mean_ms": 704.5
+      },
+      "s1_hit_mean_ms": 254.6,
+      "roc_auc": 0.9999,
+      "t1_empirical_ms": 476.8,
+      "t2_empirical_ms": 163.7,
+      "timing_gap_ms": 621.1,
+      "intermediate_feasible": "True",
+      "ks_hit_vs_miss_p": 1.9823306042836678e-29
+    },
+    "n_victims_done": 30,
+    "n_victims_total": 30,
+    "exact_so_far": 29,
+    "asr_so_far": 0.9667,
+    "asr_ci_lo": 0.8333,
+    "asr_ci_hi": 0.9941,
+    "median_q_so_far": 79.5,
+    "raw_results": [
+      {
+        "victim_id": 0,
+        "exact_match": true,
+        "total_api_calls": 95
+      },
+      {
+        "victim_id": 1,
+        "exact_match": true,
+        "total_api_calls": 83
+      },
+      {
+        "victim_id": 2,
+        "exact_match": true,
+        "total_api_calls": 133
+      },
+      {
+        "victim_id": 3,
+        "exact_match": true,
+        "total_api_calls": 45
+      },
+      {
+        "victim_id": 4,
+        "exact_match": true,
+        "total_api_calls": 43
+      },
+      {
+        "victim_id": 5,
+        "exact_match": true,
+        "total_api_calls": 69
+      },
+      {
+        "victim_id": 6,
+        "exact_match": true,
+        "total_api_calls": 66
+      },
+      {
+        "victim_id": 7,
+        "exact_match": true,
+        "total_api_calls": 81
+      },
+      {
+        "victim_id": 8,
+        "exact_match": true,
+        "total_api_calls": 115
+      },
+      {
+        "victim_id": 9,
+        "exact_match": true,
+        "total_api_calls": 86
+      },
+      {
+        "victim_id": 10,
+        "exact_match": true,
+        "total_api_calls": 111
+      },
+      {
+        "victim_id": 11,
+        "exact_match": true,
+        "total_api_calls": 41
+      },
+      {
+        "victim_id": 12,
+        "exact_match": true,
+        "total_api_calls": 15
+      },
+      {
+        "victim_id": 13,
+        "exact_match": true,
+        "total_api_calls": 60
+      },
+      {
+        "victim_id": 14,
+        "exact_match": true,
+        "total_api_calls": 14
+      },
+      {
+        "victim_id": 15,
+        "exact_match": true,
+        "total_api_calls": 41
+      },
+      {
+        "victim_id": 16,
+        "exact_match": true,
+        "total_api_calls": 127
+      },
+      {
+        "victim_id": 17,
+        "exact_match": true,
+        "total_api_calls": 98
+      },
+      {
+        "victim_id": 18,
+        "exact_match": true,
+        "total_api_calls": 131
+      },
+      {
+        "victim_id": 19,
+        "exact_match": true,
+        "total_api_calls": 95
+      },
+      {
+        "victim_id": 20,
+        "exact_match": true,
+        "total_api_calls": 80
+      },
+      {
+        "victim_id": 21,
+        "exact_match": false,
+        "total_api_calls": 151
+      },
+      {
+        "victim_id": 22,
+        "exact_match": true,
+        "total_api_calls": 30
+      },
+      {
+        "victim_id": 23,
+        "exact_match": true,
+        "total_api_calls": 28
+      },
+      {
+        "victim_id": 24,
+        "exact_match": true,
+        "total_api_calls": 95
+      },
+      {
+        "victim_id": 25,
+        "exact_match": true,
+        "total_api_calls": 55
+      },
+      {
+        "victim_id": 26,
+        "exact_match": true,
+        "total_api_calls": 63
+      },
+      {
+        "victim_id": 27,
+        "exact_match": true,
+        "total_api_calls": 46
+      },
+      {
+        "victim_id": 28,
+        "exact_match": true,
+        "total_api_calls": 80
+      },
+      {
+        "victim_id": 29,
+        "exact_match": true,
+        "total_api_calls": 79
+      }
+    ]
+  },
+  "partial_sglang": {
+    "characterization": {
+      "backend": "sglang",
+      "framework_version": "0.5.20",
+      "hit_distribution": {
+        "mean_ms": 167.6
+      },
+      "miss_distribution": {
+        "mean_ms": 725.5
+      },
+      "s1_hit_mean_ms": 256.8,
+      "roc_auc": 0.9999,
+      "t1_empirical_ms": 454.2,
+      "t2_empirical_ms": 205.7,
+      "timing_gap_ms": 557.9,
+      "intermediate_feasible": "True",
+      "ks_hit_vs_miss_p": 1.9823306042836678e-29
+    },
+    "n_victims_done": 30,
+    "n_victims_total": 30,
+    "exact_so_far": 2,
+    "asr_so_far": 0.0667,
+    "asr_ci_lo": 0.0185,
+    "asr_ci_hi": 0.2132,
+    "median_q_so_far": 59.5,
+    "raw_results": [
+      {
+        "victim_id": 0,
+        "exact_match": false,
+        "total_api_calls": 92
+      },
+      {
+        "victim_id": 1,
+        "exact_match": false,
+        "total_api_calls": 62
+      },
+      {
+        "victim_id": 2,
+        "exact_match": false,
+        "total_api_calls": 123
+      },
+      {
+        "victim_id": 3,
+        "exact_match": false,
+        "total_api_calls": 24
+      },
+      {
+        "victim_id": 4,
+        "exact_match": false,
+        "total_api_calls": 20
+      },
+      {
+        "victim_id": 5,
+        "exact_match": false,
+        "total_api_calls": 48
+      },
+      {
+        "victim_id": 6,
+        "exact_match": false,
+        "total_api_calls": 62
+      },
+      {
+        "victim_id": 7,
+        "exact_match": false,
+        "total_api_calls": 61
+      },
+      {
+        "victim_id": 8,
+        "exact_match": false,
+        "total_api_calls": 92
+      },
+      {
+        "victim_id": 9,
+        "exact_match": false,
+        "total_api_calls": 72
+      },
+      {
+        "victim_id": 10,
+        "exact_match": false,
+        "total_api_calls": 96
+      },
+      {
+        "victim_id": 11,
+        "exact_match": false,
+        "total_api_calls": 30
+      },
+      {
+        "victim_id": 12,
+        "exact_match": true,
+        "total_api_calls": 15
+      },
+      {
+        "victim_id": 13,
+        "exact_match": false,
+        "total_api_calls": 48
+      },
+      {
+        "victim_id": 14,
+        "exact_match": false,
+        "total_api_calls": 11
+      },
+      {
+        "victim_id": 15,
+        "exact_match": false,
+        "total_api_calls": 35
+      },
+      {
+        "victim_id": 16,
+        "exact_match": false,
+        "total_api_calls": 112
+      },
+      {
+        "victim_id": 17,
+        "exact_match": false,
+        "total_api_calls": 87
+      },
+      {
+        "victim_id": 18,
+        "exact_match": false,
+        "total_api_calls": 115
+      },
+      {
+        "victim_id": 19,
+        "exact_match": true,
+        "total_api_calls": 95
+      },
+      {
+        "victim_id": 20,
+        "exact_match": false,
+        "total_api_calls": 67
+      },
+      {
+        "victim_id": 21,
+        "exact_match": false,
+        "total_api_calls": 12
+      },
+      {
+        "victim_id": 22,
+        "exact_match": false,
+        "total_api_calls": 25
+      },
+      {
+        "victim_id": 23,
+        "exact_match": false,
+        "total_api_calls": 14
+      },
+      {
+        "victim_id": 24,
+        "exact_match": false,
+        "total_api_calls": 82
+      },
+      {
+        "victim_id": 25,
+        "exact_match": false,
+        "total_api_calls": 25
+      },
+      {
+        "victim_id": 26,
+        "exact_match": false,
+        "total_api_calls": 58
+      },
+      {
+        "victim_id": 27,
+        "exact_match": false,
+        "total_api_calls": 23
+      },
+      {
+        "victim_id": 28,
+        "exact_match": false,
+        "total_api_calls": 61
+      },
+      {
+        "victim_id": 29,
+        "exact_match": false,
+        "total_api_calls": 57
+      }
+    ]
+  }
+}
