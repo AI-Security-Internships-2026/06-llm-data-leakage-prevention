@@ -1,16 +1,4 @@
-"""
-kv_attack.backends.vllm_backend
-================================
-Backend adapter for vLLM ≥ 0.27.x OpenAI-compatible API.
 
-Measures TTFT by streaming completions and stopping after the first chunk.
-This mirrors exactly the measurement technique in attacker.py (Weeks 10–11).
-
-APC detection
--------------
-Queries /metrics (Prometheus) for ``vllm:gpu_prefix_cache_hit_rate_perc``.
-If the metric is absent the constructor still succeeds but logs a warning.
-"""
 
 from __future__ import annotations
 
@@ -36,13 +24,17 @@ class VLLMBackend(BackendClient):
     """
 
     FRAMEWORK     = "vllm"
-    FRAMEWORK_VER = "0.27.1"
+    FRAMEWORK_VER = "0.27.1"   # pinned; bumped if the server reports otherwise
 
     def __init__(self, base_url: str, model_id: str):
         self.base_url = base_url
         self.model_id = model_id
+        # Explicit timeout — without this, a stalled/never-closing stream
+        # can hang the client indefinitely with no error (same class of
+        # bug observed and fixed on the SGLang backend).
         self._client  = OpenAI(base_url=base_url, api_key="EMPTY", timeout=30.0, max_retries=1)
 
+    # ── Abstract interface ─────────────────────────────────────────────────────
 
     def health_check(self) -> bool:
         try:
@@ -121,6 +113,7 @@ class VLLMBackend(BackendClient):
             return 9999.0
         return value
 
+    # ── Helpers ────────────────────────────────────────────────────────────────
 
     def _detect_apc(self) -> bool:
         """Query Prometheus /metrics to detect whether APC is on."""
@@ -131,7 +124,12 @@ class VLLMBackend(BackendClient):
             )
             with urllib.request.urlopen(metrics_url, timeout=5) as resp:
                 text = resp.read().decode()
-            found = "vllm:gpu_prefix_cache_hit_rate_perc" in text
+            # vLLM >=0.6 renamed the gauge to cumulative counters.
+            # Accept either name so the check works across versions.
+            found = (
+                "vllm:prefix_cache_queries_total" in text          # vLLM >= 0.6
+                or "vllm:gpu_prefix_cache_hit_rate_perc" in text   # vLLM <  0.6
+            )
             if not found:
                 print("[VLLMBackend] ⚠ APC metric not found in /metrics — "
                       "APC may be disabled.")

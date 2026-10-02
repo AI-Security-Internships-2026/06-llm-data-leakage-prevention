@@ -1,43 +1,3 @@
-"""
-kv_attack.backends.sglang_backend
-===================================
-Issue #6 — SGLang backend adapter.
-
-SGLang (https://github.com/sgl-project/sglang) exposes an OpenAI-compatible
-API on /v1/completions and /v1/chat/completions, similar to vLLM.
-
-Key differences from vLLM:
-  - Prefix cache: SGLang uses a RadixAttention cache (radix tree) rather than
-    vLLM's block-level APC. Semantics are similar but NOT identical:
-      * vLLM reuses KV blocks aligned to BLOCK_SIZE (16 tokens).
-      * SGLang reuses any common prefix up to the last complete chunk boundary.
-    This means block alignment assumptions in two_stage_victim_seeder.py
-    may need to be verified empirically on SGLang.
-  - Health endpoint: /health  (same as vLLM ≥ 0.27)
-  - Metrics: /get_server_info (not Prometheus /metrics)
-  - Model info: /v1/models  (same)
-
-Usage
------
-    from kv_attack.backends.sglang_backend import SGLangBackend
-    backend = SGLangBackend(
-        base_url="http://localhost:8002/v1",
-        model_id="deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
-    )
-    ttft = backend.measure_ttft("Hello world")
-
-Starting SGLang
----------------
-    pip install sglang[all]
-    python -m sglang.launch_server \\
-        --model-path deepseek-ai/DeepSeek-R1-Distill-Llama-8B \\
-        --port 8002 \\
-        --mem-fraction-static 0.85 \\
-        --enable-flashinfer
-
-NOTE: SGLang prefix caching is enabled by default (no extra flag needed).
-"""
-
 from __future__ import annotations
 
 import json
@@ -66,9 +26,13 @@ class SGLangBackend(BackendClient):
     def __init__(self, base_url: str, model_id: str):
         self.base_url = base_url
         self.model_id = model_id
+        # Explicit timeout — without this, a stalled/never-closing stream
+        # can hang the client indefinitely with no error (observed on
+        # SGLang 0.5.19 under certain repeated-identical-prompt conditions).
         self._client  = OpenAI(base_url=base_url, api_key="EMPTY", timeout=30.0, max_retries=1)
         self._version = self._detect_version()
 
+    # ── BackendClient interface ───────────────────────────────────────────────
 
     def health_check(self) -> bool:
         """Return True if SGLang server is reachable and healthy."""
@@ -100,7 +64,7 @@ class SGLangBackend(BackendClient):
             framework_ver = self._version,
             model_id      = self.model_id,
             base_url      = self.base_url,
-            apc_enabled   = True,
+            apc_enabled   = True,   # SGLang RadixAttention is always on
             extra         = extra,
         )
 
@@ -129,12 +93,16 @@ class SGLangBackend(BackendClient):
                 stream      = False,
             )
         except Exception as exc:
+            # Timeout or transport error — return a large sentinel value so
+            # calibration/attack code treats this as an unambiguous "miss"
+            # rather than crashing the whole run.
             elapsed_ms = (time.perf_counter() - t0) * 1000.0
             print(f"[sglang_backend] WARNING: request failed after "
                   f"{elapsed_ms:.0f}ms ({exc!r}); treating as miss (9999ms)")
             return 9999.0
         return (time.perf_counter() - t0) * 1000.0
 
+    # ── Internal ──────────────────────────────────────────────────────────────
 
     def _detect_version(self) -> str:
         """Try to detect SGLang version from /get_server_info."""

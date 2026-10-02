@@ -1,37 +1,4 @@
-"""
-kv_attack.backends.two_stage_mock_backend
-==========================================
-Two-stage-aware mock backend for pipeline validation.
 
-Unlike ``MockBackend`` (which hashes the full prompt), this backend
-understands the two-stage prompt structure and returns TTFT distributions
-that match what a real vLLM server would return for each cache-state:
-
-  FULL MISS   — attacker probe has wrong name AND wrong condition
-                Both block regions miss → TTFT ≈ miss_ttft_ms
-
-  S1-HIT      — attacker probe has RIGHT name but WRONG/DUMMY condition
-                Name blocks (128 of 192) hit → TTFT ≈ t_s1_hit_ms
-
-  FULL HIT    — attacker probe has right name AND right condition
-                All 192 blocks hit → TTFT ≈ hit_ttft_ms
-
-The backend uses the sentinel strings injected by
-``two_stage_victim_seeder`` to classify each probe without needing
-a real tokenizer or GPU.
-
-Sentinel contract (must match two_stage_victim_seeder.py):
-  NAME_SENTINEL   = "||NAME_SENTINEL::{name}||"
-  COND_SENTINEL   = "||COND_SENTINEL::{condition}||"
-  VICTIM_KEY      = "||VICTIM::{victim_id}||"
-
-Usage
------
-    from kv_attack.backends.two_stage_mock_backend import TwoStageMockBackend
-    backend = TwoStageMockBackend(seed=42)
-    backend.seed_victim(victim_id=0, name="Mary Smith", condition="hypothyroidism")
-    ttft = backend.measure_ttft(probe_prompt)
-"""
 
 from __future__ import annotations
 
@@ -42,6 +9,7 @@ import numpy as np
 from kv_attack.backends.base import BackendClient, BackendInfo
 
 
+# ── Sentinel patterns (must match two_stage_victim_seeder) ────────────────────
 _NAME_RE   = re.compile(r"\|\|NAME_SENTINEL::([^|]+)\|\|")
 _COND_RE   = re.compile(r"\|\|COND_SENTINEL::([^|]+)\|\|")
 _VICTIM_RE = re.compile(r"\|\|VICTIM::(\d+)\|\|")
@@ -76,8 +44,10 @@ class TwoStageMockBackend(BackendClient):
         self.noise_std_ms   = noise_std_ms
         self.apc_enabled    = apc_enabled
         self._rng           = np.random.default_rng(seed)
+        # victim_id → {"name": str, "condition": str}
         self._victims: dict[int, dict[str, str]] = {}
 
+    # ── Victim seeding ────────────────────────────────────────────────────────
 
     def seed_victim(self, victim_id: int, name: str, condition: str) -> None:
         """Register a victim so their blocks appear in the mock cache."""
@@ -87,6 +57,7 @@ class TwoStageMockBackend(BackendClient):
         """Evict a victim's blocks from the mock cache."""
         self._victims.pop(victim_id, None)
 
+    # ── BackendClient interface ───────────────────────────────────────────────
 
     def health_check(self) -> bool:
         return True
@@ -125,14 +96,17 @@ class TwoStageMockBackend(BackendClient):
         victim_m = _VICTIM_RE.search(prompt)
 
         if name_m is None:
+            # calibration or eviction filler — always miss
             return self._sample(self.miss_ttft_ms)
 
         probe_name = name_m.group(1).strip()
 
+        # Find the active victim for this probe
         if victim_m is not None:
             vid = int(victim_m.group(1))
             victim = self._victims.get(vid)
         else:
+            # Fall back to checking all cached victims
             victim = next(iter(self._victims.values()), None) if len(self._victims) == 1 else None
 
         if victim is None:
@@ -143,6 +117,7 @@ class TwoStageMockBackend(BackendClient):
         if not name_hit:
             return self._sample(self.miss_ttft_ms)
 
+        # Name matched — Stage 1 hit. Now check condition.
         probe_cond = cond_m.group(1).strip() if cond_m else None
         if probe_cond is None or probe_cond == "__DUMMY__":
             return self._sample(self.s1_hit_ttft_ms)
