@@ -1,0 +1,796 @@
+{
+  "run_id": "ablation-2026-09-30-92477891",
+  "issue": 10,
+  "study": "ablation",
+  "backend": "vllm",
+  "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+  "base_url": "http://localhost:8001/v1",
+  "n_victims": 5,
+  "n_calib": 50,
+  "seed": 42,
+  "simulated_clock_interval_s": 30.0,
+  "provenance": {
+    "command": "experiments/run_ablation.py --backend vllm --base-url http://localhost:8001/v1 --n-victims 5 --seed 42 --sim-interval-s 30",
+    "git_commit": "7b0810265c1d73e7af132e1ec15401c9ed3fb560",
+    "git_dirty": true,
+    "python": "3.12.3",
+    "platform": "Linux-6.14.0-1013-nvidia-aarch64-with-glibc2.39",
+    "hostname": "spark-6e5e",
+    "gpu": "NVIDIA GB10, 580.95.05, [N/A]"
+  },
+  "conditions_config": {
+    "AB0_none": {
+      "description": "No content detector, no behavior detection (D0 baseline)",
+      "use_content_risk": false,
+      "use_confidence": false,
+      "use_behavior": false,
+      "default_action": "SHARE"
+    },
+    "AB1_content_only": {
+      "description": "Content risk detector only (Presidio NER, no confidence gate)",
+      "use_content_risk": true,
+      "use_confidence": false,
+      "use_behavior": false,
+      "confidence_threshold": null
+    },
+    "AB2_content_confidence": {
+      "description": "Content risk + confidence threshold (= D4 risk-adaptive)",
+      "use_content_risk": true,
+      "use_confidence": true,
+      "use_behavior": false,
+      "confidence_threshold": 0.7
+    },
+    "AB3_behavior_only": {
+      "description": "Behavior/probe detection only (no content risk gate)",
+      "use_content_risk": false,
+      "use_confidence": false,
+      "use_behavior": true,
+      "threshold_med": 0.4,
+      "threshold_high": 0.65
+    },
+    "FULL_all_components": {
+      "description": "All components: content risk + confidence + behavior (= D5)",
+      "use_content_risk": true,
+      "use_confidence": true,
+      "use_behavior": true,
+      "confidence_threshold": 0.7,
+      "threshold_med": 0.4,
+      "threshold_high": 0.65
+    }
+  },
+  "results": [
+    {
+      "condition": "AB0_none",
+      "description": "No content detector, no behavior detection (D0 baseline)",
+      "n_victims": 5,
+      "exact": 5,
+      "asr": 1.0,
+      "asr_ci_lo": 0.5655,
+      "asr_ci_hi": 1.0,
+      "isolation_fraction": 0.0,
+      "blocked_by_content": 0,
+      "blocked_by_behavior": 0,
+      "median_probes_before_block": null,
+      "cache_decisions": {
+        "SHARE": 5,
+        "RESTRICT": 0,
+        "ISOLATE": 0
+      },
+      "median_api_calls": 83.0,
+      "p95_api_calls": 125.39999999999999,
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 95,
+          "blocked_by": null,
+          "risk_level": "LOW",
+          "probes_seen": null,
+          "max_suspicion": null
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 83,
+          "blocked_by": null,
+          "risk_level": "LOW",
+          "probes_seen": null,
+          "max_suspicion": null
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 133,
+          "blocked_by": null,
+          "risk_level": "LOW",
+          "probes_seen": null,
+          "max_suspicion": null
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 45,
+          "blocked_by": null,
+          "risk_level": "LOW",
+          "probes_seen": null,
+          "max_suspicion": null
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 43,
+          "blocked_by": null,
+          "risk_level": "LOW",
+          "probes_seen": null,
+          "max_suspicion": null
+        }
+      ]
+    },
+    {
+      "condition": "AB1_content_only",
+      "description": "Content risk detector only (Presidio NER, no confidence gate)",
+      "n_victims": 5,
+      "exact": 0,
+      "asr": 0.0,
+      "asr_ci_lo": 0.0,
+      "asr_ci_hi": 0.4345,
+      "isolation_fraction": 1.0,
+      "blocked_by_content": 5,
+      "blocked_by_behavior": 0,
+      "median_probes_before_block": null,
+      "cache_decisions": {
+        "SHARE": 0,
+        "RESTRICT": 0,
+        "ISOLATE": 5
+      },
+      "median_api_calls": 0,
+      "p95_api_calls": 0,
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 1,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 2,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 3,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 4,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        }
+      ]
+    },
+    {
+      "condition": "AB2_content_confidence",
+      "description": "Content risk + confidence threshold (= D4 risk-adaptive)",
+      "n_victims": 5,
+      "exact": 0,
+      "asr": 0.0,
+      "asr_ci_lo": 0.0,
+      "asr_ci_hi": 0.4345,
+      "isolation_fraction": 1.0,
+      "blocked_by_content": 5,
+      "blocked_by_behavior": 0,
+      "median_probes_before_block": null,
+      "cache_decisions": {
+        "SHARE": 0,
+        "RESTRICT": 0,
+        "ISOLATE": 5
+      },
+      "median_api_calls": 0,
+      "p95_api_calls": 0,
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 1,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 2,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 3,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 4,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        }
+      ]
+    },
+    {
+      "condition": "AB3_behavior_only",
+      "description": "Behavior/probe detection only (no content risk gate)",
+      "n_victims": 5,
+      "exact": 5,
+      "asr": 1.0,
+      "asr_ci_lo": 0.5655,
+      "asr_ci_hi": 1.0,
+      "isolation_fraction": 0.0,
+      "blocked_by_content": 0,
+      "blocked_by_behavior": 0,
+      "median_probes_before_block": null,
+      "cache_decisions": {
+        "SHARE": 5,
+        "RESTRICT": 0,
+        "ISOLATE": 0
+      },
+      "median_api_calls": 83.0,
+      "p95_api_calls": 125.39999999999999,
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 95,
+          "blocked_by": null,
+          "risk_level": "LOW",
+          "probes_seen": 74,
+          "max_suspicion": 0.5
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 83,
+          "blocked_by": null,
+          "risk_level": "LOW",
+          "probes_seen": 64,
+          "max_suspicion": 0.5
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 133,
+          "blocked_by": null,
+          "risk_level": "LOW",
+          "probes_seen": 104,
+          "max_suspicion": 0.5
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 45,
+          "blocked_by": null,
+          "risk_level": "LOW",
+          "probes_seen": 34,
+          "max_suspicion": 0.5
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 43,
+          "blocked_by": null,
+          "risk_level": "LOW",
+          "probes_seen": 32,
+          "max_suspicion": 0.5
+        }
+      ]
+    },
+    {
+      "condition": "FULL_all_components",
+      "description": "All components: content risk + confidence + behavior (= D5)",
+      "n_victims": 5,
+      "exact": 0,
+      "asr": 0.0,
+      "asr_ci_lo": 0.0,
+      "asr_ci_hi": 0.4345,
+      "isolation_fraction": 1.0,
+      "blocked_by_content": 5,
+      "blocked_by_behavior": 0,
+      "median_probes_before_block": null,
+      "cache_decisions": {
+        "SHARE": 0,
+        "RESTRICT": 0,
+        "ISOLATE": 5
+      },
+      "median_api_calls": 0,
+      "p95_api_calls": 0,
+      "raw_results": [
+        {
+          "victim_id": 0,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 1,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 2,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 3,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        },
+        {
+          "victim_id": 4,
+          "exact_match": false,
+          "total_api_calls": 0,
+          "blocked_by": "CONTENT",
+          "risk_level": "HIGH",
+          "raw_risk_level": "HIGH",
+          "detector_confidence": 0.85,
+          "entity_types": [
+            "PERSON"
+          ]
+        }
+      ]
+    }
+  ],
+  "status": "complete",
+  "timestamp": "2026-09-30T05:35:51.719318+00:00",
+  "calibration": {
+    "t1_ms": 455.6554,
+    "t2_ms": 161.2529,
+    "hit_mean_ms": 87.7625,
+    "miss_mean_ms": 678.2159
+  },
+  "partial_AB0_none": {
+    "n_done": 5,
+    "n_total": 5,
+    "exact": 5,
+    "asr_so_far": 1.0,
+    "ci_lo": 0.5655,
+    "ci_hi": 1.0,
+    "cache_decisions": {
+      "SHARE": 5,
+      "RESTRICT": 0,
+      "ISOLATE": 0
+    },
+    "raw_results": [
+      {
+        "victim_id": 0,
+        "exact_match": true,
+        "total_api_calls": 95,
+        "blocked_by": null,
+        "risk_level": "LOW",
+        "probes_seen": null,
+        "max_suspicion": null
+      },
+      {
+        "victim_id": 1,
+        "exact_match": true,
+        "total_api_calls": 83,
+        "blocked_by": null,
+        "risk_level": "LOW",
+        "probes_seen": null,
+        "max_suspicion": null
+      },
+      {
+        "victim_id": 2,
+        "exact_match": true,
+        "total_api_calls": 133,
+        "blocked_by": null,
+        "risk_level": "LOW",
+        "probes_seen": null,
+        "max_suspicion": null
+      },
+      {
+        "victim_id": 3,
+        "exact_match": true,
+        "total_api_calls": 45,
+        "blocked_by": null,
+        "risk_level": "LOW",
+        "probes_seen": null,
+        "max_suspicion": null
+      },
+      {
+        "victim_id": 4,
+        "exact_match": true,
+        "total_api_calls": 43,
+        "blocked_by": null,
+        "risk_level": "LOW",
+        "probes_seen": null,
+        "max_suspicion": null
+      }
+    ]
+  },
+  "partial_AB1_content_only": {
+    "n_done": 5,
+    "n_total": 5,
+    "exact": 0,
+    "asr_so_far": 0.0,
+    "ci_lo": 0.0,
+    "ci_hi": 0.4345,
+    "cache_decisions": {
+      "SHARE": 0,
+      "RESTRICT": 0,
+      "ISOLATE": 5
+    },
+    "raw_results": [
+      {
+        "victim_id": 0,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 1,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 2,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 3,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 4,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      }
+    ]
+  },
+  "partial_AB2_content_confidence": {
+    "n_done": 5,
+    "n_total": 5,
+    "exact": 0,
+    "asr_so_far": 0.0,
+    "ci_lo": 0.0,
+    "ci_hi": 0.4345,
+    "cache_decisions": {
+      "SHARE": 0,
+      "RESTRICT": 0,
+      "ISOLATE": 5
+    },
+    "raw_results": [
+      {
+        "victim_id": 0,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 1,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 2,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 3,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 4,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      }
+    ]
+  },
+  "partial_AB3_behavior_only": {
+    "n_done": 5,
+    "n_total": 5,
+    "exact": 5,
+    "asr_so_far": 1.0,
+    "ci_lo": 0.5655,
+    "ci_hi": 1.0,
+    "cache_decisions": {
+      "SHARE": 5,
+      "RESTRICT": 0,
+      "ISOLATE": 0
+    },
+    "raw_results": [
+      {
+        "victim_id": 0,
+        "exact_match": true,
+        "total_api_calls": 95,
+        "blocked_by": null,
+        "risk_level": "LOW",
+        "probes_seen": 74,
+        "max_suspicion": 0.5
+      },
+      {
+        "victim_id": 1,
+        "exact_match": true,
+        "total_api_calls": 83,
+        "blocked_by": null,
+        "risk_level": "LOW",
+        "probes_seen": 64,
+        "max_suspicion": 0.5
+      },
+      {
+        "victim_id": 2,
+        "exact_match": true,
+        "total_api_calls": 133,
+        "blocked_by": null,
+        "risk_level": "LOW",
+        "probes_seen": 104,
+        "max_suspicion": 0.5
+      },
+      {
+        "victim_id": 3,
+        "exact_match": true,
+        "total_api_calls": 45,
+        "blocked_by": null,
+        "risk_level": "LOW",
+        "probes_seen": 34,
+        "max_suspicion": 0.5
+      },
+      {
+        "victim_id": 4,
+        "exact_match": true,
+        "total_api_calls": 43,
+        "blocked_by": null,
+        "risk_level": "LOW",
+        "probes_seen": 32,
+        "max_suspicion": 0.5
+      }
+    ]
+  },
+  "partial_FULL_all_components": {
+    "n_done": 5,
+    "n_total": 5,
+    "exact": 0,
+    "asr_so_far": 0.0,
+    "ci_lo": 0.0,
+    "ci_hi": 0.4345,
+    "cache_decisions": {
+      "SHARE": 0,
+      "RESTRICT": 0,
+      "ISOLATE": 5
+    },
+    "raw_results": [
+      {
+        "victim_id": 0,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 1,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 2,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 3,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      },
+      {
+        "victim_id": 4,
+        "exact_match": false,
+        "total_api_calls": 0,
+        "blocked_by": "CONTENT",
+        "risk_level": "HIGH",
+        "raw_risk_level": "HIGH",
+        "detector_confidence": 0.85,
+        "entity_types": [
+          "PERSON"
+        ]
+      }
+    ]
+  }
+}

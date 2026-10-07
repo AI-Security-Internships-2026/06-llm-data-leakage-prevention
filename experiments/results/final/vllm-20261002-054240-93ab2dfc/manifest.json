@@ -1,0 +1,199 @@
+{
+  "run_id": "vllm-20261002-054240-93ab2dfc",
+  "backend_kind": "real",
+  "backend": "vllm",
+  "issue": 10,
+  "profile": "smoke",
+  "profile_values": {
+    "seeds": [
+      42,
+      43
+    ],
+    "n_victims": {
+      "A2": 3,
+      "A1": 2,
+      "A0": 1
+    },
+    "n_perf_requests": 60
+  },
+  "config_path": "configs/final_benchmark.yaml",
+  "config": {
+    "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+    "order_seed": 20260930,
+    "n_calibration": 50,
+    "n_oracle_victims": 20,
+    "profiles": {
+      "smoke": {
+        "seeds": [
+          42,
+          43
+        ],
+        "n_victims": {
+          "A2": 3,
+          "A1": 2,
+          "A0": 1
+        },
+        "n_perf_requests": 60
+      },
+      "standard": {
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "n_victims": {
+          "A2": 6,
+          "A1": 3,
+          "A0": 2
+        },
+        "n_perf_requests": 300
+      },
+      "full": {
+        "seeds": [
+          42,
+          43,
+          44,
+          45,
+          46
+        ],
+        "n_victims": {
+          "A2": 10,
+          "A1": 5,
+          "A0": 3
+        },
+        "n_perf_requests": 600
+      }
+    },
+    "core": [
+      {
+        "attack": "A2",
+        "defenses": [
+          "D0_no_defense",
+          "D1_full_isolation",
+          "D2_tenant_salt",
+          "D3_binary_pii",
+          "D4_risk_adaptive",
+          "D5_risk_behavior"
+        ]
+      },
+      {
+        "attack": "A1",
+        "defenses": [
+          "D0_no_defense",
+          "D4_risk_adaptive",
+          "D5_risk_behavior"
+        ]
+      },
+      {
+        "attack": "A0",
+        "defenses": [
+          "D0_no_defense",
+          "D5_risk_behavior"
+        ]
+      }
+    ],
+    "fn_sweep": {
+      "attack": "A2",
+      "defenses": [
+        "D4_risk_adaptive",
+        "D5_risk_behavior"
+      ],
+      "fnr": [
+        0.1,
+        0.3,
+        0.5,
+        1.0
+      ]
+    },
+    "ablation": {
+      "attack": "A2",
+      "fnr": [
+        0.0,
+        0.3
+      ],
+      "conditions": [
+        "AB0_none",
+        "AB1_content_only",
+        "AB2_content_confidence",
+        "AB3_behavior_only",
+        "FULL_all_components"
+      ]
+    },
+    "load": {
+      "attack": "A2",
+      "defenses": [
+        "D0_no_defense",
+        "D5_risk_behavior"
+      ],
+      "levels": {
+        "L0": 0,
+        "L1": 2,
+        "L2": 8,
+        "L3": 16
+      }
+    },
+    "perf": {
+      "defenses": [
+        "D0_no_defense",
+        "D1_full_isolation",
+        "D2_tenant_salt",
+        "D3_binary_pii",
+        "D4_risk_adaptive",
+        "D5_risk_behavior",
+        "AB2_content_confidence",
+        "AB3_behavior_only"
+      ],
+      "load_levels": [
+        "L0",
+        "L1",
+        "L2",
+        "L3"
+      ],
+      "n_benign_tenants": 6,
+      "n_documents": 8,
+      "document_blocks": 40,
+      "p_sensitive": 0.3,
+      "concurrency": 4
+    },
+    "behavior_detector": {
+      "threshold_med": 0.4,
+      "threshold_high": 0.65,
+      "cooldown_probes": 10
+    },
+    "confidence_gate": 0.7,
+    "aliases": {
+      "AB0_none": "D0_no_defense",
+      "AB1_content_only": "D4_risk_adaptive",
+      "FULL_all_components": "D5_risk_behavior"
+    }
+  },
+  "config_sha256": "edda0fce75b84745858dcdd93359519dd5eaa4d3b071c1350f49e75dcc3dab30",
+  "command": "/home/hashim/06-llm-data-leakage-prevention/.venv/bin/python3 experiments/run_final_benchmark.py --backend vllm --base-url http://localhost:8001/v1 --profile smoke --out-root experiments/results/final",
+  "server_flags": "",
+  "risk_model": "presidio",
+  "backend_info": {
+    "backend_name": "vllm",
+    "framework": "vllm",
+    "framework_ver": "0.27.1",
+    "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+    "base_url": "http://localhost:8001/v1",
+    "apc_enabled": false,
+    "extra": {
+      "apc_metric_found": false
+    }
+  },
+  "git_commit": "7b0810265c1d73e7af132e1ec15401c9ed3fb560",
+  "git_dirty": true,
+  "hardware": {
+    "python": "3.12.3",
+    "platform": "Linux-6.14.0-1013-nvidia-aarch64-with-glibc2.39",
+    "hostname": "spark-6e5e",
+    "cpu_count": 20,
+    "gpu": "NVIDIA GB10, 580.95.05, [N/A]"
+  },
+  "status": "ABORTED_PREFLIGHT",
+  "started_utc": "2026-10-02T05:42:40.456586+00:00",
+  "preflight_problems": [
+    "backend reports apc_enabled=False"
+  ]
+}

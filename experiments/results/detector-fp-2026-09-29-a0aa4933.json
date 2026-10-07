@@ -1,0 +1,135 @@
+{
+  "run_id": "detector-fp-2026-09-29-a0aa4933",
+  "study": "detector_fp_check",
+  "synthetic": true,
+  "seed": 42,
+  "n_sessions": 200,
+  "probes_per_session": 60,
+  "thr_med": 0.4,
+  "thr_high": 0.65,
+  "command": "experiments/detector_fp_check.py --n-sessions 200 --seed 42",
+  "git_commit": "7b0810265c1d73e7af132e1ec15401c9ed3fb560",
+  "platform": "Linux-6.14.0-1013-nvidia-aarch64-with-glibc2.39",
+  "results": [
+    {
+      "scenario": "benign_diverse_chat",
+      "label": "BENIGN",
+      "n_sessions": 200,
+      "alert_rate": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0188,
+      "median_probes_to_alert": null,
+      "mean_final_features": {
+        "repeated_prefix": 0.032,
+        "high_frequency": 0.0,
+        "substitution": 0.035,
+        "miss_streak": 0.118
+      }
+    },
+    {
+      "scenario": "benign_templated_app",
+      "label": "BENIGN",
+      "n_sessions": 200,
+      "alert_rate": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0188,
+      "median_probes_to_alert": null,
+      "mean_final_features": {
+        "repeated_prefix": 0.022,
+        "high_frequency": 0.034,
+        "substitution": 1.0,
+        "miss_streak": 0.119
+      }
+    },
+    {
+      "scenario": "benign_batch_job",
+      "label": "BENIGN",
+      "n_sessions": 200,
+      "alert_rate": 0.065,
+      "ci_lo": 0.0384,
+      "ci_hi": 0.108,
+      "median_probes_to_alert": 3.0,
+      "mean_final_features": {
+        "repeated_prefix": 0.054,
+        "high_frequency": 1.0,
+        "substitution": 1.0,
+        "miss_streak": 0.09
+      }
+    },
+    {
+      "scenario": "benign_long_template_slow",
+      "label": "BENIGN",
+      "n_sessions": 200,
+      "alert_rate": 1.0,
+      "ci_lo": 0.9812,
+      "ci_hi": 1.0,
+      "median_probes_to_alert": 7.0,
+      "mean_final_features": {
+        "repeated_prefix": 1.0,
+        "high_frequency": 0.0,
+        "substitution": 1.0,
+        "miss_streak": 0.203
+      }
+    },
+    {
+      "scenario": "attacker_fast",
+      "label": "ATTACK",
+      "n_sessions": 200,
+      "alert_rate": 1.0,
+      "ci_lo": 0.9812,
+      "ci_hi": 1.0,
+      "median_probes_to_alert": 5.0,
+      "mean_final_features": {
+        "repeated_prefix": 0.0,
+        "high_frequency": 1.0,
+        "substitution": 1.0,
+        "miss_streak": 1.0
+      }
+    },
+    {
+      "scenario": "attacker_paced",
+      "label": "ATTACK",
+      "n_sessions": 200,
+      "alert_rate": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0188,
+      "median_probes_to_alert": null,
+      "mean_final_features": {
+        "repeated_prefix": 0.0,
+        "high_frequency": 0.0,
+        "substitution": 1.0,
+        "miss_streak": 0.742
+      }
+    },
+    {
+      "scenario": "attacker_paced_longprompt",
+      "label": "ATTACK",
+      "n_sessions": 200,
+      "alert_rate": 1.0,
+      "ci_lo": 0.9812,
+      "ci_hi": 1.0,
+      "median_probes_to_alert": 2.0,
+      "mean_final_features": {
+        "repeated_prefix": 1.0,
+        "high_frequency": 0.0,
+        "substitution": 1.0,
+        "miss_streak": 0.36
+      }
+    },
+    {
+      "scenario": "attacker_paced_shuffled",
+      "label": "ATTACK",
+      "n_sessions": 200,
+      "alert_rate": 0.02,
+      "ci_lo": 0.0078,
+      "ci_hi": 0.0503,
+      "median_probes_to_alert": 2.0,
+      "mean_final_features": {
+        "repeated_prefix": 0.037,
+        "high_frequency": 0.0,
+        "substitution": 0.055,
+        "miss_streak": 0.709
+      }
+    }
+  ]
+}

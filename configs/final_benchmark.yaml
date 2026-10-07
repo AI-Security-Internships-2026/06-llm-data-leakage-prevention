@@ -1,0 +1,61 @@
+model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+order_seed: 20260930
+n_calibration: 50
+n_oracle_victims: 20          # oracle-quality probes per (defense, seed)
+
+# ---- profiles: choose with --profile ---------------------------------------
+profiles:
+  smoke:                      # sim / CI only: proves the pipeline end-to-end
+    seeds: [42, 43]
+    n_victims: {A2: 3, A1: 2, A0: 1}
+    n_perf_requests: 60
+  standard:                   # recommended real run (see --dry-run for hours)
+    seeds: [42, 43, 44]
+    n_victims: {A2: 6, A1: 3, A0: 2}
+    n_perf_requests: 300
+  full:
+    seeds: [42, 43, 44, 45, 46]
+    n_victims: {A2: 10, A1: 5, A0: 3}
+    n_perf_requests: 600
+
+# ---- groups ------------------------------------------------------------------
+core:                         # security, load=0, fnr=0.  (attack, defenses)
+  - {attack: A2, defenses: [D0_no_defense, D1_full_isolation, D2_tenant_salt,
+                            D3_binary_pii, D4_risk_adaptive, D5_risk_behavior]}
+  - {attack: A1, defenses: [D0_no_defense, D4_risk_adaptive, D5_risk_behavior]}
+  - {attack: A0, defenses: [D0_no_defense, D5_risk_behavior]}
+
+fn_sweep:                     # detector false-negative injection (Fig 6 / Table V)
+  attack: A2
+  defenses: [D4_risk_adaptive, D5_risk_behavior]
+  fnr: [0.1, 0.3, 0.5, 1.0]   # fnr=0 comes from `core`
+
+ablation:                     # AB0..AB3 + FULL (Fig 8 / Table VI), two detector-quality operating points
+  attack: A2
+  fnr: [0.0, 0.3]
+  conditions: [AB0_none, AB1_content_only, AB2_content_confidence,
+               AB3_behavior_only, FULL_all_components]
+
+load:                         # robustness (Fig 4): background tenants per level
+  attack: A2
+  defenses: [D0_no_defense, D5_risk_behavior]
+  levels: {L0: 0, L1: 2, L2: 8, L3: 16}     # L0 comes from `core`
+
+perf:                         # benign workload, every defense, every load level
+  defenses: [D0_no_defense, D1_full_isolation, D2_tenant_salt, D3_binary_pii,
+             D4_risk_adaptive, D5_risk_behavior,
+             AB2_content_confidence, AB3_behavior_only]
+  load_levels: [L0, L1, L2, L3]
+  n_benign_tenants: 6
+  n_documents: 8              # shared RAG-style documents (cross-tenant sharing = utility)
+  document_blocks: 40
+  p_sensitive: 0.30
+  concurrency: 4
+
+# ---- behaviour detector (Issue #8 values; unchanged) ------------------------
+behavior_detector: {threshold_med: 0.40, threshold_high: 0.65, cooldown_probes: 10}
+confidence_gate: 0.70
+
+# ---- aliases (reuse trials instead of re-running identical configurations) --
+aliases: {AB0_none: D0_no_defense, AB1_content_only: D4_risk_adaptive,
+          FULL_all_components: D5_risk_behavior}
