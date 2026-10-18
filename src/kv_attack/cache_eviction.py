@@ -1,4 +1,3 @@
-
 import random
 import time
 import uuid
@@ -31,25 +30,54 @@ def _make_eviction_prompt(token_count: int) -> str:
     return f"[EVICT-{unique_id}] " + " ".join(words)
 
 
-def _get_cache_hit_rate(base_url: str = VLLM_BASE_URL) -> float | None:
-    """
-    Query the vLLM Prometheus endpoint for the current KV cache hit rate (%).
-    Returns None if the endpoint is unavailable or the metric is absent.
+def _fmt_pct(v: "float | None") -> str:
+    return f"{v:.1f}%" if v is not None else "n/a"
 
-    ── URL construction (FIX #10) ───────────────────────────────────────────
-    Uses urllib.parse so any trailing slashes, query strings, or port numbers
-    in VLLM_BASE_URL are handled correctly.
+
+_last_snapshot: "tuple[float, float] | None" = None
+
+
+def _get_cache_hit_rate(base_url: str = VLLM_BASE_URL) -> "float | None":
     """
+    Return the KV-cache hit rate (%) since the previous call (delta-based).
+
+    vLLM <0.6  exposed a rolling gauge: vllm:gpu_prefix_cache_hit_rate_perc
+    vLLM >=0.6 replaced it with cumulative counters:
+                  vllm:prefix_cache_queries_total
+                  vllm:prefix_cache_hits_total
+    A naive read of the new counters gives a lifetime average (~20%) and
+    evict_cache's < 5.0 check would always fail.  We diff consecutive reads
+    so the returned value reflects only the traffic since the last call.
+    """
+    global _last_snapshot
     try:
-        parsed   = urllib.parse.urlparse(base_url)
+        parsed = urllib.parse.urlparse(base_url)
         metrics_url = urllib.parse.urlunparse(
             parsed._replace(path="/metrics", query="", fragment="")
         )
         with urllib.request.urlopen(metrics_url, timeout=3) as resp:
-            for line in resp.read().decode().splitlines():
-                if line.startswith("vllm:gpu_prefix_cache_hit_rate_perc"):
-                    parts = line.split()
-                    return float(parts[-1])
+            text = resp.read().decode()
+
+        queries = hits = None
+        for line in text.splitlines():
+            if line.startswith("vllm:prefix_cache_queries_total") and not line.startswith("#"):
+                queries = float(line.split()[-1])
+            elif line.startswith("vllm:prefix_cache_hits_total") and not line.startswith("#"):
+                hits = float(line.split()[-1])
+
+        if queries is not None and hits is not None:
+            prev = _last_snapshot
+            _last_snapshot = (queries, hits)
+            if prev is None or queries == prev[0]:
+                return (hits / queries * 100.0) if queries > 0 else 0.0
+            dq = queries - prev[0]
+            dh = hits    - prev[1]
+            return (dh / dq * 100.0) if dq > 0 else 0.0
+
+        for line in text.splitlines():
+            if line.startswith("vllm:gpu_prefix_cache_hit_rate_perc") and not line.startswith("#"):
+                return float(line.split()[-1])
+
     except Exception:
         pass
     return None
@@ -103,8 +131,8 @@ def evict_cache(
         if hit_rate_after is not None:
             status = "✓" if eviction_confirmed else "⚠"
             print(f"[eviction] {status} Cache hit rate after eviction: "
-                  f"{hit_rate_after:.1f}%  "
-                  f"(was {hit_rate_before:.1f}%)")
+                  f"{_fmt_pct(hit_rate_after)}  "
+                  f"(was {_fmt_pct(hit_rate_before)})")
             if not eviction_confirmed:
                 print("[eviction] WARNING: hit rate still high — "
                       "increase EVICT_REQUESTS or EVICT_TOKENS.")

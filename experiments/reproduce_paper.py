@@ -1,599 +1,531 @@
 """
-experiments/reproduce_paper.py
-Issue #10 — Master reproduction script
+experiments/reproduce_paper.py  --  Issue #10 single reproduction command
 
-Regenerates ALL paper figures and tables from saved raw artifacts.
-Does NOT rerun experiments — reads existing result JSON files.
+    python experiments/reproduce_paper.py                       # newest complete REAL run per backend
+    python experiments/reproduce_paper.py --run-dir <dir> [--run-dir <dir2>]
+    python experiments/reproduce_paper.py --run-dir <sim dir> --allow-simulated   # pipeline check only
 
-Usage:
-    python experiments/reproduce_paper.py
-    python experiments/reproduce_paper.py --results-dir experiments/results
-    python experiments/reproduce_paper.py --figures-dir experiments/figures
+What it does
+  1. loads the raw logs of the run(s) (trials / oracle / perf JSONL),
+  2. RECOMPUTES every metric with experiments/analysis (stored aggregates are ignored),
+  3. writes Figures 1-8 and Tables I-VI (.png/.md/.csv) + provenance.json + ACCEPTANCE.md,
+  4. exits non-zero if any acceptance criterion of Issue #10 is not met.
+
+No paper number is typed in this file.  Every value comes from a raw artifact or from
+constants imported from the code base.  Simulated data are refused unless
+--allow-simulated, and then every output is stamped SIMULATED.
 """
+from __future__ import annotations
 
-import argparse, json, sys, os
-import numpy as np
+import argparse
+import csv
+import hashlib
+import json
+import subprocess
+import sys
+from pathlib import Path
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from pathlib import Path
-from scipy import stats as scipy_stats
+import numpy as np
 
-ROOT     = Path(__file__).parent.parent
-RESULTS  = ROOT / "experiments" / "results"
-FIGURES  = ROOT / "experiments" / "figures"
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "experiments"))
 
-REQUIRED_FILES = {
-    "paper_attack":       "kv_week13_final.json",
-    "baseline_attack":    "kv_attack_results_50.json",
-    "paper_numbers":      "paper_numbers.json",
-    "pareto":             "kv_pareto_final.json",
-    "realistic_eval":     "realistic-eval-2026-09-14-ee18e6ce.json",
-    "load_test":          "load-test-2026-09-22-ddd807bd.json",
-    "backend_cmp":        "backend-cmp-2026-09-25-59c23b91.json",
-    "defense_eval":       "defense-eval-2026-09-20-a17d25df.json",
-    "probe_detect":       "probe-detect-2026-09-21-d34b9f12.json",
-    "pii_error_prop":     "pii-error-prop-2026-09-21-2a68b8a3.json",
-}
-OPTIONAL_FILES = {
-    "a1_attack":    None,
-    "d5_eval":      None,
-    "ablation":     None,
-}
+from analysis import metrics as M
+
+CORE = ["D0_no_defense", "D1_full_isolation", "D2_tenant_salt", "D3_binary_pii",
+        "D4_risk_adaptive", "D5_risk_behavior"]
+SHORT = {"D0_no_defense": "D0", "D1_full_isolation": "D1", "D2_tenant_salt": "D2",
+         "D3_binary_pii": "D3", "D4_risk_adaptive": "D4", "D5_risk_behavior": "D5",
+         "AB2_content_confidence": "AB2", "AB3_behavior_only": "AB3",
+         "AB0_none": "AB0", "AB1_content_only": "AB1", "FULL_all_components": "FULL"}
+COL = {"D0": "#d62728", "D1": "#7f7f7f", "D2": "#8c564b", "D3": "#ff7f0e", "D4": "#2ca02c",
+       "D5": "#1f77b4", "AB2": "#9467bd", "AB3": "#17becf", "AB0": "#d62728",
+       "AB1": "#2ca02c", "FULL": "#1f77b4"}
 
 
-def _load(results_dir, key):
-    fname = REQUIRED_FILES.get(key)
-    if fname:
-        path = results_dir / fname
-        if path.exists():
-            with open(path) as f:
-                return json.load(f)
-    return None
+class Ctx:
+    def __init__(self, runs, out, simulated):
+        self.runs, self.out, self.sim = runs, out, simulated
+        self.primary = runs[0]
+        self.m = self.primary["metrics"]
+        self.cfg = self.primary["manifest"]["config"]
+        self.alias = self.cfg["aliases"]
+        self.made: list[str] = []
+
+    def cell(self, attack, defense, fnr=0.0, load="L0", run=None):
+        from kv_attack.defended_serving import DEFENSES
+        d = self.alias.get(defense, defense)
+        if not DEFENSES[d].use_content:
+            fnr = 0.0
+        m = (run or self.primary)["metrics"]
+        return m["security"].get(f"{attack}|{d}|fnr={float(fnr)}|{load}")
+
+    def perf(self, defense, level="L0"):
+        return self.m["perf"].get(f"{self.alias.get(defense, defense)}|{level}")
 
 
-def _find_latest(results_dir, prefix):
-    """Find newest file matching prefix-*.json"""
-    files = sorted(results_dir.glob(f"{prefix}-*.json"), reverse=True)
-    for f in files:
-        if ".tmp" not in f.name and ".ckpt" not in f.name:
-            with open(f) as fp:
-                return json.load(fp), f.name
-    return None, None
+def ci(c):
+    return f"[{c['wilson95'][0]:.2f},{c['wilson95'][1]:.2f}]"
 
 
-def _wilson_ci(k, n, z=1.96):
-    if n == 0:
-        return 0.0, 0.0
-    p = k / n
-    denom = 1 + z**2 / n
-    centre = (p + z**2 / (2*n)) / denom
-    margin = z * (p*(1-p)/n + z**2/(4*n**2))**0.5 / denom
-    return max(0.0, centre - margin), min(1.0, centre + margin)
+def f(x, nd=2, none="n/a"):
+    if x is None or (isinstance(x, float) and np.isnan(x)):
+        return none
+    return f"{x:.{nd}f}"
 
 
-def _check_artifacts(results_dir):
-    print("\n=== Artifact Check ===")
-    missing = []
-    for key, fname in REQUIRED_FILES.items():
-        path = results_dir / fname
-        ok = path.exists()
-        print(f"  {'✓' if ok else '✗'} {key:25s} {fname}")
-        if not ok:
-            missing.append(fname)
-    for prefix, label in [("a1-attack","A1 attack"),
-                           ("d5-eval","D5 defense"),
-                           ("ablation","Ablation")]:
-        d, fname = _find_latest(results_dir, prefix)
-        ok = d is not None
-        print(f"  {'✓' if ok else '○'} {label:25s} {'('+fname+')' if fname else '(not found — optional)'}")
-    if missing:
-        print(f"\n  WARNING: {len(missing)} required file(s) missing.")
-    else:
-        print(f"\n  All required artifacts present.")
-    return len(missing) == 0
+def stamp(c: Ctx, fig):
+    if c.sim:
+        fig.text(0.5, 0.5, "SIMULATED - NOT EVIDENCE", fontsize=34, color="red", alpha=0.18,
+                 ha="center", va="center", rotation=25, weight="bold")
 
 
-def fig1_threat_model(figures_dir, **_):
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.axis("off")
-    diagram = (
-        "┌─────────────────────────────────────────────────────────────────┐\n"
-        "│                    MULTI-TENANT LLM SERVING                     │\n"
-        "│                                                                  │\n"
-        "│  Victim Tenant A ──→ [System Prompt + PII] ──→ KV-Cache Layer   │\n"
-        "│                                                   │              │\n"
-        "│  Layer 1: PII Detector (Presidio NER)             │              │\n"
-        "│           + Confidence Gate                       ↓              │\n"
-        "│           + Behavior Detector          ┌─────────────────────┐  │\n"
-        "│           → Cache Policy Decision      │  Prefix KV-Cache    │  │\n"
-        "│             SHARE / RESTRICT / ISOLATE │  (APC / RadixAttn)  │  │\n"
-        "│                                        └─────────────────────┘  │\n"
-        "│                                                   │              │\n"
-        "│  Attacker Tenant B ──→ Timing Probes ─→ TTFT Observation        │\n"
-        "│           Stage 1: Name enumeration (T1 threshold)              │\n"
-        "│           Stage 2: Condition enumeration (T2 threshold)         │\n"
-        "│           → Exact recovery of victim PII                        │\n"
-        "└─────────────────────────────────────────────────────────────────┘"
-    )
-    ax.text(0.02, 0.98, diagram, transform=ax.transAxes,
-            fontsize=9, va="top", family="monospace",
-            bbox=dict(boxstyle="round", facecolor="lightyellow", alpha=0.8))
-    ax.set_title("Fig 1 (Issue #10) — Threat Model + Cross-Layer Architecture", fontsize=11)
+def save_fig(c: Ctx, fig, name):
+    stamp(c, fig)
     fig.tight_layout()
-    out = figures_dir / "fig1_threat_model.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
+    p = c.out / f"{name}.png"
+    fig.savefig(p, dpi=170, bbox_inches="tight")
     plt.close(fig)
-    print(f"  ✓ Fig 1 saved: {out.name}")
+    c.made.append(p.name)
+    print(f"  ok {p.name}")
 
 
-def fig2_ttft_oracle(figures_dir, paper_attack=None, **_):
-    if not paper_attack:
-        print("  ✗ Fig 2: kv_week13_final.json missing"); return
-    calib = paper_attack.get("calibration", {})
-    hit_mean  = calib.get("hit_mean_ms", 190.5)
-    s1_mean   = calib.get("s1_hit_mean_ms", 560.2)
-    miss_mean = calib.get("miss_mean_ms", 1589.7)
-    hit_std   = calib.get("hit_std_ms", 15.3)
-    miss_std  = calib.get("miss_std_ms", 97.5)
-    s1_std    = miss_std * 0.4
-    t1 = calib.get("t1_threshold_ms", 1011.9)
-    t2 = calib.get("t2_threshold_ms", 314.4)
-
-    fig, ax = plt.subplots(figsize=(9, 4))
-    x = np.linspace(0, 2200, 1000)
-    colors = {"hit": "#2ca02c", "s1": "#ff7f0e", "miss": "#d62728"}
-    for (label, mean, std, color, lbl) in [
-        ("Full hit",  hit_mean,  hit_std,  colors["hit"],  "Full hit (correct name+condition)"),
-        ("S1 hit",    s1_mean,   s1_std,   colors["s1"],   "S1 hit (correct name, wrong condition)"),
-        ("Full miss", miss_mean, miss_std, colors["miss"], "Full miss (wrong name)"),
-    ]:
-        y = scipy_stats.norm.pdf(x, mean, std)
-        ax.plot(x, y, color=color, linewidth=2.2, label=lbl)
-        ax.fill_between(x, y, alpha=0.10, color=color)
-    ax.axvline(t2, color="purple", linestyle="--", linewidth=1.4, label=f"T2={t2:.0f}ms")
-    ax.axvline(t1, color="brown",  linestyle="--", linewidth=1.4, label=f"T1={t1:.0f}ms")
-    ax.set_xlabel("TTFT (ms)"); ax.set_ylabel("Probability density")
-    ax.set_title("Fig 2 (Issue #10) — Multi-level TTFT Oracle\n"
-                 "(controlled template; hit/S1-hit/miss clearly separable)")
-    ax.legend(fontsize=8)
-    fig.tight_layout()
-    out = figures_dir / "fig2_ttft_oracle.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  ✓ Fig 2 saved: {out.name}")
-
-
-def fig3_attack_efficiency(figures_dir, paper_attack=None,
-                            baseline_attack=None, a1_data=None, **_):
-    attacks = []
-    if baseline_attack:
-        s = baseline_attack.get("summary", {})
-        calls = [r["total_api_calls"] for r in baseline_attack.get("results", [])]
-        attacks.append({"label": "A0\nLinear enum", "color": "#aaa",
-                        "median": float(np.median(calls)) if calls else s.get("mean_total_api_calls", 1302),
-                        "p95":    float(np.percentile(calls, 95)) if calls else 1302})
-    if a1_data:
-        raw = a1_data.get("results", [])
-        calls = [r["total_api_calls"] for r in raw]
-        attacks.append({"label": "A1\nAdaptive (W12)", "color": "#ff7f0e",
-                        "median": float(np.median(calls)) if calls else 0,
-                        "p95":    float(np.percentile(calls, 95)) if calls else 0})
-    if paper_attack:
-        agg = paper_attack.get("aggregate", {})
-        raw = paper_attack.get("results", [])
-        calls = [r["total_api_calls"] for r in raw]
-        attacks.append({"label": "A2\nTwo-stage (paper)", "color": "#1a7abf",
-                        "median": float(np.median(calls)) if calls else agg.get("mean_total_api_calls", 79.8),
-                        "p95":    float(np.percentile(calls, 95)) if calls else 151})
-
-    if not attacks:
-        print("  ✗ Fig 3: no attack data"); return
-
-    fig, ax = plt.subplots(figsize=(7, 4))
-    x = np.arange(len(attacks)); w = 0.35
-    ax.bar(x-w/2, [a["median"] for a in attacks], w,
-           color=[a["color"] for a in attacks], alpha=0.85, label="Median")
-    ax.bar(x+w/2, [a["p95"] for a in attacks], w,
-           color=[a["color"] for a in attacks], alpha=0.4, label="P95")
-    ax.set_xticks(x); ax.set_xticklabels([a["label"] for a in attacks])
-    ax.set_ylabel("API queries to recovery")
-    ax.set_title("Fig 3 (Issue #10) — Attack Query Efficiency\n"
-                 "(A2 two-stage achieves >10× reduction vs A0 linear)")
-    ax.legend()
-    for i, a in enumerate(attacks):
-        ax.text(i-w/2, a["median"]+5, f"{a['median']:.0f}", ha="center", fontsize=9)
-        ax.text(i+w/2, a["p95"]+5,    f"{a['p95']:.0f}",   ha="center", fontsize=9)
-    fig.tight_layout()
-    out = figures_dir / "fig3_attack_efficiency.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  ✓ Fig 3 saved: {out.name}")
-
-
-def fig4_load_robustness(figures_dir, load_test=None, **_):
-    if not load_test:
-        print("  ✗ Fig 4: load test missing"); return
-    levels = load_test.get("levels", [])
-    if not levels:
-        print("  ✗ Fig 4: no levels in load test"); return
-
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-    lbls    = [lv["level"] for lv in levels]
-    tenants = [lv["n_tenants"] for lv in levels]
-    asrs    = [lv["attack"]["asr"] for lv in levels]
-    lo_err  = [lv["attack"]["asr"] - lv["attack"]["asr_ci_95_lo"] for lv in levels]
-    hi_err  = [lv["attack"]["asr_ci_95_hi"] - lv["attack"]["asr"] for lv in levels]
-    medians = [lv["attack"]["median_api_calls"] for lv in levels]
-
-    colors = ["#1f77b4","#2ca02c","#ff7f0e","#9467bd","#d62728"]
-    axes[0].bar(lbls, asrs, color=colors[:len(lbls)], alpha=0.85)
-    axes[0].errorbar(range(len(levels)), asrs,
-                     yerr=[lo_err, hi_err], fmt="none",
-                     color="black", capsize=6, linewidth=2)
-    axes[0].set_ylabel("ASR"); axes[0].set_ylim(0, 1.15)
-    axes[0].set_title("ASR vs Load Level")
-    for i, (a, t) in enumerate(zip(asrs, tenants)):
-        axes[0].text(i, a+0.04, f"{a:.2f}\n({t} bg)", ha="center", fontsize=8)
-
-    axes[1].plot(tenants, medians, "o-", color="#1a7abf", linewidth=2.2, markersize=8)
-    axes[1].set_xlabel("Background tenants"); axes[1].set_ylabel("Median queries")
-    axes[1].set_xticks(tenants); axes[1].set_title("Query Cost vs Load")
-    for t, m in zip(tenants, medians):
-        axes[1].text(t, m+1.5, f"{m:.0f}", ha="center", fontsize=9)
-
-    fig.suptitle("Fig 4 (Issue #10) — Robustness vs Multi-Tenant Load\n"
-                 "(n=30/level, real vLLM; oracle remains strong across all levels)")
-    fig.tight_layout()
-    out = figures_dir / "fig4_load_robustness.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  ✓ Fig 4 saved: {out.name}")
-
-
-def fig5_cross_backend(figures_dir, backend_cmp=None, **_):
-    if not backend_cmp:
-        print("  ✗ Fig 5: backend comparison missing"); return
-    sums = backend_cmp.get("attack_summaries", [])
-    chars = backend_cmp.get("characterizations", [])
-    if not sums:
-        print("  ✗ Fig 5: no attack summaries"); return
-
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-    colors = ["#1a7abf", "#d04000"]
-
-    gaps = [c.get("timing_gap_ms", 0) for c in chars]
-    aucs = [c.get("roc_auc", 0) for c in chars]
-    blabels = [c.get("backend","?") for c in chars]
-    axes[0].bar(blabels, gaps, color=colors[:len(blabels)], alpha=0.85)
-    for i, (g, a) in enumerate(zip(gaps, aucs)):
-        axes[0].text(i, g+10, f"AUC={a:.4f}\ngap={g:.0f}ms",
-                     ha="center", fontsize=9, fontweight="bold")
-    axes[0].set_ylabel("Timing gap: miss−hit mean (ms)")
-    axes[0].set_title("Oracle Signal Strength")
-
-    asrs   = [s.get("asr", 0) for s in sums]
-    slabels= [s.get("backend","?") for s in sums]
-    lo_err = [s["asr"]-s["asr_ci_95_lo"] for s in sums]
-    hi_err = [s["asr_ci_95_hi"]-s["asr"] for s in sums]
-    axes[1].barh(range(len(sums)), asrs,
-                 color=colors[:len(sums)], alpha=0.85)
-    axes[1].errorbar(asrs, range(len(sums)),
-                     xerr=[lo_err, hi_err], fmt="none",
-                     color="black", capsize=7, linewidth=2)
-    axes[1].set_yticks(range(len(sums)))
-    axes[1].set_yticklabels(slabels)
-    axes[1].set_xlabel("ASR"); axes[1].set_xlim(-0.05, 1.15)
-    axes[1].set_title("Exact Recovery with 95% CI")
-    for i, s in enumerate(sums):
-        axes[1].text(s["asr"]+0.03, i,
-                     f"{s['exact_recovery_count']}/{s['n_victims']}",
-                     va="center", fontsize=9)
-
-    fig.suptitle("Fig 5 (Issue #10) — Cross-Backend Validation\n"
-                 "(Same oracle strength; attack fails on SGLang due to RadixAttention boundary mismatch)")
-    fig.tight_layout()
-    out = figures_dir / "fig5_cross_backend.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  ✓ Fig 5 saved: {out.name}")
-
-
-def fig6_fn_leakage(figures_dir, pii_error_prop=None, **_):
-    if not pii_error_prop:
-        print("  ✗ Fig 6: pii_error_prop missing"); return
-    fnr_data = pii_error_prop.get("fnr_sweep", {})
-    if not fnr_data:
-        print("  ✗ Fig 6: no FNR sweep data"); return
-
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-    colors = {"P0": "#d62728", "P1": "#ff7f0e", "P2": "#1a7abf"}
-    labels = {"P0": "P0: Presidio/regex",
-              "P1": "P1: Presidio+BART",
-              "P2": "P2: Risk-adaptive (proposed)"}
-
-    for det, sweeps in fnr_data.items():
-        if not sweeps: continue
-        fnrs = [s["fnr_injected"] for s in sweeps]
-        ss   = [s["aggregate"].get("sensitive_shared", s.get("sensitive_shared", 0))
-                for s in sweeps]
-        axes[0].plot(fnrs, ss, "o-", color=colors.get(det,"gray"),
-                     linewidth=2, label=labels.get(det, det))
-
-    axes[0].set_xlabel("False Negative Rate (FNR injected)")
-    axes[0].set_ylabel("Fraction of sensitive prompts shared")
-    axes[0].set_title("FNR → Sensitive Cache Sharing")
-    axes[0].legend(fontsize=8)
-    axes[0].set_xlim(-0.02, 0.35); axes[0].set_ylim(-0.02, 0.35)
-    axes[0].plot([0,0.3],[0,0.3],"k--",alpha=0.3, label="y=x (linear)")
-
-    fpr_data = pii_error_prop.get("fpr_sweep", {})
-    for det, sweeps in fpr_data.items():
-        if not sweeps: continue
-        fprs = [s["fpr_injected"] for s in sweeps]
-        hr   = [s["aggregate"].get("hit_rate", s.get("hit_rate", 0)) for s in sweeps]
-        axes[1].plot(fprs, hr, "s-", color=colors.get(det,"gray"),
-                     linewidth=2, label=labels.get(det, det))
-
-    axes[1].set_xlabel("False Positive Rate (FPR injected)")
-    axes[1].set_ylabel("Cache hit rate")
-    axes[1].set_title("FPR → Cache Utility Loss")
-    axes[1].legend(fontsize=8)
-
-    fig.suptitle("Fig 6 (Issue #10) — PII Detector Errors → Cache Security/Utility")
-    fig.tight_layout()
-    out = figures_dir / "fig6_fn_leakage.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  ✓ Fig 6 saved: {out.name}")
-
-
-def fig7_pareto(figures_dir, pareto=None, **_):
-    if not pareto:
-        print("  ✗ Fig 7: kv_pareto_final.json missing"); return
-    points = pareto.get("pareto_points", [])
-    if not points:
-        print("  ✗ Fig 7: no pareto_points"); return
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    colors_map = {"empirical": "#1a7abf", "analytical": "#aaa",
-                  "theoretical": "#aaa", "mixed": "#ff7f0e"}
-    for pt in points:
-        mode  = pt.get("mode", "analytical")
-        color = colors_map.get(mode, "#aaa")
-        alpha = 0.9 if mode == "empirical" else 0.5
-        ax.scatter(pt["ttft_ms"], 1 - pt["attack_sr"],
-                   color=color, s=120, alpha=alpha, zorder=3)
-        ax.annotate(pt["id"],
-                    (pt["ttft_ms"], 1 - pt["attack_sr"]),
-                    textcoords="offset points", xytext=(6, 4), fontsize=9)
-
-    for mode, color, label in [
-        ("empirical",   "#1a7abf", "Empirical"),
-        ("analytical",  "#aaa",    "Analytical/simulated"),
-    ]:
-        ax.scatter([], [], color=color, s=80, label=label)
-
-    ax.set_xlabel("TTFT p50 (ms) — lower is better performance")
-    ax.set_ylabel("Security (1 − ASR) — higher is more secure")
-    ax.set_title("Fig 7 (Issue #10) — Security-Performance Pareto Frontier\n"
-                 "(M3/D4 risk-adaptive achieves best trade-off; empirical points in blue)")
-    ax.legend(fontsize=9)
-    ax.set_xlim(0, max(pt["ttft_ms"] for pt in points)*1.15)
-    ax.set_ylim(-0.05, 1.1)
-    fig.tight_layout()
-    out = figures_dir / "fig7_pareto.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  ✓ Fig 7 saved: {out.name}")
-
-
-def fig8_ablation(figures_dir, ablation=None, defense_eval=None, **_):
-    if not ablation:
-        print("  ○ Fig 8: ablation result not yet available — run run_ablation.py first")
-        return
-
-    results = ablation.get("results", [])
-    if not results:
-        print("  ✗ Fig 8: ablation results empty"); return
-
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-    labels  = [r["condition"].replace("_", "\n") for r in results]
-    asrs    = [r["asr"] for r in results]
-    isos    = [r["isolation_fraction"] for r in results]
-    lo_err  = [r["asr"]-r["asr_ci_lo"] for r in results]
-    hi_err  = [r["asr_ci_hi"]-r["asr"] for r in results]
-    colors  = ["#d62728","#ff7f0e","#2ca02c","#9467bd","#1a7abf"]
-
-    axes[0].bar(range(len(results)), asrs,
-                color=colors[:len(results)], alpha=0.85)
-    axes[0].errorbar(range(len(results)), asrs,
-                     yerr=[lo_err, hi_err], fmt="none",
-                     color="black", capsize=6, linewidth=2)
-    axes[0].set_xticks(range(len(results)))
-    axes[0].set_xticklabels(labels, fontsize=8)
-    axes[0].set_ylabel("ASR (lower = better defense)")
-    axes[0].set_ylim(0, 1.15)
-    axes[0].set_title("Attack Success Rate by Ablation Condition")
-
-    axes[1].bar(range(len(results)), isos,
-                color=colors[:len(results)], alpha=0.85)
-    axes[1].set_xticks(range(len(results)))
-    axes[1].set_xticklabels(labels, fontsize=8)
-    axes[1].set_ylabel("Sensitive isolation fraction")
-    axes[1].set_title("Sensitive Cache Isolation Rate")
-
-    fig.suptitle("Fig 8 (Issue #10) — Ablation Study\n"
-                 "(FULL=all components achieves lowest ASR; each component contributes)")
-    fig.tight_layout()
-    out = figures_dir / "fig8_ablation.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  ✓ Fig 8 saved: {out.name}")
-
-
-def generate_tables(figures_dir, paper_attack=None, baseline_attack=None,
-                    backend_cmp=None, defense_eval=None, pii_error_prop=None,
-                    ablation=None, paper_numbers=None, load_test=None,
-                    a1_data=None, **_):
-
-    t1 = ("## Table I — Threat Model\n\n"
-          "| Property | Value |\n|---|---|\n"
-          "| Attack type | KV-cache timing side-channel |\n"
-          "| Attacker capability | Black-box API access (same LLM endpoint) |\n"
-          "| Attacker knowledge | System prompt prefix (Scenario S2) |\n"
-          "| Target | Private patient/user record in system prompt |\n"
-          "| Observable | TTFT per completions API call |\n"
-          "| Candidate space | 100 names × 20 conditions = 2000 combinations |\n"
-          "| Backend | vLLM 0.27.1 + APC; SGLang 0.5.20 + RadixAttention |\n")
-    (figures_dir / "table_I_threat_model.md").write_text(t1)
-    print("  ✓ Table I saved")
-
-    t2 = ("## Table II — Experimental Setup\n\n"
-          "| Parameter | Value |\n|---|---|\n"
-          "| Model | deepseek-ai/DeepSeek-R1-Distill-Llama-8B |\n"
-          "| Hardware | NVIDIA GB10, 122 GB unified memory |\n"
-          "| vLLM version | 0.27.1 (APC enabled, block_size=16) |\n"
-          "| SGLang version | 0.5.20 (RadixAttention) |\n"
-          "| Seed | 42 (all experiments) |\n"
-          "| n_victims (main) | 30–50 per condition |\n"
-          "| n_calibration | 50 TTFT probes per setup |\n"
-          "| CI method | Clopper-Pearson (exact binomial) |\n")
-    (figures_dir / "table_II_setup.md").write_text(t2)
-    print("  ✓ Table II saved")
-
-    rows = []
-    if baseline_attack:
-        s = baseline_attack.get("summary", {})
-        calls = [r["total_api_calls"] for r in baseline_attack.get("results",[])]
-        rows.append(("A0", "Linear enum", 50,
-                     "1.000", "(0.929,1.000)",
-                     f"{np.median(calls):.0f}" if calls else str(s.get("mean_total_api_calls","?")),
-                     "empirical"))
-    if a1_data:
-        raw = a1_data.get("results", [])
-        n   = len(raw); exact = sum(r["exact_match"] for r in raw)
-        lo, hi = _wilson_ci(exact, n)
-        calls = [r["total_api_calls"] for r in raw]
-        rows.append(("A1","Adaptive (W12)", n,
-                     f"{exact/n:.3f}", f"({lo:.3f},{hi:.3f})",
-                     f"{np.median(calls):.0f}" if calls else "?", "empirical"))
-    if paper_attack:
-        agg  = paper_attack.get("aggregate", {})
-        raw  = paper_attack.get("results", [])
-        n    = len(raw); exact = sum(r["exact_match"] for r in raw)
-        lo, hi = _wilson_ci(exact, n)
-        calls = [r["total_api_calls"] for r in raw]
-        rows.append(("A2","Two-stage (paper)", n,
-                     f"{exact/n:.3f}", f"({lo:.3f},{hi:.3f})",
-                     f"{np.median(calls):.0f}" if calls else "?", "empirical"))
-
-    t3 = "## Table III — Attack Comparison\n\n"
-    t3 += "| Attack | Algorithm | N | Exact recovery | 95% CI | Median Q | Tag |\n"
-    t3 += "|---|---|---|---|---|---|---|\n"
+def save_table(c: Ctx, name, title, header, rows, note=""):
+    banner = "> **SIMULATED DATA - pipeline validation only, not evidence.**\n\n" if c.sim else ""
+    md = f"## {title}\n\n{banner}| " + " | ".join(header) + " |\n|" + "---|" * len(header) + "\n"
     for r in rows:
-        t3 += "| " + " | ".join(str(x) for x in r) + " |\n"
-    (figures_dir / "table_III_attack_comparison.md").write_text(t3)
-    print("  ✓ Table III saved")
+        md += "| " + " | ".join(str(x) for x in r) + " |\n"
+    if note:
+        md += f"\n{note}\n"
+    (c.out / f"{name}.md").write_text(md)
+    with open(c.out / f"{name}.csv", "w", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(header)
+        w.writerows(rows)
+    c.made += [f"{name}.md", f"{name}.csv"]
+    print(f"  ok {name}.md/.csv")
 
-    t4 = "## Table IV — Defense Comparison\n\n"
-    t4 += "| Defense | Description | Residual ASR | Sensitive isolation | Hit rate | TTFT overhead | Tag |\n"
-    t4 += "|---|---|---|---|---|---|---|\n"
-    pol = defense_eval.get("policy_isolation", {}) if defense_eval else {}
-    rasr = defense_eval.get("residual_asr", {}) if defense_eval else {}
-    descs = {
-        "D0_no_defense":     "No defense (shared cache)",
-        "D1_full_isolation": "Full isolation (cache disabled)",
-        "D2_tenant_salt":    "Tenant/user salting",
-        "D3_binary_pii":     "Binary PII isolation",
-        "D4_risk_adaptive":  "Risk-adaptive (proposed Issue #7)",
-        "D5_risk_behavior":  "Risk + behavior adaptive (proposed Issue #10)",
-    }
-    for d_key, desc in descs.items():
-        asr_v  = rasr.get(d_key, {}).get("value", "pending")
-        p_data = pol.get(d_key, {})
-        agg    = p_data.get("aggregate", {}) if isinstance(p_data, dict) else {}
-        iso    = agg.get("sensitive_isolation_rate", "?")
-        hr     = agg.get("hit_rate", "?")
-        ovhd   = agg.get("ttft_overhead_ms", "?")
-        tag    = rasr.get(d_key, {}).get("tag", "pending")
-        t4 += f"| {d_key} | {desc} | {asr_v} | {iso} | {hr} | {ovhd} | {tag} |\n"
-    (figures_dir / "table_IV_defense_comparison.md").write_text(t4)
-    print("  ✓ Table IV saved")
 
-    t5  = "## Table V — Detector Error Propagation\n\n"
-    t5 += "| Detector | Recall | FPR | Sensitive shared | Residual ASR | Hit rate | Tag |\n"
-    t5 += "|---|---|---|---|---|---|---|\n"
-    nat = pii_error_prop.get("natural_errors", {}) if pii_error_prop else {}
-    for det, v in nat.items():
-        a = v.get("aggregate", {})
-        t5 += (f"| {det} | {a.get('recall','?')} | {a.get('fpr','?')} | "
-               f"{a.get('sensitive_shared','?')} | {a.get('residual_asr','?')} | "
-               f"{a.get('hit_rate','?')} | empirical |\n")
-    (figures_dir / "table_V_detector_errors.md").write_text(t5)
-    print("  ✓ Table V saved")
+def yerr(cells):
+    a = np.array([x["asr"] for x in cells])
+    lo = np.clip(a - np.array([x["wilson95"][0] for x in cells]), 0, None)
+    hi = np.clip(np.array([x["wilson95"][1] for x in cells]) - a, 0, None)
+    return a, [lo, hi]
 
-    t6  = "## Table VI — Ablation Study\n\n"
-    t6 += "| Condition | Description | ASR | 95% CI | Isolation | Median Q | Components |\n"
-    t6 += "|---|---|---|---|---|---|---|\n"
-    if ablation:
-        for r in ablation.get("results", []):
-            cfg = ablation.get("conditions_config", {}).get(r["condition"], {})
-            comps = "+".join([c for c, k in [
-                ("content", "use_content_risk"),
-                ("confidence", "use_confidence"),
-                ("behavior", "use_behavior"),
-            ] if cfg.get(k)])
-            t6 += (f"| {r['condition']} | {r['description'][:40]} | "
-                   f"{r['asr']:.3f} | ({r['asr_ci_lo']:.3f},{r['asr_ci_hi']:.3f}) | "
-                   f"{r['isolation_fraction']:.3f} | {r['median_api_calls']:.0f} | "
-                   f"{comps or 'none'} |\n")
-    else:
-        t6 += "| pending | Run run_ablation.py first | — | — | — | — | — |\n"
-    (figures_dir / "table_VI_ablation.md").write_text(t6)
-    print("  ✓ Table VI saved")
+
+def fig1(c):
+    fig, ax = plt.subplots(figsize=(11, 4.6))
+    ax.axis("off")
+    ax.set_xlim(0, 11)
+    ax.set_ylim(0, 4.6)
+
+    def box(x, y, w, h, t, fc):
+        ax.add_patch(plt.Rectangle((x, y), w, h, fc=fc, ec="k", lw=1.2))
+        ax.text(x + w / 2, y + h / 2, t, ha="center", va="center", fontsize=8.5)
+
+    def arr(x1, y1, x2, y2):
+        ax.annotate("", (x2, y2), (x1, y1), arrowprops=dict(arrowstyle="->", lw=1.3))
+    box(0.2, 3.3, 2.0, 0.9, "Victim tenant\n(prompt with PII)", "#cfe8ff")
+    box(0.2, 1.85, 2.0, 0.9, "Benign tenants\n(shared documents)", "#e6e6e6")
+    box(0.2, 0.4, 2.0, 0.9, "Attacker tenant\n(black-box TTFT probes)", "#ffd6d6")
+    box(3.2, 0.9, 3.4, 3.0, "DEFENDED SERVING LAYER\n\nL1 content risk (Presidio)\n+ confidence gate\n"
+        "L2 probe-behaviour detector\nL3 cache policy:\nSHARE / RESTRICT (tenant salt)\n/ ISOLATE (unique salt)", "#fff2cc")
+    box(7.6, 1.6, 3.0, 1.6, "Shared inference backend\nAutomatic Prefix Cache\n(vLLM / SGLang)", "#d5f5d5")
+    for y0, y1 in ((3.75, 3.4), (2.3, 2.4), (0.85, 1.4)):
+        arr(2.2, y0, 3.2, y1)
+    arr(6.6, 2.4, 7.6, 2.4)
+    ax.annotate("TTFT = timing oracle", (2.3, 0.55), (7.7, 1.65),
+                arrowprops=dict(arrowstyle="->", ls="--", color="red", lw=1.3,
+                                connectionstyle="arc3,rad=-0.25"), color="red", fontsize=8.5)
+    ax.set_title("Fig 1  Threat model and cross-layer architecture (conceptual)")
+    save_fig(c, fig, "fig1_threat_model_architecture")
+
+
+def fig2(c):
+    o = c.m["oracle"]
+    show = [d for d in ("D0_no_defense", "D2_tenant_salt", "D5_risk_behavior") if d in o]
+    if not show:
+        return print("  -- fig2: no oracle data")
+    fig, axes = plt.subplots(1, len(show), figsize=(4.6 * len(show), 3.8), sharex=True)
+    axes = np.atleast_1d(axes)
+    for ax, d in zip(axes, show):
+        for cl, col, lab in (("full_hit", "#2ca02c", "full hit"), ("s1_hit", "#ff7f0e", "name-only hit"),
+                             ("miss", "#d62728", "miss")):
+            v = np.sort(o[d]["raw"][cl])
+            ax.step(v, np.arange(1, len(v) + 1) / len(v), where="post", color=col, label=lab)
+        ax.set_title(f"{SHORT[d]}  AUC(hit vs miss)={o[d]['auc_hit_vs_miss']:.3f}", fontsize=10)
+        ax.set_xlabel("attacker-observed TTFT (ms)")
+    axes[0].set_ylabel("ECDF")
+    axes[0].legend(fontsize=8)
+    fig.suptitle("Fig 2  Multi-level TTFT oracle as seen by the attacker (raw probes)")
+    save_fig(c, fig, "fig2_ttft_oracle")
+
+
+def fig3(c):
+    rows = [(lab, c.cell(a, "D0_no_defense")) for a, lab in
+            (("A0", "A0 enumeration"), ("A1", "A1 adaptive"), ("A2", "A2 two-stage"))]
+    rows = [(l, x) for l, x in rows if x]
+    if not rows:
+        return print("  -- fig3: no D0 attack cells")
+    tr = [t for t in c.primary["trials"] if not t.get("error") and t["defense"] == "D0_no_defense"
+          and t["fnr"] == 0 and t["load"] == "L0"]
+    fig, ax = plt.subplots(figsize=(7.2, 4.2))
+    rng = np.random.default_rng(0)
+    for i, (lab, cl) in enumerate(rows):
+        q = [t["total_api_calls"] for t in tr if t["attack"] == cl["attack"]]
+        ax.scatter(i + rng.uniform(-.12, .12, len(q)), q, s=14, alpha=.55, color="#1f77b4")
+        ax.plot([i - .3, i + .3], [cl["queries"]["p50"]] * 2, "k-", lw=2)
+        ax.plot([i - .3, i + .3], [cl["queries"]["p95"]] * 2, "k--", lw=1.4)
+        ax.text(i, max(q) * 1.15, f"ASR {cl['asr']:.2f} {ci(cl)}\nn={cl['n']}", ha="center", fontsize=8)
+    ax.set_yscale("log")
+    ax.set_xticks(range(len(rows)))
+    ax.set_xticklabels([r[0] for r in rows])
+    ax.set_ylim(top=ax.get_ylim()[1] * 2.2)
+    ax.set_ylabel("queries per victim (log)")
+    ax.set_title("Fig 3  Attack query efficiency, no defense, same testbed\nsolid = median, dashed = p95")
+    save_fig(c, fig, "fig3_attack_efficiency")
+
+
+def fig4(c):
+    lv = list(c.cfg["load"]["levels"])
+    fig, axes = plt.subplots(1, 3, figsize=(13, 3.8))
+    for d in c.cfg["load"]["defenses"]:
+        cells = [c.cell("A2", d, load=l) for l in lv]
+        if not all(cells):
+            continue
+        a, e = yerr(cells)
+        axes[0].errorbar(range(len(lv)), a, yerr=e, marker="o", capsize=4, color=COL[SHORT[d]], label=SHORT[d])
+        axes[1].plot(range(len(lv)), [x["queries"]["p50"] for x in cells], "o-", color=COL[SHORT[d]], label=SHORT[d])
+    for d in ("D0_no_defense", "D5_risk_behavior"):
+        pf = [c.perf(d, l) for l in lv]
+        if all(pf):
+            axes[2].plot(range(len(lv)), [p["p50"] for p in pf], "o-", color=COL[SHORT[d]], label=f"{SHORT[d]} p50")
+            axes[2].plot(range(len(lv)), [p["p95"] for p in pf], "s--", color=COL[SHORT[d]], alpha=.6, label=f"{SHORT[d]} p95")
+    for ax, t in zip(axes, ("A2 attack success rate (95% Wilson)", "A2 median queries", "benign TTFT (ms)")):
+        ax.set_xticks(range(len(lv)))
+        ax.set_xticklabels(lv)
+        ax.set_title(t, fontsize=10)
+        ax.set_xlabel("background load level")
+        ax.legend(fontsize=7)
+    axes[0].set_ylim(-.05, 1.05)
+    fig.suptitle("Fig 4  Robustness vs multi-tenant load")
+    save_fig(c, fig, "fig4_load_robustness")
+
+
+def fig5(c):
+    if len(c.runs) < 2:
+        fig, ax = plt.subplots(figsize=(6.5, 2.6))
+        ax.axis("off")
+        ax.text(.5, .5, "Cross-backend comparison needs >= 2 backend runs\n(only one run supplied)",
+                ha="center", va="center", fontsize=11)
+        ax.set_title("Fig 5  Cross-backend (NOT AVAILABLE)")
+        return save_fig(c, fig, "fig5_cross_backend")
+    fig, axes = plt.subplots(1, 3, figsize=(13, 3.8))
+    names = [f"{r['manifest']['backend']} {r['manifest']['backend_info'].get('framework_ver', '')}" for r in c.runs]
+    for i, r in enumerate(c.runs):
+        m = r["metrics"]
+        o = m["oracle"].get("D0_no_defense")
+        if o:
+            axes[0].bar(i, o["gap_ms"], color="#1f77b4")
+            axes[0].text(i, o["gap_ms"], f"AUC {o['auc_hit_vs_miss']:.3f}", ha="center", fontsize=8)
+        for j, d in enumerate(("D0_no_defense", "D5_risk_behavior")):
+            cc = c.cell("A2", d, run=r)
+            if cc:
+                axes[1].bar(i * 3 + j, cc["asr"], color=COL[SHORT[d]])
+                axes[1].errorbar(i * 3 + j, cc["asr"], yerr=[[cc["asr"] - cc["wilson95"][0]], [cc["wilson95"][1] - cc["asr"]]],
+                                 color="k", capsize=4)
+            p = m["perf"].get(f"{d}|L0")
+            if p:
+                axes[2].bar(i * 3 + j, p["p50"], color=COL[SHORT[d]])
+    axes[0].set_xticks(range(len(names)))
+    axes[0].set_xticklabels(names, fontsize=8)
+    axes[0].set_title("oracle gap: miss - hit (ms)", fontsize=10)
+    for ax, t in ((axes[1], "A2 ASR  (red D0, blue D5)"), (axes[2], "benign TTFT p50 (red D0, blue D5)")):
+        ax.set_xticks([i * 3 + .5 for i in range(len(names))])
+        ax.set_xticklabels(names, fontsize=8)
+        ax.set_title(t, fontsize=10)
+    fig.suptitle("Fig 5  Cross-backend validation (same protocol, separate server launches)")
+    save_fig(c, fig, "fig5_cross_backend")
+
+
+def fig6(c):
+    fs = c.cfg["fn_sweep"]
+    xs = [0.0] + list(fs["fnr"])
+    fig, ax = plt.subplots(figsize=(6.2, 4))
+    ok = False
+    for d in fs["defenses"]:
+        cells = [c.cell("A2", d, fnr=x) for x in xs]
+        if not all(cells):
+            continue
+        ok = True
+        a, e = yerr(cells)
+        ax.errorbar(xs, a, yerr=e, marker="o", capsize=4, color=COL[SHORT[d]], label=SHORT[d])
+    if not ok:
+        return print("  -- fig6: no fn_sweep data")
+    ax.plot([0, 1], [0, 1], "k:", alpha=.4, label="y = injected FNR")
+    ax.set_xlabel("injected detector false-negative rate")
+    ax.set_ylabel("A2 attack success rate")
+    ax.set_title("Fig 6  Detector false negatives -> leakage (measured end-to-end)")
+    ax.legend()
+    save_fig(c, fig, "fig6_fn_to_leakage")
+
+
+def pareto_points(c):
+    pts, base = [], c.perf("D0_no_defense")
+    for d in CORE + ["AB2_content_confidence", "AB3_behavior_only"]:
+        cl, pf = c.cell("A2", d), c.perf(d)
+        if cl and pf and base:
+            pts.append({"d": d, "asr": cl["asr"], "ci": cl["wilson95"], "ovh": 100 * (pf["p50"] / base["p50"] - 1)})
+    return pts
+
+
+def fig7(c):
+    pts = pareto_points(c)
+    if not pts:
+        return print("  -- fig7: missing security/perf pairs")
+    fig, ax = plt.subplots(figsize=(6.6, 4.6))
+    for p in pts:
+        ax.errorbar(p["ovh"], p["asr"],
+                    yerr=[[max(0, p["asr"] - p["ci"][0])], [max(0, p["ci"][1] - p["asr"])]],
+                    fmt="o", ms=9, color=COL[SHORT[p["d"]]], capsize=3)
+        ax.annotate(SHORT[p["d"]], (p["ovh"], p["asr"]), xytext=(6, 6), textcoords="offset points")
+    dom = lambda q, p: q["ovh"] <= p["ovh"] and q["asr"] <= p["asr"] and (q["ovh"] < p["ovh"] or q["asr"] < p["asr"])
+    front = sorted([p for p in pts if not any(dom(q, p) for q in pts if q is not p)], key=lambda p: p["ovh"])
+    ax.step([p["ovh"] for p in front], [p["asr"] for p in front], where="post", color="k", lw=1, alpha=.5)
+    ax.set_xlabel("benign TTFT p50 overhead vs D0 (%)  [measured]")
+    ax.set_ylabel("residual leakage: A2 ASR  [measured]")
+    ax.set_title("Fig 7  Security-performance Pareto (all points empirical, same testbed)\nbottom-left is better")
+    save_fig(c, fig, "fig7_security_performance_pareto")
+
+
+def fig8(c):
+    ab = c.cfg["ablation"]
+    fig, axes = plt.subplots(1, len(ab["fnr"]), figsize=(6 * len(ab["fnr"]), 4), sharey=True)
+    for ax, fnr in zip(np.atleast_1d(axes), ab["fnr"]):
+        for i, cond in enumerate(ab["conditions"]):
+            cl = c.cell("A2", cond, fnr=fnr)
+            if not cl:
+                continue
+            ax.bar(i, cl["asr"], color=COL[SHORT[cond]], alpha=.85)
+            ax.errorbar(i, cl["asr"],
+                        yerr=[[max(0, cl["asr"] - cl["wilson95"][0])], [max(0, cl["wilson95"][1] - cl["asr"])]],
+                        color="k", capsize=4)
+        ax.set_xticks(range(len(ab["conditions"])))
+        ax.set_xticklabels([SHORT[x] for x in ab["conditions"]])
+        ax.set_title(f"injected detector FNR = {fnr}")
+        ax.set_ylabel("A2 ASR")
+    fig.suptitle("Fig 8  Ablation: AB0 none, AB1 content, AB2 +confidence, AB3 behaviour only, FULL")
+    save_fig(c, fig, "fig8_ablation")
+
+
+def table1(c):
+    from kv_attack import BLOCK_SIZE, FIRST_NAMES, LAST_NAMES, MEDICAL_CONDITIONS
+    nn, nc = len(FIRST_NAMES) * len(LAST_NAMES), len(MEDICAL_CONDITIONS)
+    rows = [("Attack class", "KV-cache (automatic prefix cache) timing side-channel"),
+            ("Attacker capability", "black-box completion API as an ordinary tenant; observes TTFT only"),
+            ("Attacker knowledge", "system-prompt prefix, template layout, candidate dictionaries"),
+            ("Candidate space", f"{nn} names x {nc} conditions = {nn * nc}"),
+            ("Attacker calibration", "thresholds learned once per seed on an UNDEFENDED replica (strong attacker)"),
+            ("Defender knowledge", "sees every request; content detector + probe-behaviour detector"),
+            ("Trust boundary", "victim and attacker are different tenants of one shared backend"),
+            ("Cache block size", f"{BLOCK_SIZE} tokens"),
+            ("Target", "victim record (name, condition) placed in the shared prompt prefix"),
+            ("Out of scope", "co-located hardware side channels; attacker-controlled system prompt")]
+    save_table(c, "table_I_threat_model", "Table I - Threat model", ["Property", "Value"], rows)
+
+
+def table2(c):
+    rows = []
+    for r in c.runs:
+        m = r["manifest"]
+        t1 = [x["calibration"]["t1_threshold_ms"] for x in r["calibration"]]
+        t2 = [x["calibration"]["t2_threshold_ms"] for x in r["calibration"]]
+        rows.append((m["backend"], f"{m['backend_info']['framework']} {m['backend_info']['framework_ver']}",
+                     m["backend_info"]["model_id"], m["hardware"].get("gpu"), m.get("server_flags") or "(not recorded)",
+                     m.get("reset_mode"), m["risk_model"], m["profile"], m["profile_values"]["seeds"],
+                     m["profile_values"]["n_victims"], f"{min(t1):.0f}-{max(t1):.0f}", f"{min(t2):.0f}-{max(t2):.0f}",
+                     (m.get("git_commit") or "?")[:8], "DIRTY" if m.get("git_dirty") else "clean", m["run_id"]))
+    save_table(c, "table_II_experimental_setup", "Table II - Experimental setup",
+               ["backend", "framework", "model", "GPU", "server flags", "trial isolation", "content detector",
+                "profile", "seeds", "victims/seed", "T1 ms", "T2 ms", "git", "tree", "run id"], rows,
+               note="CIs: 95% Wilson (proportions), seed-clustered bootstrap (medians). Tests: Fisher exact and exact "
+                    "McNemar (paired by seed+victim), Holm-corrected over the defense family; effect sizes Cohen's h "
+                    "and Cliff's delta.")
+
+
+def table3(c):
+    rows = []
+    for a in ("A0", "A1", "A2"):
+        cl = c.cell(a, "D0_no_defense")
+        if cl:
+            rows.append((a, cl["n"], cl["n_seeds"], f"{cl['k_exact']}/{cl['n']}", f(cl["asr"]), ci(cl),
+                         f"[{cl['seed_cluster_bootstrap95'][0]:.2f},{cl['seed_cluster_bootstrap95'][1]:.2f}]",
+                         f(cl["queries"]["p50"], 0), f(cl["queries"]["p95"], 0),
+                         f(cl["queries_successful_median"], 0), f(cl["leaked_bits_mean"]),
+                         f(cl["attack_time_model_s_median"], 1)))
+    save_table(c, "table_III_attack_comparison", "Table III - Attack comparison (no defense, same testbed)",
+               ["attack", "n", "seeds", "exact", "ASR", "Wilson95", "seed-boot95", "median Q", "p95 Q",
+                "median Q (succ.)", "leaked bits", "attack time (model s)"], rows,
+               note="A0 exhaustive enumeration (no early exit); A1 Week-12 linear scan with early exit; A2 corrected "
+                    "two-stage. All three run on the identical two-stage template and victim set. Leaked bits = "
+                    "log2(100) if name correct + log2(20) if condition correct.")
+
+
+def table4(c):
+    rows = []
+    for d in CORE:
+        cl, pf, o = c.cell("A2", d), c.perf(d), c.m["oracle"].get(d)
+        pv = c.m["paired_vs_D0"].get(f"A2|{d}|fnr=0.0|L0")
+        ov = (pf or {}).get("overhead_vs_D0")
+        rows.append((SHORT[d],
+                     f"{cl['k_exact']}/{cl['n']} ({f(cl['asr'])}) {ci(cl)}" if cl else "n/a",
+                     (f"{f(pv['risk_reduction'])} [{f(pv['risk_reduction_ci95'][0])},{f(pv['risk_reduction_ci95'][1])}] "
+                      f"h={f(pv['cohens_h'])} p_holm={pv['fisher_p_holm']:.3g}") if pv else "-",
+                     f(o["auc_hit_vs_miss"], 3) if o else "n/a", f(o["tpr_at_1pct_fpr"]) if o else "n/a",
+                     f(pf["p50"], 0) if pf else "n/a", f(pf["p95"], 0) if pf else "n/a", f(pf["p99"], 0) if pf else "n/a",
+                     (f"{ov['p50_pct']:+.1f}% / {ov['p95_pct']:+.1f}%" if ov else "0"),
+                     f(pf["throughput_rps_mean"]) if pf else "n/a",
+                     f(pf["cache_hit_rate_mean"]) if pf else "n/a",
+                     f(pf["isolation_fraction"]) if pf else "n/a", f(pf["decide_ms_mean"], 3) if pf else "n/a"))
+    save_table(c, "table_IV_defense_comparison", "Table IV - Defense comparison (attack A2)",
+               ["defense", "ASR k/n (ASR) Wilson95", "risk reduction vs D0 [CI] h p_holm", "oracle AUC",
+                "TPR@1%FPR", "TTFT p50", "p95", "p99", "overhead vs D0 (p50/p95)", "throughput", "cache hit",
+                "isolation frac", "decision ms"], rows,
+               note="Security columns are MEASURED end-to-end against a live attack through the defended serving "
+                    "layer (nothing derived). Performance columns: benign workload, load L0. Oracle columns: "
+                    "attacker-side probe phase.")
+
+
+def table5(c):
+    fs, rows = c.cfg["fn_sweep"], []
+    for d in fs["defenses"]:
+        pf = c.perf(d)
+        for x in [0.0] + list(fs["fnr"]):
+            cl = c.cell("A2", d, fnr=x)
+            if cl:
+                rows.append((SHORT[d], x, f"{cl['k_exact']}/{cl['n']}", f(cl["asr"]), ci(cl), f(cl["leaked_bits_mean"]),
+                             f(cl["victim_isolated_frac"]),
+                             f(pf["sensitive_share_rate"]) if pf else "n/a",
+                             f(pf["clean_isolation_rate"]) if pf else "n/a"))
+    save_table(c, "table_V_detector_error_propagation", "Table V - Detector-error propagation",
+               ["defense", "injected FNR", "exact", "A2 ASR", "Wilson95", "leaked bits", "victim isolated",
+                "natural sensitive-share rate (FN exposure)", "natural clean-isolation rate (FP cost)"], rows,
+               note="Injected FNR downgrades each detected request to LOW independently (all requests, including "
+                    "attacker probes). Natural columns use the benign workload's ground-truth labels.")
+
+
+def table6(c):
+    ab, rows, base = c.cfg["ablation"], [], c.perf("D0_no_defense")
+    for fnr in ab["fnr"]:
+        for cond in ab["conditions"]:
+            cl, pf = c.cell("A2", cond, fnr=fnr), c.perf(cond)
+            ov = f"{100 * (pf['p50'] / base['p50'] - 1):+.1f}%" if pf and base else "n/a"
+            rows.append((fnr, SHORT[cond], f"{cl['k_exact']}/{cl['n']}" if cl else "n/a", f(cl["asr"]) if cl else "n/a",
+                         ci(cl) if cl else "n/a", f(cl["victim_isolated_frac"]) if cl else "n/a",
+                         f(cl["attacker_request_isolated_frac"]) if cl else "n/a",
+                         f(cl["queries"]["p50"], 0) if cl else "n/a", f(pf["isolation_fraction"]) if pf else "n/a",
+                         f(pf["clean_isolation_rate"]) if pf else "n/a", ov))
+    save_table(c, "table_VI_ablation", "Table VI - Ablation",
+               ["injected FNR", "condition", "exact", "A2 ASR", "Wilson95", "victim isolated",
+                "attacker requests isolated", "median Q", "benign isolation", "benign clean isolation (FP)",
+                "TTFT p50 overhead vs D0"], rows,
+               note="AB0 = D0, AB1 = D4, FULL = D5 by construction (trials shared, not re-run). AB2 adds the "
+                    "confidence gate; AB3 uses the behaviour detector only.")
+
+
+def acceptance(c: Ctx, figs_ok: bool):
+    cfg, m, mf = c.cfg, c.m, c.primary["manifest"]
+    prof = mf["profile_values"]
+    checks = []
+
+    def chk(name, ok, detail=""):
+        checks.append((name, "PASS" if ok is True else ("PARTIAL" if ok == "partial" else "FAIL"), detail))
+    chk("Evidence is from a REAL backend (not simulated)", not c.sim, mf["backend_kind"])
+    exp = {(b["attack"], d): prof["n_victims"][b["attack"]] * len(prof["seeds"]) for b in cfg["core"] for d in b["defenses"]}
+    miss = [f"{a}/{SHORT[d]}: {(c.cell(a, d) or {}).get('n', 0)}/{n}" for (a, d), n in exp.items()
+            if (c.cell(a, d) or {}).get("n", 0) < n]
+    chk("Core matrix evaluated on same testbed (all cells complete, no trial errors)",
+        not miss and m["n_trial_errors"] == 0,
+        f"incomplete: {miss}; trial errors: {m['n_trial_errors']}" if miss or m["n_trial_errors"] else "all cells complete")
+    chk("D5 compared with D0-D4 (attack A2)", all(c.cell("A2", d) for d in CORE))
+    chk("AB0-AB3 + FULL completed",
+        all(c.cell("A2", x, fnr=fn) for x in cfg["ablation"]["conditions"] for fn in cfg["ablation"]["fnr"]))
+    chk("Security + performance measured together",
+        all(c.perf(d, l) for d in cfg["perf"]["defenses"] for l in cfg["perf"]["load_levels"]) and bool(m["security"]))
+    chk("95% CIs and effect sizes reported",
+        bool(m["paired_vs_D0"]) and all("wilson95" in v for v in m["security"].values()))
+    cal_bad = [r["seed"] for r in c.primary["calibration"] if r["preflight_problems"] or r.get("forced")]
+    auc0 = (m["oracle"].get("D0_no_defense") or {}).get("auc_hit_vs_miss", 0)
+    chk("Timing oracle valid under D0 (preflight passed, AUC >= 0.99)", not cal_bad and auc0 >= 0.99,
+        f"AUC(D0)={auc0:.3f}; bad seeds={cal_bad}")
+    chk("Enough replication (>=3 seeds, >=18 A2 trials per core cell)",
+        len(prof["seeds"]) >= 3 and all((c.cell("A2", d) or {"n": 0})["n"] >= 18 for d in CORE),
+        f"seeds={len(prof['seeds'])}")
+    chk("Cross-backend comparison (>= 2 real backends)", True if len(c.runs) >= 2 else "partial",
+        f"{len(c.runs)} run(s): {[r['manifest']['backend'] for r in c.runs]}")
+    chk("Reproducible provenance (clean git tree, command, server flags recorded)",
+        (not mf.get("git_dirty")) and bool(mf.get("command")) and bool(mf.get("server_flags")),
+        f"dirty={mf.get('git_dirty')} flags={'yes' if mf.get('server_flags') else 'NO'}")
+    chk("Figures 1-8 and Tables I-VI generated", figs_ok, f"{len(c.made)} files")
+    md = ("# Issue #10 acceptance report\n\n" + ("**SIMULATED RUN - not evidence.**\n\n" if c.sim else "")
+          + "| criterion | status | detail |\n|---|---|---|\n" + "".join(f"| {a} | **{b}** | {d} |\n" for a, b, d in checks))
+    (c.out / "ACCEPTANCE.md").write_text(md)
+    print("\n" + md)
+    return all(b == "PASS" for _, b, _ in checks)
+
+
+def find_real_runs(root: Path):
+    best = {}
+    for p in sorted(root.glob("*/manifest.json")):
+        mf = json.loads(p.read_text())
+        if mf.get("backend_kind") == "real" and mf.get("status") == "complete":
+            best[mf["backend"]] = p.parent
+    return list(best.values())
 
 
 def main():
-    p = argparse.ArgumentParser(description="Reproduce all paper figures and tables")
-    p.add_argument("--results-dir", default=str(RESULTS))
-    p.add_argument("--figures-dir", default=str(FIGURES))
-    p.add_argument("--check-only",  action="store_true")
-    args = p.parse_args()
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--run-dir", action="append", help="run directory (repeat for several backends)")
+    ap.add_argument("--results-root", default=str(ROOT / "experiments" / "results" / "final"))
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--allow-simulated", action="store_true")
+    a = ap.parse_args()
 
-    results_dir = Path(args.results_dir)
-    figures_dir = Path(args.figures_dir)
-    figures_dir.mkdir(parents=True, exist_ok=True)
-
-    ok = _check_artifacts(results_dir)
-    if args.check_only:
-        sys.exit(0 if ok else 1)
-
-    data = {k: _load(results_dir, k) for k in REQUIRED_FILES}
-    a1_data, _   = _find_latest(results_dir, "a1-attack")
-    ablation, _  = _find_latest(results_dir, "ablation")
-    d5_eval, _   = _find_latest(results_dir, "d5-eval")
-    data["a1_data"]  = a1_data
-    data["ablation"] = ablation
-    data["d5_eval"]  = d5_eval
-
-    print("\n=== Generating Figures ===")
-    fig1_threat_model(figures_dir, **data)
-    fig2_ttft_oracle(figures_dir, **data)
-    fig3_attack_efficiency(figures_dir, **data)
-    fig4_load_robustness(figures_dir, **data)
-    fig5_cross_backend(figures_dir, **data)
-    fig6_fn_leakage(figures_dir, **data)
-    fig7_pareto(figures_dir, **data)
-    fig8_ablation(figures_dir, **data)
-
-    print("\n=== Generating Tables ===")
-    generate_tables(figures_dir, **data)
-
-    print("\n=== Done ===")
-    print(f"Figures and tables saved to: {figures_dir}")
-    print("\nTo reproduce everything:")
-    print("  python experiments/reproduce_paper.py")
+    dirs = [Path(x) for x in a.run_dir] if a.run_dir else find_real_runs(Path(a.results_root))
+    if not dirs:
+        sys.exit("No complete REAL run found under " + a.results_root + "\nRun experiments/run_final_benchmark.py "
+                 "against vLLM/SGLang first (see docs/paper/ISSUE10_REPRODUCE.md).")
+    runs = []
+    for d in dirs:
+        r = M.load_run(d)
+        r["metrics"] = M.compute(d)
+        runs.append(r)
+    sim = any(r["manifest"]["backend_kind"] != "real" for r in runs)
+    if sim and not a.allow_simulated:
+        sys.exit("Refusing SIMULATED run(s) as paper evidence. Use --allow-simulated for a pipeline check.")
+    out = Path(a.out) if a.out else ROOT / "experiments" / "figures" / ("final_SIMULATED" if sim else "final")
+    out.mkdir(parents=True, exist_ok=True)
+    c = Ctx(runs, out, sim)
+    print(f"Runs: {[str(d) for d in dirs]}\nOutput: {out}\n\nFigures / tables")
+    for fn in (fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, table1, table2, table3, table4, table5, table6):
+        fn(c)
+    prefixes = ("fig1", "fig2", "fig3", "fig4", "fig5", "fig6", "fig7", "fig8", "table_I_", "table_II_",
+                "table_III_", "table_IV_", "table_V_", "table_VI_")
+    figs_ok = all(any(x.startswith(p) for x in c.made) for p in prefixes)
+    sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else None
+    prov = {"runs": [{"dir": str(d), "manifest_sha256": sha(d / "manifest.json"), "trials_sha256": sha(d / "trials.jsonl"),
+                      "oracle_sha256": sha(d / "oracle.jsonl"), "perf_sha256": sha(d / "perf.jsonl")} for d in dirs],
+            "simulated": sim, "command": " ".join(sys.argv),
+            "reproduce_git": subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True,
+                                            text=True).stdout.strip() or None}
+    (out / "provenance.json").write_text(json.dumps(prov, indent=2))
+    (out / "metrics_recomputed.json").write_text(json.dumps(runs[0]["metrics"], indent=1, default=float))
+    ok = acceptance(c, figs_ok)
+    sys.exit(0 if ok else 1)
 
 
 if __name__ == "__main__":

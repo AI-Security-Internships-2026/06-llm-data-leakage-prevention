@@ -152,6 +152,14 @@ def parse_args() -> argparse.Namespace:
                    help="Use analytical T1/T2 instead of empirical calibration")
     p.add_argument("--output",     required=True,
                    help="Output JSON path")
+    p.add_argument("--raw-probe-log", default=None,
+                   help="Optional path for a JSONL file with EVERY probe "
+                        "(victim, stage, candidate, truth, probe_index, "
+                        "ttft_ms, predicted_cache_state) — not just the "
+                        "top-3 kept in the main output. Addresses Issue #2's "
+                        "raw-probe-level evidence requirement. Defaults to "
+                        "'<output>.raw_probes.jsonl' if --output is given "
+                        "and this flag is omitted (i.e. it's on by default).")
     return p.parse_args()
 
 
@@ -186,12 +194,19 @@ def main() -> None:
     tokenizer = AutoTokenizer.from_pretrained(args.model_id)
     backend   = make_backend(args, tokenizer)
 
+    raw_probe_log_path = args.raw_probe_log or (str(args.output) + ".raw_probes.jsonl")
+    Path(raw_probe_log_path).parent.mkdir(parents=True, exist_ok=True)
+    open(raw_probe_log_path, "w").close()
+    run_id = f"week13-twostage-{datetime.datetime.utcnow().strftime('%Y-%m-%d')}"
+
     print("\n" + "=" * 65)
     print("[harness_v2] Week 13 — True Two-Stage Adaptive Attack")
     print(f"[harness_v2] Backend   : {args.backend}")
     print(f"[harness_v2] Model     : {args.model_id}")
     print(f"[harness_v2] Victims   : {args.n_victims}")
     print(f"[harness_v2] Output    : {args.output}")
+    print(f"[harness_v2] Raw probes: {raw_probe_log_path}  "
+          f"(Issue #2 — every candidate probe, not just top-3)")
     print("=" * 65 + "\n")
 
     system_prefix, n_prefix_tok = build_aligned_system_prompt(
@@ -275,6 +290,8 @@ def main() -> None:
             t2_ms          = t2_ms,
             victim_record  = victim_record,
             candidate_seed = args.seed * 1000 + vid,
+            raw_probe_log_path = raw_probe_log_path,
+            run_id             = run_id,
         )
         results.append(result)
 
@@ -307,7 +324,7 @@ def main() -> None:
     print(f"{'=' * 65}\n")
 
     out_data = {
-        "run_id"       : f"week13-twostage-{datetime.datetime.utcnow().strftime('%Y-%m-%d')}",
+        "run_id"       : run_id,
         "algorithm"    : "two_stage_adaptive",
         "model"        : args.model_id,
         "hardware"     : HARDWARE,
@@ -315,6 +332,7 @@ def main() -> None:
         "n_victims"    : args.n_victims,
         "n_calibration": args.n_calib,
         "seed"         : args.seed,
+        "raw_probe_log": raw_probe_log_path,
         "calibration"  : calibration,
         "aggregate"    : aggregate,
         "results"      : [

@@ -1,3 +1,6 @@
+"""experiments/audit_issue10.py -- machine-checkable audit of pre-Issue-10 artifacts.
+Re-derives each finding from experiments/results; writes docs/paper/ISSUE10_AUDIT_FINDINGS.json.
+Read-only: never modifies raw results."""
 import glob, json, sys
 from pathlib import Path
 R = Path(__file__).resolve().parent / "results"

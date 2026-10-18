@@ -52,6 +52,7 @@ From Week 10 empirical measurements (kv_attack_results.json):
 
 from __future__ import annotations
 
+import json
 import math
 import random
 import uuid
@@ -88,7 +89,7 @@ VOCAB_SIZE    = N_NAMES * N_CONDITIONS
 H0_BITS       = math.log2(VOCAB_SIZE)
 
 BLQ_ADAPTIVE_EXPECTED      = H0_BITS / 79.2
-BLQ_LINEAR_WEEK12_EXPECTED = H0_BITS / 762.4
+BLQ_LINEAR_WEEK12_EXPECTED = H0_BITS / 1302.5
 
 EVICT_N_REQUESTS = 500
 
@@ -372,6 +373,8 @@ def reconstruct_victim_two_stage(
     t2_ms          : float,
     victim_record  : dict,
     candidate_seed : int = 0,
+    raw_probe_log_path: str | None = None,
+    run_id             : str | None = None,
 ) -> TwoStageResult:
     """
     Recover one victim's (name, condition) using the true two-stage adaptive
@@ -381,10 +384,41 @@ def reconstruct_victim_two_stage(
     ----------
     t1_ms : Stage 1 threshold (name gate). From calibrate_two_stage().
     t2_ms : Stage 2 threshold (condition gate). From calibrate_two_stage().
+    raw_probe_log_path : optional path to a JSONL file. If given, every single
+        probe (both stages, not just the top-3 kept in TwoStageResult) is
+        appended as one JSON line, in the schema requested in Issue #2:
+        run_id, victim, stage, candidate, truth, probe_index, TTFT,
+        predicted_cache_state. Previously this per-probe data existed only in
+        memory (s1_log/s2_log below) and was discarded after truncating to
+        the top 3 candidates — see claim_evidence_matrix.md's Issue #2 note
+        and the week13_harness.py `_save_partial`/final-write functions,
+        which both sliced `[:3]` and threw the rest away. Fixed 2026-10-11.
+        Writes are flushed after every line so partial data survives a crash,
+        consistent with how oracle.jsonl/trials.jsonl are written elsewhere
+        in this project.
     """
     gt        = victim_record["ground_truth"]
     victim_id = victim_record["victim_id"]
     dob       = gt["dob"]
+
+    _raw_fh = open(raw_probe_log_path, "a") if raw_probe_log_path else None
+
+    def _log_probe(stage: int, probe_idx: int, candidate: str, truth: str,
+                    ttft_ms: float, is_hit: bool) -> None:
+        if _raw_fh is None:
+            return
+        state = "below_threshold (candidate accepted)" if is_hit else "above_threshold (candidate rejected)"
+        _raw_fh.write(json.dumps({
+            "run_id": run_id,
+            "victim": victim_id,
+            "stage": stage,
+            "probe_index": probe_idx,
+            "candidate": candidate,
+            "truth": truth,
+            "ttft_ms": ttft_ms,
+            "predicted_cache_state": state,
+        }) + "\n")
+        _raw_fh.flush()
 
     names      = _shuffled_names(seed=candidate_seed)
     s1_calls   = 0
@@ -417,6 +451,8 @@ def reconstruct_victim_two_stage(
             "mean_ttft": round(mean_ttft, 3),
             "is_s1_hit": is_s1_hit,
         })
+        _log_probe(stage=1, probe_idx=probe_idx, candidate=cand_name,
+                   truth=gt["name"], ttft_ms=round(mean_ttft, 3), is_hit=is_s1_hit)
 
         if is_s1_hit:
             print(f"[reconstructor_v2] Victim {victim_id}: "
@@ -462,6 +498,8 @@ def reconstruct_victim_two_stage(
             "mean_ttft": round(mean_ttft, 3),
             "is_s2_hit": is_s2_hit,
         })
+        _log_probe(stage=2, probe_idx=probe_idx, candidate=cand_cond,
+                   truth=gt["condition"], ttft_ms=round(mean_ttft, 3), is_hit=is_s2_hit)
 
         if is_s2_hit:
             print(f"[reconstructor_v2] Victim {victim_id}: "
@@ -509,6 +547,9 @@ def reconstruct_victim_two_stage(
     s1_log.sort(key=lambda x: x["mean_ttft"])
     s2_log.sort(key=lambda x: x["mean_ttft"])
 
+    if _raw_fh is not None:
+        _raw_fh.close()
+
     it_metrics = _compute_it_metrics(total_calls, s1_calls, s2_calls)
 
     return TwoStageResult(
@@ -546,6 +587,9 @@ def aggregate_two_stage(results: list[TwoStageResult]) -> dict:
     mean_blq       = float(np.mean(blq_list))
     improvement    = mean_blq / BLQ_LINEAR_WEEK12_EXPECTED
 
+    blq_ratio_of_means            = H0_BITS / mean_calls
+    improvement_ratio_of_means    = blq_ratio_of_means / BLQ_LINEAR_WEEK12_EXPECTED
+
     budget_points  = [20, 50, 79, 100, 120, 153, 200, 500, 762, 1000, 2000]
     cdf = {
         str(q): round(float(np.mean(np.array(total_calls) <= q)), 4)
@@ -566,6 +610,8 @@ def aggregate_two_stage(results: list[TwoStageResult]) -> dict:
         "mean_blq"                : round(mean_blq, 6),
         "blq_linear_week12"       : round(BLQ_LINEAR_WEEK12_EXPECTED, 6),
         "blq_improvement_factor"  : round(improvement, 2),
+        "blq_ratio_of_means"              : round(blq_ratio_of_means, 6),
+        "blq_improvement_factor_ratio_of_means": round(improvement_ratio_of_means, 2),
         "blq_theoretical_adaptive": round(BLQ_ADAPTIVE_EXPECTED, 6),
         "e_q_theoretical"         : 79.2,
         "q_max_theoretical"       : 153,

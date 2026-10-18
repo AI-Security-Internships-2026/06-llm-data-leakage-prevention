@@ -1,3 +1,17 @@
+# configs/final_benchmark.yaml
+# Issue #10 -- PRE-REGISTERED final same-testbed benchmark.
+#
+# Rules (do not edit after the first real run; make a new file + new run instead):
+#   * One model, one backend build, one server launch config for ALL cells.
+#   * Paired design: every cell of a given seed uses the SAME victim set
+#     (first n victims of that seed) and the SAME attacker thresholds.
+#   * Cell order is randomised with `order_seed` (removes time-drift confounds).
+#   * Only the cells below are run (no Cartesian product). Aliases
+#     (AB0=D0, AB1=D4, FULL=D5) reuse the D-cell trials, they are not re-run.
+#   * Negative / null results are reported as-is; thresholds are calibrated
+#     once per seed on an UNDEFENDED replica (strong-attacker assumption) and
+#     are never re-tuned per defense.
+
 model_id: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
 order_seed: 20260930
 n_calibration: 50

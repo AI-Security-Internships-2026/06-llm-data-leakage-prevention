@@ -1,0 +1,3851 @@
+{
+  "run_id": "week13-twostage-2026-10-15",
+  "algorithm": "two_stage_adaptive",
+  "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+  "hardware": "NVIDIA GB10 (119.7 GB unified memory, Blackwell)",
+  "backend": "vllm",
+  "n_victims": 50,
+  "n_calibration": 200,
+  "seed": 42,
+  "raw_probe_log": "../experiments/results/kv_week13_final_rerun.json.raw_probes.jsonl",
+  "calibration": {
+    "t1_threshold_ms": 492.4848,
+    "t2_threshold_ms": 162.8298,
+    "intermediate_feasible": true,
+    "hit_mean_ms": 86.0667,
+    "hit_std_ms": 1.0893,
+    "s1_hit_mean_ms": 249.2619,
+    "s1_hit_std_ms": 18.3467,
+    "miss_mean_ms": 628.5862,
+    "miss_std_ms": 24.8969,
+    "ks_hit_vs_miss": {
+      "stat": 1.0,
+      "p": 1.9426434495222354e-119
+    },
+    "ks_s1hit_vs_miss": {
+      "stat": 1.0,
+      "p": 1.9426434495222354e-119
+    },
+    "ks_hit_vs_s1hit": {
+      "stat": 1.0,
+      "p": 1.9426434495222354e-119
+    },
+    "t1_analytical_ms": 438.8,
+    "t2_analytical_ms": 177.1,
+    "s1_hit_analytical_ms": 264.0
+  },
+  "aggregate": {
+    "algorithm": "two_stage_adaptive",
+    "n_victims": 50,
+    "vocab_size": 2000,
+    "prior_entropy_bits": 10.9658,
+    "mean_total_api_calls": 79.44,
+    "mean_stage1_api_calls": 62.56,
+    "mean_stage2_api_calls": 13.88,
+    "mean_trr": 0.98,
+    "success_rate": 0.98,
+    "confirmed_hit_rate": 1.0,
+    "mean_blq": 0.187795,
+    "blq_linear_week12": 0.008419,
+    "blq_improvement_factor": 22.31,
+    "blq_ratio_of_means": 0.138039,
+    "blq_improvement_factor_ratio_of_means": 16.4,
+    "blq_theoretical_adaptive": 0.138457,
+    "e_q_theoretical": 79.2,
+    "q_max_theoretical": 153,
+    "query_budget_cdf": {
+      "20": 0.04,
+      "50": 0.28,
+      "79": 0.52,
+      "100": 0.72,
+      "120": 0.8,
+      "153": 1.0,
+      "200": 1.0,
+      "500": 1.0,
+      "762": 1.0,
+      "1000": 1.0,
+      "2000": 1.0
+    },
+    "target_trr": 0.85,
+    "target_sr": 0.8,
+    "trr_target_met": true,
+    "sr_target_met": true
+  },
+  "results": [
+    {
+      "victim_id": 0,
+      "ground_truth": {
+        "name": "Mary Smith",
+        "dob": "2001-07-12",
+        "condition": "hypothyroidism"
+      },
+      "recovered": {
+        "name": "Mary Smith",
+        "condition": "hypothyroidism",
+        "dob": "2001-07-12"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 95,
+      "stage1_api_calls": 88,
+      "stage2_api_calls": 4,
+      "stage1_survivors": 1,
+      "arpt": 15.83,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 95,
+        "stage1_api_calls": 88,
+        "stage2_api_calls": 4,
+        "bits_leaked_per_query": 0.115429,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 13.7105,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Mary Smith",
+          "mean_ttft": 239.302,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Barbara Brown",
+          "mean_ttft": 620.007,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Linda Brown",
+          "mean_ttft": 620.153,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "hypothyroidism",
+          "mean_ttft": 89.036,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "anxiety",
+          "mean_ttft": 238.525,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "arthritis",
+          "mean_ttft": 238.99,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 1,
+      "ground_truth": {
+        "name": "Patricia Brown",
+        "dob": "1947-07-09",
+        "condition": "arthritis"
+      },
+      "recovered": {
+        "name": "Patricia Brown",
+        "condition": "arthritis",
+        "dob": "1947-07-09"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 83,
+      "stage1_api_calls": 57,
+      "stage2_api_calls": 23,
+      "stage1_survivors": 1,
+      "arpt": 16.6,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 83,
+        "stage1_api_calls": 57,
+        "stage2_api_calls": 23,
+        "bits_leaked_per_query": 0.132118,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 15.6928,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Patricia Brown",
+          "mean_ttft": 236.502,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Robert Wilson",
+          "mean_ttft": 619.566,
+          "is_s1_hit": false
+        },
+        {
+          "name": "John Johnson",
+          "mean_ttft": 619.723,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "arthritis",
+          "mean_ttft": 85.918,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "migraine",
+          "mean_ttft": 242.219,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "asthma",
+          "mean_ttft": 242.485,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 2,
+      "ground_truth": {
+        "name": "William Johnson",
+        "dob": "1987-12-23",
+        "condition": "atrial fibrillation"
+      },
+      "recovered": {
+        "name": "William Johnson",
+        "condition": "atrial fibrillation",
+        "dob": "1987-12-23"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 133,
+      "stage1_api_calls": 119,
+      "stage2_api_calls": 11,
+      "stage1_survivors": 1,
+      "arpt": 22.17,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 133,
+        "stage1_api_calls": 119,
+        "stage2_api_calls": 11,
+        "bits_leaked_per_query": 0.08245,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 9.7932,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "William Johnson",
+          "mean_ttft": 246.096,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Michael Garcia",
+          "mean_ttft": 619.038,
+          "is_s1_hit": false
+        },
+        {
+          "name": "John Davis",
+          "mean_ttft": 619.576,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "atrial fibrillation",
+          "mean_ttft": 88.13,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 236.233,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "asthma",
+          "mean_ttft": 244.949,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 3,
+      "ground_truth": {
+        "name": "James Smith",
+        "dob": "1943-05-29",
+        "condition": "COPD"
+      },
+      "recovered": {
+        "name": "James Smith",
+        "condition": "COPD",
+        "dob": "1943-05-29"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 45,
+      "stage1_api_calls": 19,
+      "stage2_api_calls": 23,
+      "stage1_survivors": 1,
+      "arpt": 9.0,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 45,
+        "stage1_api_calls": 19,
+        "stage2_api_calls": 23,
+        "bits_leaked_per_query": 0.243684,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 28.9444,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "James Smith",
+          "mean_ttft": 241.453,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Linda Davis",
+          "mean_ttft": 622.054,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Barbara Martinez",
+          "mean_ttft": 622.101,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "COPD",
+          "mean_ttft": 87.298,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "atrial fibrillation",
+          "mean_ttft": 236.338,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 237.298,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 4,
+      "ground_truth": {
+        "name": "Patricia Wilson",
+        "dob": "1989-01-03",
+        "condition": "diabetes"
+      },
+      "recovered": {
+        "name": "Patricia Wilson",
+        "condition": "diabetes",
+        "dob": "1989-01-03"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 43,
+      "stage1_api_calls": 16,
+      "stage2_api_calls": 24,
+      "stage1_survivors": 1,
+      "arpt": 8.6,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 43,
+        "stage1_api_calls": 16,
+        "stage2_api_calls": 24,
+        "bits_leaked_per_query": 0.255018,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 30.2907,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Patricia Wilson",
+          "mean_ttft": 244.643,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Robert Garcia",
+          "mean_ttft": 621.05,
+          "is_s1_hit": false
+        },
+        {
+          "name": "James Davis",
+          "mean_ttft": 621.086,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "diabetes",
+          "mean_ttft": 85.707,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "depression",
+          "mean_ttft": 243.312,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "coronary artery disease",
+          "mean_ttft": 243.458,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 5,
+      "ground_truth": {
+        "name": "William Brown",
+        "dob": "1999-03-28",
+        "condition": "epilepsy"
+      },
+      "recovered": {
+        "name": "William Brown",
+        "condition": "epilepsy",
+        "dob": "1999-03-28"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 69,
+      "stage1_api_calls": 44,
+      "stage2_api_calls": 22,
+      "stage1_survivors": 1,
+      "arpt": 13.8,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 69,
+        "stage1_api_calls": 44,
+        "stage2_api_calls": 22,
+        "bits_leaked_per_query": 0.158924,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 18.8768,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "William Brown",
+          "mean_ttft": 237.646,
+          "is_s1_hit": true
+        },
+        {
+          "name": "William Jones",
+          "mean_ttft": 618.131,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Robert Miller",
+          "mean_ttft": 618.802,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 89.24,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "atrial fibrillation",
+          "mean_ttft": 245.175,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "sleep apnea",
+          "mean_ttft": 245.739,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 6,
+      "ground_truth": {
+        "name": "Michael Brown",
+        "dob": "1975-04-20",
+        "condition": "migraine"
+      },
+      "recovered": {
+        "name": "Michael Brown",
+        "condition": "migraine",
+        "dob": "1975-04-20"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 66,
+      "stage1_api_calls": 57,
+      "stage2_api_calls": 6,
+      "stage1_survivors": 1,
+      "arpt": 13.2,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 66,
+        "stage1_api_calls": 57,
+        "stage2_api_calls": 6,
+        "bits_leaked_per_query": 0.166148,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 19.7348,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Michael Brown",
+          "mean_ttft": 236.672,
+          "is_s1_hit": true
+        },
+        {
+          "name": "John Jones",
+          "mean_ttft": 619.847,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Linda Garcia",
+          "mean_ttft": 620.478,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "migraine",
+          "mean_ttft": 89.238,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "obesity",
+          "mean_ttft": 233.514,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "multiple sclerosis",
+          "mean_ttft": 235.786,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 7,
+      "ground_truth": {
+        "name": "Robert Smith",
+        "dob": "2003-01-28",
+        "condition": "anxiety"
+      },
+      "recovered": {
+        "name": "Robert Smith",
+        "condition": "anxiety",
+        "dob": "2003-01-28"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 81,
+      "stage1_api_calls": 57,
+      "stage2_api_calls": 21,
+      "stage1_survivors": 1,
+      "arpt": 20.25,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 81,
+        "stage1_api_calls": 57,
+        "stage2_api_calls": 21,
+        "bits_leaked_per_query": 0.13538,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 16.0802,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Robert Smith",
+          "mean_ttft": 245.494,
+          "is_s1_hit": true
+        },
+        {
+          "name": "John Garcia",
+          "mean_ttft": 619.061,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Barbara Wilson",
+          "mean_ttft": 620.633,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "anxiety",
+          "mean_ttft": 88.192,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 236.603,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "osteoporosis",
+          "mean_ttft": 242.963,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 8,
+      "ground_truth": {
+        "name": "Michael Garcia",
+        "dob": "1959-12-06",
+        "condition": "depression"
+      },
+      "recovered": {
+        "name": "Michael Garcia",
+        "condition": "depression",
+        "dob": "1959-12-06"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 115,
+      "stage1_api_calls": 88,
+      "stage2_api_calls": 24,
+      "stage1_survivors": 1,
+      "arpt": 19.17,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 115,
+        "stage1_api_calls": 88,
+        "stage2_api_calls": 24,
+        "bits_leaked_per_query": 0.095355,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 11.3261,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Michael Garcia",
+          "mean_ttft": 236.331,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Linda Johnson",
+          "mean_ttft": 619.38,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Jennifer Miller",
+          "mean_ttft": 619.496,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "depression",
+          "mean_ttft": 85.579,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "obesity",
+          "mean_ttft": 232.941,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 234.138,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 9,
+      "ground_truth": {
+        "name": "Patricia Garcia",
+        "dob": "1944-03-03",
+        "condition": "asthma"
+      },
+      "recovered": {
+        "name": "Patricia Garcia",
+        "condition": "asthma",
+        "dob": "1944-03-03"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 86,
+      "stage1_api_calls": 67,
+      "stage2_api_calls": 16,
+      "stage1_survivors": 1,
+      "arpt": 12.29,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 86,
+        "stage1_api_calls": 67,
+        "stage2_api_calls": 16,
+        "bits_leaked_per_query": 0.127509,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 15.1453,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Patricia Garcia",
+          "mean_ttft": 235.77,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Patricia Miller",
+          "mean_ttft": 616.052,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Michael Miller",
+          "mean_ttft": 618.171,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "asthma",
+          "mean_ttft": 84.693,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "arthritis",
+          "mean_ttft": 240.153,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "COPD",
+          "mean_ttft": 241.301,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 10,
+      "ground_truth": {
+        "name": "Michael Johnson",
+        "dob": "1967-03-17",
+        "condition": "chronic kidney disease"
+      },
+      "recovered": {
+        "name": "Michael Johnson",
+        "condition": "chronic kidney disease",
+        "dob": "1967-03-17"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 111,
+      "stage1_api_calls": 92,
+      "stage2_api_calls": 16,
+      "stage1_survivors": 1,
+      "arpt": 13.88,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 111,
+        "stage1_api_calls": 92,
+        "stage2_api_calls": 16,
+        "bits_leaked_per_query": 0.098791,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 11.7342,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Michael Johnson",
+          "mean_ttft": 241.807,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Michael Garcia",
+          "mean_ttft": 619.201,
+          "is_s1_hit": false
+        },
+        {
+          "name": "James Garcia",
+          "mean_ttft": 619.557,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "chronic kidney disease",
+          "mean_ttft": 85.772,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "multiple sclerosis",
+          "mean_ttft": 237.294,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "anxiety",
+          "mean_ttft": 238.091,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 11,
+      "ground_truth": {
+        "name": "Barbara Jones",
+        "dob": "1938-11-24",
+        "condition": "osteoporosis"
+      },
+      "recovered": {
+        "name": "Barbara Jones",
+        "condition": "osteoporosis",
+        "dob": "1938-11-24"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 41,
+      "stage1_api_calls": 26,
+      "stage2_api_calls": 12,
+      "stage1_survivors": 1,
+      "arpt": 6.83,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 41,
+        "stage1_api_calls": 26,
+        "stage2_api_calls": 12,
+        "bits_leaked_per_query": 0.267458,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 31.7683,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Barbara Jones",
+          "mean_ttft": 237.333,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Mary Johnson",
+          "mean_ttft": 618.625,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Barbara Davis",
+          "mean_ttft": 620.193,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "osteoporosis",
+          "mean_ttft": 85.807,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "COPD",
+          "mean_ttft": 232.008,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "hyperlipidemia",
+          "mean_ttft": 234.807,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 12,
+      "ground_truth": {
+        "name": "William Johnson",
+        "dob": "1968-12-16",
+        "condition": "asthma"
+      },
+      "recovered": {
+        "name": "William Johnson",
+        "condition": "asthma",
+        "dob": "1968-12-16"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 15,
+      "stage1_api_calls": 11,
+      "stage2_api_calls": 1,
+      "stage1_survivors": 1,
+      "arpt": 3.75,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 15,
+        "stage1_api_calls": 11,
+        "stage2_api_calls": 1,
+        "bits_leaked_per_query": 0.731052,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 86.8333,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "William Johnson",
+          "mean_ttft": 246.145,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Linda Johnson",
+          "mean_ttft": 620.388,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Robert Johnson",
+          "mean_ttft": 624.998,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "asthma",
+          "mean_ttft": 87.697,
+          "is_s2_hit": true
+        }
+      ]
+    },
+    {
+      "victim_id": 13,
+      "ground_truth": {
+        "name": "William Jones",
+        "dob": "1991-05-26",
+        "condition": "sleep apnea"
+      },
+      "recovered": {
+        "name": "William Jones",
+        "condition": "sleep apnea",
+        "dob": "1991-05-26"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 60,
+      "stage1_api_calls": 44,
+      "stage2_api_calls": 13,
+      "stage1_survivors": 1,
+      "arpt": 12.0,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 60,
+        "stage1_api_calls": 44,
+        "stage2_api_calls": 13,
+        "bits_leaked_per_query": 0.182763,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 21.7083,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "William Jones",
+          "mean_ttft": 238.202,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Robert Jones",
+          "mean_ttft": 618.071,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Jennifer Johnson",
+          "mean_ttft": 619.343,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "sleep apnea",
+          "mean_ttft": 87.592,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "COPD",
+          "mean_ttft": 243.06,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "obesity",
+          "mean_ttft": 244.606,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 14,
+      "ground_truth": {
+        "name": "Jennifer Martinez",
+        "dob": "1952-04-01",
+        "condition": "asthma"
+      },
+      "recovered": {
+        "name": "Jennifer Martinez",
+        "condition": "asthma",
+        "dob": "1952-04-01"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 14,
+      "stage1_api_calls": 7,
+      "stage2_api_calls": 4,
+      "stage1_survivors": 1,
+      "arpt": 2.8,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 14,
+        "stage1_api_calls": 7,
+        "stage2_api_calls": 4,
+        "bits_leaked_per_query": 0.78327,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 93.0357,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Jennifer Martinez",
+          "mean_ttft": 244.738,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Robert Smith",
+          "mean_ttft": 621.41,
+          "is_s1_hit": false
+        },
+        {
+          "name": "John Smith",
+          "mean_ttft": 622.354,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "asthma",
+          "mean_ttft": 86.98,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "migraine",
+          "mean_ttft": 243.174,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "heart failure",
+          "mean_ttft": 243.737,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 15,
+      "ground_truth": {
+        "name": "James Brown",
+        "dob": "2004-05-09",
+        "condition": "hyperlipidemia"
+      },
+      "recovered": {
+        "name": "James Brown",
+        "condition": "hyperlipidemia",
+        "dob": "2004-05-09"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 41,
+      "stage1_api_calls": 29,
+      "stage2_api_calls": 9,
+      "stage1_survivors": 1,
+      "arpt": 6.83,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 41,
+        "stage1_api_calls": 29,
+        "stage2_api_calls": 9,
+        "bits_leaked_per_query": 0.267458,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 31.7683,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "James Brown",
+          "mean_ttft": 238.0,
+          "is_s1_hit": true
+        },
+        {
+          "name": "William Williams",
+          "mean_ttft": 619.111,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Robert Martinez",
+          "mean_ttft": 620.246,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "hyperlipidemia",
+          "mean_ttft": 86.781,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "asthma",
+          "mean_ttft": 236.189,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "chronic kidney disease",
+          "mean_ttft": 236.504,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 16,
+      "ground_truth": {
+        "name": "Mary Brown",
+        "dob": "1944-01-23",
+        "condition": "heart failure"
+      },
+      "recovered": {
+        "name": "Mary Brown",
+        "condition": "heart failure",
+        "dob": "1944-01-23"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 127,
+      "stage1_api_calls": 108,
+      "stage2_api_calls": 16,
+      "stage1_survivors": 1,
+      "arpt": 31.75,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 127,
+        "stage1_api_calls": 108,
+        "stage2_api_calls": 16,
+        "bits_leaked_per_query": 0.086345,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 10.2559,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Mary Brown",
+          "mean_ttft": 238.103,
+          "is_s1_hit": true
+        },
+        {
+          "name": "John Williams",
+          "mean_ttft": 617.521,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Jennifer Jones",
+          "mean_ttft": 619.753,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "heart failure",
+          "mean_ttft": 91.378,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "osteoporosis",
+          "mean_ttft": 234.348,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "anxiety",
+          "mean_ttft": 235.414,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 17,
+      "ground_truth": {
+        "name": "Robert Davis",
+        "dob": "1992-01-12",
+        "condition": "chronic kidney disease"
+      },
+      "recovered": {
+        "name": "Robert Davis",
+        "condition": "chronic kidney disease",
+        "dob": "1992-01-12"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 98,
+      "stage1_api_calls": 83,
+      "stage2_api_calls": 12,
+      "stage1_survivors": 1,
+      "arpt": 12.25,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 98,
+        "stage1_api_calls": 83,
+        "stage2_api_calls": 12,
+        "bits_leaked_per_query": 0.111896,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 13.2908,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Robert Davis",
+          "mean_ttft": 246.916,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Robert Garcia",
+          "mean_ttft": 619.518,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Robert Williams",
+          "mean_ttft": 621.643,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "chronic kidney disease",
+          "mean_ttft": 88.872,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "anxiety",
+          "mean_ttft": 239.145,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "arthritis",
+          "mean_ttft": 247.155,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 18,
+      "ground_truth": {
+        "name": "John Garcia",
+        "dob": "1966-11-15",
+        "condition": "COPD"
+      },
+      "recovered": {
+        "name": "John Garcia",
+        "condition": "COPD",
+        "dob": "1966-11-15"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 131,
+      "stage1_api_calls": 111,
+      "stage2_api_calls": 17,
+      "stage1_survivors": 1,
+      "arpt": 18.71,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 131,
+        "stage1_api_calls": 111,
+        "stage2_api_calls": 17,
+        "bits_leaked_per_query": 0.083708,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 9.9427,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "John Garcia",
+          "mean_ttft": 238.548,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Mary Brown",
+          "mean_ttft": 614.828,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Barbara Brown",
+          "mean_ttft": 617.737,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "COPD",
+          "mean_ttft": 86.845,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "hypothyroidism",
+          "mean_ttft": 233.479,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "obesity",
+          "mean_ttft": 233.96,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 19,
+      "ground_truth": {
+        "name": "Robert Johnson",
+        "dob": "1989-08-25",
+        "condition": "anxiety"
+      },
+      "recovered": {
+        "name": "Robert Johnson",
+        "condition": "anxiety",
+        "dob": "1989-08-25"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 95,
+      "stage1_api_calls": 91,
+      "stage2_api_calls": 1,
+      "stage1_survivors": 1,
+      "arpt": 23.75,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 95,
+        "stage1_api_calls": 91,
+        "stage2_api_calls": 1,
+        "bits_leaked_per_query": 0.115429,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 13.7105,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Robert Johnson",
+          "mean_ttft": 245.294,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Michael Martinez",
+          "mean_ttft": 617.94,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Michael Garcia",
+          "mean_ttft": 618.58,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "anxiety",
+          "mean_ttft": 85.454,
+          "is_s2_hit": true
+        }
+      ]
+    },
+    {
+      "victim_id": 20,
+      "ground_truth": {
+        "name": "William Brown",
+        "dob": "1949-08-29",
+        "condition": "osteoporosis"
+      },
+      "recovered": {
+        "name": "William Brown",
+        "condition": "osteoporosis",
+        "dob": "1949-08-29"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 80,
+      "stage1_api_calls": 63,
+      "stage2_api_calls": 14,
+      "stage1_survivors": 1,
+      "arpt": 16.0,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 80,
+        "stage1_api_calls": 63,
+        "stage2_api_calls": 14,
+        "bits_leaked_per_query": 0.137072,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 16.2813,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "William Brown",
+          "mean_ttft": 238.677,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Mary Davis",
+          "mean_ttft": 619.062,
+          "is_s1_hit": false
+        },
+        {
+          "name": "James Miller",
+          "mean_ttft": 619.847,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "osteoporosis",
+          "mean_ttft": 91.035,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "chronic kidney disease",
+          "mean_ttft": 245.574,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "anxiety",
+          "mean_ttft": 246.034,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 21,
+      "ground_truth": {
+        "name": "Michael Jones",
+        "dob": "1992-06-01",
+        "condition": "epilepsy"
+      },
+      "recovered": {
+        "name": "Michael Smith",
+        "condition": "chronic kidney disease",
+        "dob": "1992-06-01"
+      },
+      "token_recovery_rate": 0.0,
+      "exact_match": false,
+      "confirmed_hit": true,
+      "total_api_calls": 151,
+      "stage1_api_calls": 124,
+      "stage2_api_calls": 24,
+      "stage1_survivors": 1,
+      "arpt": 18.88,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 151,
+        "stage1_api_calls": 124,
+        "stage2_api_calls": 24,
+        "bits_leaked_per_query": 0.072621,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 8.6258,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Michael Smith",
+          "mean_ttft": 618.351,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Jennifer Jones",
+          "mean_ttft": 618.4,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Patricia Smith",
+          "mean_ttft": 618.448,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "chronic kidney disease",
+          "mean_ttft": 233.829,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "depression",
+          "mean_ttft": 234.914,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "hypothyroidism",
+          "mean_ttft": 235.435,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 22,
+      "ground_truth": {
+        "name": "Patricia Garcia",
+        "dob": "2003-12-06",
+        "condition": "hypertension"
+      },
+      "recovered": {
+        "name": "Patricia Garcia",
+        "condition": "hypertension",
+        "dob": "2003-12-06"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 30,
+      "stage1_api_calls": 21,
+      "stage2_api_calls": 6,
+      "stage1_survivors": 1,
+      "arpt": 3.75,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 30,
+        "stage1_api_calls": 21,
+        "stage2_api_calls": 6,
+        "bits_leaked_per_query": 0.365526,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 43.4167,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Patricia Garcia",
+          "mean_ttft": 238.139,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Jennifer Davis",
+          "mean_ttft": 623.122,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Robert Martinez",
+          "mean_ttft": 624.165,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "hypertension",
+          "mean_ttft": 87.187,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "chronic kidney disease",
+          "mean_ttft": 246.411,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "anxiety",
+          "mean_ttft": 246.928,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 23,
+      "ground_truth": {
+        "name": "Patricia Smith",
+        "dob": "1963-04-20",
+        "condition": "heart failure"
+      },
+      "recovered": {
+        "name": "Patricia Smith",
+        "condition": "heart failure",
+        "dob": "1963-04-20"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 28,
+      "stage1_api_calls": 7,
+      "stage2_api_calls": 18,
+      "stage1_survivors": 1,
+      "arpt": 5.6,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 28,
+        "stage1_api_calls": 7,
+        "stage2_api_calls": 18,
+        "bits_leaked_per_query": 0.391635,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 46.5179,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Patricia Smith",
+          "mean_ttft": 246.375,
+          "is_s1_hit": true
+        },
+        {
+          "name": "James Jones",
+          "mean_ttft": 623.567,
+          "is_s1_hit": false
+        },
+        {
+          "name": "James Martinez",
+          "mean_ttft": 623.591,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "heart failure",
+          "mean_ttft": 88.241,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "hypothyroidism",
+          "mean_ttft": 244.942,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "obesity",
+          "mean_ttft": 245.128,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 24,
+      "ground_truth": {
+        "name": "Robert Johnson",
+        "dob": "1953-12-05",
+        "condition": "migraine"
+      },
+      "recovered": {
+        "name": "Robert Johnson",
+        "condition": "migraine",
+        "dob": "1953-12-05"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 95,
+      "stage1_api_calls": 76,
+      "stage2_api_calls": 16,
+      "stage1_survivors": 1,
+      "arpt": 19.0,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 95,
+        "stage1_api_calls": 76,
+        "stage2_api_calls": 16,
+        "bits_leaked_per_query": 0.115429,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 13.7105,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Robert Johnson",
+          "mean_ttft": 248.462,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Barbara Davis",
+          "mean_ttft": 619.559,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Michael Garcia",
+          "mean_ttft": 620.015,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "migraine",
+          "mean_ttft": 88.32,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 238.298,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "atrial fibrillation",
+          "mean_ttft": 245.093,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 25,
+      "ground_truth": {
+        "name": "Jennifer Brown",
+        "dob": "1993-10-20",
+        "condition": "Parkinson's disease"
+      },
+      "recovered": {
+        "name": "Jennifer Brown",
+        "condition": "Parkinson's disease",
+        "dob": "1993-10-20"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 55,
+      "stage1_api_calls": 38,
+      "stage2_api_calls": 14,
+      "stage1_survivors": 1,
+      "arpt": 7.86,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 55,
+        "stage1_api_calls": 38,
+        "stage2_api_calls": 14,
+        "bits_leaked_per_query": 0.199378,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 23.6818,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Jennifer Brown",
+          "mean_ttft": 240.847,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Barbara Brown",
+          "mean_ttft": 616.606,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Mary Wilson",
+          "mean_ttft": 619.008,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "Parkinson's disease",
+          "mean_ttft": 91.53,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "chronic kidney disease",
+          "mean_ttft": 234.97,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "COPD",
+          "mean_ttft": 236.373,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 26,
+      "ground_truth": {
+        "name": "Michael Davis",
+        "dob": "1947-10-26",
+        "condition": "hypothyroidism"
+      },
+      "recovered": {
+        "name": "Michael Davis",
+        "condition": "hypothyroidism",
+        "dob": "1947-10-26"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 63,
+      "stage1_api_calls": 54,
+      "stage2_api_calls": 6,
+      "stage1_survivors": 1,
+      "arpt": 10.5,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 63,
+        "stage1_api_calls": 54,
+        "stage2_api_calls": 6,
+        "bits_leaked_per_query": 0.17406,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 20.6746,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Michael Davis",
+          "mean_ttft": 237.305,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Patricia Martinez",
+          "mean_ttft": 615.789,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Barbara Johnson",
+          "mean_ttft": 617.062,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "hypothyroidism",
+          "mean_ttft": 84.518,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "asthma",
+          "mean_ttft": 233.097,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "arthritis",
+          "mean_ttft": 236.888,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 27,
+      "ground_truth": {
+        "name": "John Brown",
+        "dob": "2001-11-01",
+        "condition": "epilepsy"
+      },
+      "recovered": {
+        "name": "John Brown",
+        "condition": "epilepsy",
+        "dob": "2001-11-01"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 46,
+      "stage1_api_calls": 19,
+      "stage2_api_calls": 24,
+      "stage1_survivors": 1,
+      "arpt": 9.2,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 46,
+        "stage1_api_calls": 19,
+        "stage2_api_calls": 24,
+        "bits_leaked_per_query": 0.238387,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 28.3152,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "John Brown",
+          "mean_ttft": 365.863,
+          "is_s1_hit": true
+        },
+        {
+          "name": "John Smith",
+          "mean_ttft": 619.574,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Barbara Wilson",
+          "mean_ttft": 624.193,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 91.172,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "hypothyroidism",
+          "mean_ttft": 238.295,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "asthma",
+          "mean_ttft": 238.998,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 28,
+      "ground_truth": {
+        "name": "William Jones",
+        "dob": "2002-01-07",
+        "condition": "migraine"
+      },
+      "recovered": {
+        "name": "William Jones",
+        "condition": "migraine",
+        "dob": "2002-01-07"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 80,
+      "stage1_api_calls": 56,
+      "stage2_api_calls": 21,
+      "stage1_survivors": 1,
+      "arpt": 16.0,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 80,
+        "stage1_api_calls": 56,
+        "stage2_api_calls": 21,
+        "bits_leaked_per_query": 0.137072,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 16.2813,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "William Jones",
+          "mean_ttft": 244.761,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Patricia Brown",
+          "mean_ttft": 616.943,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Michael Wilson",
+          "mean_ttft": 617.393,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "migraine",
+          "mean_ttft": 88.159,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "sleep apnea",
+          "mean_ttft": 236.266,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "multiple sclerosis",
+          "mean_ttft": 242.553,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 29,
+      "ground_truth": {
+        "name": "Michael Martinez",
+        "dob": "1970-10-31",
+        "condition": "chronic kidney disease"
+      },
+      "recovered": {
+        "name": "Michael Martinez",
+        "condition": "chronic kidney disease",
+        "dob": "1970-10-31"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 79,
+      "stage1_api_calls": 53,
+      "stage2_api_calls": 23,
+      "stage1_survivors": 1,
+      "arpt": 8.78,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 79,
+        "stage1_api_calls": 53,
+        "stage2_api_calls": 23,
+        "bits_leaked_per_query": 0.138807,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 16.4873,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Michael Martinez",
+          "mean_ttft": 244.939,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Linda Garcia",
+          "mean_ttft": 617.753,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Mary Martinez",
+          "mean_ttft": 619.504,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "chronic kidney disease",
+          "mean_ttft": 88.014,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "sleep apnea",
+          "mean_ttft": 244.476,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "migraine",
+          "mean_ttft": 244.637,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 30,
+      "ground_truth": {
+        "name": "Patricia Williams",
+        "dob": "1980-09-17",
+        "condition": "Parkinson's disease"
+      },
+      "recovered": {
+        "name": "Patricia Williams",
+        "condition": "Parkinson's disease",
+        "dob": "1980-09-17"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 120,
+      "stage1_api_calls": 103,
+      "stage2_api_calls": 14,
+      "stage1_survivors": 1,
+      "arpt": 15.0,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 120,
+        "stage1_api_calls": 103,
+        "stage2_api_calls": 14,
+        "bits_leaked_per_query": 0.091382,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 10.8542,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Patricia Williams",
+          "mean_ttft": 245.323,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Barbara Davis",
+          "mean_ttft": 616.432,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Mary Wilson",
+          "mean_ttft": 617.552,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "Parkinson's disease",
+          "mean_ttft": 87.288,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "atrial fibrillation",
+          "mean_ttft": 243.292,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "heart failure",
+          "mean_ttft": 243.438,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 31,
+      "ground_truth": {
+        "name": "Mary Smith",
+        "dob": "1944-11-01",
+        "condition": "depression"
+      },
+      "recovered": {
+        "name": "Mary Smith",
+        "condition": "depression",
+        "dob": "1944-11-01"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 139,
+      "stage1_api_calls": 118,
+      "stage2_api_calls": 18,
+      "stage1_survivors": 1,
+      "arpt": 34.75,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 139,
+        "stage1_api_calls": 118,
+        "stage2_api_calls": 18,
+        "bits_leaked_per_query": 0.078891,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 9.3705,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Mary Smith",
+          "mean_ttft": 233.043,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Mary Jones",
+          "mean_ttft": 616.05,
+          "is_s1_hit": false
+        },
+        {
+          "name": "John Williams",
+          "mean_ttft": 618.142,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "depression",
+          "mean_ttft": 84.26,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "coronary artery disease",
+          "mean_ttft": 232.943,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "COPD",
+          "mean_ttft": 233.378,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 32,
+      "ground_truth": {
+        "name": "John Miller",
+        "dob": "1988-07-04",
+        "condition": "asthma"
+      },
+      "recovered": {
+        "name": "John Miller",
+        "condition": "asthma",
+        "dob": "1988-07-04"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 130,
+      "stage1_api_calls": 116,
+      "stage2_api_calls": 11,
+      "stage1_survivors": 1,
+      "arpt": 32.5,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 130,
+        "stage1_api_calls": 116,
+        "stage2_api_calls": 11,
+        "bits_leaked_per_query": 0.084352,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 10.0192,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "John Miller",
+          "mean_ttft": 238.878,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Mary Garcia",
+          "mean_ttft": 618.585,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Linda Wilson",
+          "mean_ttft": 619.725,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "asthma",
+          "mean_ttft": 90.821,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "hyperlipidemia",
+          "mean_ttft": 237.603,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "atrial fibrillation",
+          "mean_ttft": 237.748,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 33,
+      "ground_truth": {
+        "name": "Michael Miller",
+        "dob": "1988-06-17",
+        "condition": "osteoporosis"
+      },
+      "recovered": {
+        "name": "Michael Miller",
+        "condition": "osteoporosis",
+        "dob": "1988-06-17"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 110,
+      "stage1_api_calls": 98,
+      "stage2_api_calls": 9,
+      "stage1_survivors": 1,
+      "arpt": 22.0,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 110,
+        "stage1_api_calls": 98,
+        "stage2_api_calls": 9,
+        "bits_leaked_per_query": 0.099689,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 11.8409,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Michael Miller",
+          "mean_ttft": 238.418,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Linda Davis",
+          "mean_ttft": 617.736,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Linda Martinez",
+          "mean_ttft": 619.007,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "osteoporosis",
+          "mean_ttft": 89.818,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "obesity",
+          "mean_ttft": 236.041,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "hyperlipidemia",
+          "mean_ttft": 237.527,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 34,
+      "ground_truth": {
+        "name": "William Jones",
+        "dob": "1984-08-19",
+        "condition": "diabetes"
+      },
+      "recovered": {
+        "name": "William Jones",
+        "condition": "diabetes",
+        "dob": "1984-08-19"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 126,
+      "stage1_api_calls": 114,
+      "stage2_api_calls": 9,
+      "stage1_survivors": 1,
+      "arpt": 31.5,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 126,
+        "stage1_api_calls": 114,
+        "stage2_api_calls": 9,
+        "bits_leaked_per_query": 0.08703,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 10.3373,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "William Jones",
+          "mean_ttft": 252.065,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Linda Jones",
+          "mean_ttft": 618.114,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Robert Davis",
+          "mean_ttft": 618.623,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "diabetes",
+          "mean_ttft": 89.032,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "hypothyroidism",
+          "mean_ttft": 245.923,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "chronic kidney disease",
+          "mean_ttft": 246.83,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 35,
+      "ground_truth": {
+        "name": "Mary Wilson",
+        "dob": "2002-05-13",
+        "condition": "hypothyroidism"
+      },
+      "recovered": {
+        "name": "Mary Wilson",
+        "condition": "hypothyroidism",
+        "dob": "2002-05-13"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 52,
+      "stage1_api_calls": 47,
+      "stage2_api_calls": 2,
+      "stage1_survivors": 1,
+      "arpt": 8.67,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 52,
+        "stage1_api_calls": 47,
+        "stage2_api_calls": 2,
+        "bits_leaked_per_query": 0.21088,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 25.0481,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Mary Wilson",
+          "mean_ttft": 237.14,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Robert Garcia",
+          "mean_ttft": 621.0,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Linda Williams",
+          "mean_ttft": 621.347,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "hypothyroidism",
+          "mean_ttft": 89.886,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "arthritis",
+          "mean_ttft": 239.251,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 36,
+      "ground_truth": {
+        "name": "Jennifer Johnson",
+        "dob": "1961-05-01",
+        "condition": "atrial fibrillation"
+      },
+      "recovered": {
+        "name": "Jennifer Johnson",
+        "condition": "atrial fibrillation",
+        "dob": "1961-05-01"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 142,
+      "stage1_api_calls": 122,
+      "stage2_api_calls": 17,
+      "stage1_survivors": 1,
+      "arpt": 23.67,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 142,
+        "stage1_api_calls": 122,
+        "stage2_api_calls": 17,
+        "bits_leaked_per_query": 0.077224,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 9.1725,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Jennifer Johnson",
+          "mean_ttft": 238.254,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Jennifer Martinez",
+          "mean_ttft": 618.039,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Mary Williams",
+          "mean_ttft": 619.023,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "atrial fibrillation",
+          "mean_ttft": 89.521,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "COPD",
+          "mean_ttft": 234.92,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "anxiety",
+          "mean_ttft": 235.533,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 37,
+      "ground_truth": {
+        "name": "John Davis",
+        "dob": "1935-04-17",
+        "condition": "hypothyroidism"
+      },
+      "recovered": {
+        "name": "John Davis",
+        "condition": "hypothyroidism",
+        "dob": "1935-04-17"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 46,
+      "stage1_api_calls": 21,
+      "stage2_api_calls": 22,
+      "stage1_survivors": 1,
+      "arpt": 7.67,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 46,
+        "stage1_api_calls": 21,
+        "stage2_api_calls": 22,
+        "bits_leaked_per_query": 0.238387,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 28.3152,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "John Davis",
+          "mean_ttft": 242.807,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Linda Johnson",
+          "mean_ttft": 620.006,
+          "is_s1_hit": false
+        },
+        {
+          "name": "John Brown",
+          "mean_ttft": 621.696,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "hypothyroidism",
+          "mean_ttft": 87.711,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 233.787,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "Parkinson's disease",
+          "mean_ttft": 234.256,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 38,
+      "ground_truth": {
+        "name": "William Williams",
+        "dob": "1980-07-18",
+        "condition": "arthritis"
+      },
+      "recovered": {
+        "name": "William Williams",
+        "condition": "arthritis",
+        "dob": "1980-07-18"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 73,
+      "stage1_api_calls": 51,
+      "stage2_api_calls": 19,
+      "stage1_survivors": 1,
+      "arpt": 18.25,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 73,
+        "stage1_api_calls": 51,
+        "stage2_api_calls": 19,
+        "bits_leaked_per_query": 0.150216,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 17.8425,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "William Williams",
+          "mean_ttft": 244.685,
+          "is_s1_hit": true
+        },
+        {
+          "name": "William Miller",
+          "mean_ttft": 615.864,
+          "is_s1_hit": false
+        },
+        {
+          "name": "William Garcia",
+          "mean_ttft": 617.055,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "arthritis",
+          "mean_ttft": 84.64,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 237.282,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "obesity",
+          "mean_ttft": 240.58,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 39,
+      "ground_truth": {
+        "name": "Robert Wilson",
+        "dob": "1989-08-19",
+        "condition": "COPD"
+      },
+      "recovered": {
+        "name": "Robert Wilson",
+        "condition": "COPD",
+        "dob": "1989-08-19"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 77,
+      "stage1_api_calls": 56,
+      "stage2_api_calls": 18,
+      "stage1_survivors": 1,
+      "arpt": 15.4,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 77,
+        "stage1_api_calls": 56,
+        "stage2_api_calls": 18,
+        "bits_leaked_per_query": 0.142413,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 16.9156,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Robert Wilson",
+          "mean_ttft": 243.471,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Mary Brown",
+          "mean_ttft": 617.324,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Michael Garcia",
+          "mean_ttft": 617.947,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "COPD",
+          "mean_ttft": 85.564,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 233.822,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "heart failure",
+          "mean_ttft": 240.551,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 40,
+      "ground_truth": {
+        "name": "John Garcia",
+        "dob": "2003-05-29",
+        "condition": "anxiety"
+      },
+      "recovered": {
+        "name": "John Garcia",
+        "condition": "anxiety",
+        "dob": "2003-05-29"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 78,
+      "stage1_api_calls": 67,
+      "stage2_api_calls": 8,
+      "stage1_survivors": 1,
+      "arpt": 13.0,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 78,
+        "stage1_api_calls": 67,
+        "stage2_api_calls": 8,
+        "bits_leaked_per_query": 0.140587,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 16.6987,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "John Garcia",
+          "mean_ttft": 235.903,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Michael Smith",
+          "mean_ttft": 615.733,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Barbara Smith",
+          "mean_ttft": 619.611,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "anxiety",
+          "mean_ttft": 87.118,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "arthritis",
+          "mean_ttft": 235.058,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 236.329,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 41,
+      "ground_truth": {
+        "name": "William Wilson",
+        "dob": "1935-01-19",
+        "condition": "sleep apnea"
+      },
+      "recovered": {
+        "name": "William Wilson",
+        "condition": "sleep apnea",
+        "dob": "1935-01-19"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 134,
+      "stage1_api_calls": 113,
+      "stage2_api_calls": 18,
+      "stage1_survivors": 1,
+      "arpt": 26.8,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 134,
+        "stage1_api_calls": 113,
+        "stage2_api_calls": 18,
+        "bits_leaked_per_query": 0.081834,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 9.7201,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "William Wilson",
+          "mean_ttft": 250.254,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Barbara Miller",
+          "mean_ttft": 616.231,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Linda Wilson",
+          "mean_ttft": 618.419,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "sleep apnea",
+          "mean_ttft": 88.381,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 240.12,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "anxiety",
+          "mean_ttft": 244.938,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 42,
+      "ground_truth": {
+        "name": "Jennifer Davis",
+        "dob": "1936-09-30",
+        "condition": "arthritis"
+      },
+      "recovered": {
+        "name": "Jennifer Davis",
+        "condition": "arthritis",
+        "dob": "1936-09-30"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 42,
+      "stage1_api_calls": 28,
+      "stage2_api_calls": 11,
+      "stage1_survivors": 1,
+      "arpt": 10.5,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 42,
+        "stage1_api_calls": 28,
+        "stage2_api_calls": 11,
+        "bits_leaked_per_query": 0.26109,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 31.0119,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Jennifer Davis",
+          "mean_ttft": 236.346,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Barbara Williams",
+          "mean_ttft": 618.475,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Jennifer Martinez",
+          "mean_ttft": 620.992,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "arthritis",
+          "mean_ttft": 84.844,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "migraine",
+          "mean_ttft": 235.128,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "obesity",
+          "mean_ttft": 235.482,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 43,
+      "ground_truth": {
+        "name": "Jennifer Jones",
+        "dob": "1956-06-25",
+        "condition": "hypertension"
+      },
+      "recovered": {
+        "name": "Jennifer Jones",
+        "condition": "hypertension",
+        "dob": "1956-06-25"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 122,
+      "stage1_api_calls": 112,
+      "stage2_api_calls": 7,
+      "stage1_survivors": 1,
+      "arpt": 24.4,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 122,
+        "stage1_api_calls": 112,
+        "stage2_api_calls": 7,
+        "bits_leaked_per_query": 0.089883,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 10.6762,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Jennifer Jones",
+          "mean_ttft": 237.824,
+          "is_s1_hit": true
+        },
+        {
+          "name": "James Smith",
+          "mean_ttft": 613.517,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Linda Wilson",
+          "mean_ttft": 615.171,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "hypertension",
+          "mean_ttft": 87.158,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 235.425,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "depression",
+          "mean_ttft": 235.477,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 44,
+      "ground_truth": {
+        "name": "Patricia Martinez",
+        "dob": "1942-01-24",
+        "condition": "asthma"
+      },
+      "recovered": {
+        "name": "Patricia Martinez",
+        "condition": "asthma",
+        "dob": "1942-01-24"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 63,
+      "stage1_api_calls": 54,
+      "stage2_api_calls": 6,
+      "stage1_survivors": 1,
+      "arpt": 10.5,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 63,
+        "stage1_api_calls": 54,
+        "stage2_api_calls": 6,
+        "bits_leaked_per_query": 0.17406,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 20.6746,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Patricia Martinez",
+          "mean_ttft": 234.008,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Mary Garcia",
+          "mean_ttft": 615.834,
+          "is_s1_hit": false
+        },
+        {
+          "name": "William Garcia",
+          "mean_ttft": 616.26,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "asthma",
+          "mean_ttft": 84.593,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "multiple sclerosis",
+          "mean_ttft": 233.933,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "hypothyroidism",
+          "mean_ttft": 234.004,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 45,
+      "ground_truth": {
+        "name": "Linda Johnson",
+        "dob": "2003-03-28",
+        "condition": "epilepsy"
+      },
+      "recovered": {
+        "name": "Linda Johnson",
+        "condition": "epilepsy",
+        "dob": "2003-03-28"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 58,
+      "stage1_api_calls": 31,
+      "stage2_api_calls": 24,
+      "stage1_survivors": 1,
+      "arpt": 9.67,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 58,
+        "stage1_api_calls": 31,
+        "stage2_api_calls": 24,
+        "bits_leaked_per_query": 0.189065,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 22.4569,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Linda Johnson",
+          "mean_ttft": 236.718,
+          "is_s1_hit": true
+        },
+        {
+          "name": "John Martinez",
+          "mean_ttft": 620.401,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Mary Garcia",
+          "mean_ttft": 621.092,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 89.093,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "sleep apnea",
+          "mean_ttft": 235.859,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "arthritis",
+          "mean_ttft": 236.116,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 46,
+      "ground_truth": {
+        "name": "John Williams",
+        "dob": "1994-03-10",
+        "condition": "Parkinson's disease"
+      },
+      "recovered": {
+        "name": "John Williams",
+        "condition": "Parkinson's disease",
+        "dob": "1994-03-10"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 35,
+      "stage1_api_calls": 23,
+      "stage2_api_calls": 9,
+      "stage1_survivors": 1,
+      "arpt": 5.0,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 35,
+        "stage1_api_calls": 23,
+        "stage2_api_calls": 9,
+        "bits_leaked_per_query": 0.313308,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 37.2143,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "John Williams",
+          "mean_ttft": 239.827,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Barbara Smith",
+          "mean_ttft": 619.525,
+          "is_s1_hit": false
+        },
+        {
+          "name": "William Garcia",
+          "mean_ttft": 619.908,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "Parkinson's disease",
+          "mean_ttft": 86.07,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "sleep apnea",
+          "mean_ttft": 234.741,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "atrial fibrillation",
+          "mean_ttft": 235.214,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 47,
+      "ground_truth": {
+        "name": "William Williams",
+        "dob": "1958-10-12",
+        "condition": "multiple sclerosis"
+      },
+      "recovered": {
+        "name": "William Williams",
+        "condition": "multiple sclerosis",
+        "dob": "1958-10-12"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 86,
+      "stage1_api_calls": 66,
+      "stage2_api_calls": 17,
+      "stage1_survivors": 1,
+      "arpt": 17.2,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 86,
+        "stage1_api_calls": 66,
+        "stage2_api_calls": 17,
+        "bits_leaked_per_query": 0.127509,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 15.1453,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "William Williams",
+          "mean_ttft": 238.535,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Linda Wilson",
+          "mean_ttft": 615.869,
+          "is_s1_hit": false
+        },
+        {
+          "name": "John Davis",
+          "mean_ttft": 618.364,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "multiple sclerosis",
+          "mean_ttft": 89.181,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "atrial fibrillation",
+          "mean_ttft": 244.098,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "sleep apnea",
+          "mean_ttft": 244.229,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 48,
+      "ground_truth": {
+        "name": "Barbara Miller",
+        "dob": "1954-01-01",
+        "condition": "epilepsy"
+      },
+      "recovered": {
+        "name": "Barbara Miller",
+        "condition": "epilepsy",
+        "dob": "1954-01-01"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 35,
+      "stage1_api_calls": 24,
+      "stage2_api_calls": 8,
+      "stage1_survivors": 1,
+      "arpt": 5.83,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 35,
+        "stage1_api_calls": 24,
+        "stage2_api_calls": 8,
+        "bits_leaked_per_query": 0.313308,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 37.2143,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Barbara Miller",
+          "mean_ttft": 234.736,
+          "is_s1_hit": true
+        },
+        {
+          "name": "John Garcia",
+          "mean_ttft": 619.852,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Patricia Wilson",
+          "mean_ttft": 620.064,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "epilepsy",
+          "mean_ttft": 84.266,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "atrial fibrillation",
+          "mean_ttft": 233.222,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "hypertension",
+          "mean_ttft": 234.793,
+          "is_s2_hit": false
+        }
+      ]
+    },
+    {
+      "victim_id": 49,
+      "ground_truth": {
+        "name": "Patricia Jones",
+        "dob": "1970-10-18",
+        "condition": "chronic kidney disease"
+      },
+      "recovered": {
+        "name": "Patricia Jones",
+        "condition": "chronic kidney disease",
+        "dob": "1970-10-18"
+      },
+      "token_recovery_rate": 1.0,
+      "exact_match": true,
+      "confirmed_hit": true,
+      "total_api_calls": 48,
+      "stage1_api_calls": 39,
+      "stage2_api_calls": 6,
+      "stage1_survivors": 1,
+      "arpt": 5.33,
+      "n_name_blocks": 128,
+      "n_cond_blocks": 64,
+      "information_theory": {
+        "vocab_size": 2000,
+        "prior_entropy_bits": 10.9658,
+        "h_after_stage1_bits": 4.3219,
+        "h_after_stage2_bits": 0.0,
+        "total_api_calls": 48,
+        "stage1_api_calls": 39,
+        "stage2_api_calls": 6,
+        "bits_leaked_per_query": 0.228454,
+        "blq_adaptive_theoretical": 0.138457,
+        "blq_linear_week12": 0.008419,
+        "improvement_vs_linear": 27.1354,
+        "t1_threshold_ms": 438.8,
+        "t2_threshold_ms": 177.1,
+        "note": "True two-stage adaptive (Week 13). Stage 1 probes 100 names (expected ~50 queries) using the name-only block region. Stage 2 probes 20 conditions (expected ~10 queries). BLQ theoretical = 10.97 / 79.2 = 0.1384. Improvement vs linear Week 12 = BLQ_empirical / BLQ_linear_week12."
+      },
+      "algorithm": "two_stage_adaptive",
+      "t1_threshold_ms": 492.4848,
+      "t2_threshold_ms": 162.8298,
+      "top_scan_s1": [
+        {
+          "name": "Patricia Jones",
+          "mean_ttft": 249.527,
+          "is_s1_hit": true
+        },
+        {
+          "name": "Mary Williams",
+          "mean_ttft": 617.982,
+          "is_s1_hit": false
+        },
+        {
+          "name": "Michael Smith",
+          "mean_ttft": 620.431,
+          "is_s1_hit": false
+        }
+      ],
+      "top_scan_s2": [
+        {
+          "condition": "chronic kidney disease",
+          "mean_ttft": 87.957,
+          "is_s2_hit": true
+        },
+        {
+          "condition": "heart failure",
+          "mean_ttft": 246.736,
+          "is_s2_hit": false
+        },
+        {
+          "condition": "depression",
+          "mean_ttft": 247.448,
+          "is_s2_hit": false
+        }
+      ]
+    }
+  ]
+}

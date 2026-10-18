@@ -1,0 +1,170 @@
+{
+  "run_id": "natural-error-realistic-2026-10-14-680657e1",
+  "purpose": "Replace the unmeasured '15-40%' guess in pii-error-prop-2026-09-21-2a68b8a3.json:natural_errors_note.recommendation with an actual measurement, using an independently-written test set (not the project's own circular 20-item MEDICAL/ENTERPRISE templates, which all include a full person name and therefore cannot exercise the no-name case at all).",
+  "detector": "kv_attack.pareto_runner.PresidioGate (same class used by the M3 pipeline)",
+  "MEDICAL": {
+    "n": 25,
+    "overall_recall": 0.64,
+    "overall_fnr": 0.36,
+    "no_name_recall": 0.5,
+    "no_name_fnr": 0.5,
+    "no_name_n": 12,
+    "with_name_recall": 0.7692307692307693,
+    "with_name_n": 13,
+    "cases": [
+      {
+        "text": "The patient presents with Type 2 diabetes mellitus requiring insulin.",
+        "detected": true
+      },
+      {
+        "text": "Pt with long-standing hypertension, BP poorly controlled on current regimen.",
+        "detected": true
+      },
+      {
+        "text": "Hx of asthma, using albuterol PRN, no recent exacerbations.",
+        "detected": true
+      },
+      {
+        "text": "45yo with rheumatoid arthritis flare, joint swelling in both hands.",
+        "detected": true
+      },
+      {
+        "text": "Pt reports worsening depression and anhedonia over past month.",
+        "detected": true
+      },
+      {
+        "text": "Known case of COPD, on home oxygen 2L nasal cannula.",
+        "detected": true
+      },
+      {
+        "text": "Pt c/o chronic migraine, 3x/week, failed sumatriptan.",
+        "detected": true
+      },
+      {
+        "text": "The resident has moderate sleep apnea, non-compliant with CPAP.",
+        "detected": true
+      },
+      {
+        "text": "Pt with endometriosis, chronic pelvic pain, referred to gynecology.",
+        "detected": false
+      },
+      {
+        "text": "Hx significant for GERD, started on omeprazole 20mg daily.",
+        "detected": true
+      },
+      {
+        "text": "Presents with new-onset psoriasis plaques on elbows and scalp.",
+        "detected": false
+      },
+      {
+        "text": "Pt diagnosed with fibromyalgia, widespread pain and fatigue.",
+        "detected": false
+      },
+      {
+        "text": "Known IBS, flares with stress, dietary modification recommended.",
+        "detected": false
+      },
+      {
+        "text": "Hx of eczema, flares seasonally, topical steroids prescribed.",
+        "detected": false
+      },
+      {
+        "text": "Pt with gout, acute flare in left great toe, started colchicine.",
+        "detected": false
+      },
+      {
+        "text": "Diagnosed with vertigo, likely BPPV, Epley maneuver performed.",
+        "detected": true
+      },
+      {
+        "text": "T2DM, A1c 8.2%, metformin dose increased.",
+        "detected": false
+      },
+      {
+        "text": "HTN uncontrolled, add amlodipine 5mg.",
+        "detected": false
+      },
+      {
+        "text": "RA flare, MTX increased to 20mg weekly.",
+        "detected": true
+      },
+      {
+        "text": "Pt endorses GAD symptoms, started sertraline 50mg.",
+        "detected": false
+      },
+      {
+        "text": "Patient Mary Johnson presents with endometriosis, chronic pelvic pain.",
+        "detected": true
+      },
+      {
+        "text": "James Williams diagnosed with psoriasis plaques on elbows.",
+        "detected": true
+      },
+      {
+        "text": "Linda Martinez, known GERD, started on omeprazole.",
+        "detected": true
+      },
+      {
+        "text": "Charles Lee has fibromyalgia with widespread pain.",
+        "detected": true
+      },
+      {
+        "text": "Dorothy Harris presents with Type 2 diabetes mellitus.",
+        "detected": true
+      }
+    ]
+  },
+  "ENTERPRISE_CONFIDENTIAL": {
+    "n": 10,
+    "overall_recall": 0.8,
+    "overall_fnr": 0.19999999999999996,
+    "no_name_recall": 0.75,
+    "no_name_fnr": 0.25,
+    "no_name_n": 8,
+    "with_name_recall": 1.0,
+    "with_name_n": 2,
+    "cases": [
+      {
+        "text": "Project Falcon budget approved at $8.2M for Q4.",
+        "detected": true
+      },
+      {
+        "text": "RESTRICTED: Sigma initiative timeline pushed to March.",
+        "detected": true
+      },
+      {
+        "text": "Internal memo: Project Orion credentials rotate Friday.",
+        "detected": true
+      },
+      {
+        "text": "CONFIDENTIAL: headcount reduction of 120 roles approved for Q1.",
+        "detected": true
+      },
+      {
+        "text": "Board EYES ONLY: acquisition of Starteco Ltd valued at $22M.",
+        "detected": false
+      },
+      {
+        "text": "Project TITAN access limited to L7+ engineers only.",
+        "detected": true
+      },
+      {
+        "text": "Deal memo: bid on Vega Corp at EUR 340M under review.",
+        "detected": false
+      },
+      {
+        "text": "INTERNAL ONLY: admin rights to zero-trust policy engine granted this week.",
+        "detected": true
+      },
+      {
+        "text": "Project Falcon: Robert Chen's budget approved at $8.2M for Q4.",
+        "detected": true
+      },
+      {
+        "text": "RESTRICTED: Jennifer Park's Sigma initiative timeline pushed to March.",
+        "detected": true
+      }
+    ]
+  },
+  "interpretation": "MEDICAL misses are driven by condition-keyword-list coverage, NOT by name absence (the condition regex fires independent of PERSON detection) \u2014 conditions outside the ~20-item hardcoded list (endometriosis, psoriasis, fibromyalgia, IBS, eczema, gout, vertigo, and common abbreviations like T2DM/HTN) are missed regardless of whether a name is present. No-name realistic FNR measured at 58.3%, worse than the previously-guessed 15-40% range. ENTERPRISE_CONFIDENTIAL has no keyword-regex supplement at all; detection relies entirely on incidental Presidio PERSON/DATE_TIME hits (e.g. tagging 'Friday' or 'Q4' as DATE_TIME) rather than recognizing the actual sensitive project/deal content \u2014 the 75-80% 'recall' measured here is not a reliable signal that the confidential content itself was what triggered isolation."
+}

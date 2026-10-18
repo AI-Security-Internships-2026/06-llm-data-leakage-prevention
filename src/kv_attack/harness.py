@@ -1,294 +1,403 @@
+"""
+kv_attack.week13_harness
+=========================
+Week 13 — End-to-end harness for the true two-stage adaptive attack.
+
+Runs the full pipeline:
+  1. Build aligned system prefix
+  2. Seed n_victims using the two-stage template (two_stage_victim_seeder)
+  3. Calibrate T1 / T2 thresholds empirically
+  4. For each victim:
+       a. Evict cache (victim-structured prompts)
+       b. Run two_stage_reconstructor.reconstruct_victim_two_stage()
+  5. Aggregate results and write to experiments/results/kv_week13_two_stage_*.json
+
+Usage
+------
+  cd src
+  python -m kv_attack.week13_harness \\
+      --n-victims 5 \\
+      --output ../experiments/results/kv_week13_two_stage_5vic.json
+
+  # Larger run
+  python -m kv_attack.week13_harness \\
+      --n-victims 50 \\
+      --output ../experiments/results/kv_week13_two_stage_50vic.json
+
+  # Mock backend (no GPU needed — for CI / smoke test)
+  python -m kv_attack.week13_harness \\
+      --backend mock \\
+      --n-victims 5 \\
+      --output ../experiments/results/kv_week13_mock_5vic.json
+"""
+
+from __future__ import annotations
+
 import argparse
+import dataclasses
 import datetime
 import json
-import time
-import uuid
-import urllib.request
-import urllib.parse
-from pathlib import Path
+import sys
 
 import numpy as np
+
+
+class _NumpyEncoder(json.JSONEncoder):
+    """Convert numpy scalars/arrays to native Python types for JSON serialisation."""
+    def default(self, obj):
+        if isinstance(obj, np.bool_):
+            return bool(obj)
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
+from pathlib import Path
+
 from openai import OpenAI
 from transformers import AutoTokenizer
 
-from kv_attack import (
-    VLLM_BASE_URL, VLLM_HOST, VLLM_PORT, MODEL_ID, BLOCK_SIZE,
-    detect_has_bos,
+from kv_attack import VLLM_BASE_URL, MODEL_ID, detect_has_bos
+from kv_attack.backends.mock_backend import MockBackend
+from kv_attack.backends.vllm_backend import VLLMBackend
+from kv_attack.victim_seeder import build_aligned_system_prompt
+from kv_attack.two_stage_victim_seeder import (
+    seed_victims_two_stage,
+    count_two_stage_blocks,
 )
-from kv_attack.victim_seeder import (
-    build_aligned_system_prompt,
-    seed_victim_prefix,
-    build_private_block,
+from kv_attack.two_stage_reconstructor import (
+    calibrate_two_stage,
+    evict_cache_two_stage,
+    reconstruct_victim_two_stage,
+    aggregate_two_stage,
+    T1_THRESHOLD_MS,
+    T2_THRESHOLD_MS,
+    TwoStageResult,
 )
-from kv_attack.attacker import calibrate_threshold
-from kv_attack.cache_eviction import evict_cache
-from kv_attack.reconstructor import reconstruct_victim, ReconstructionResult
+
+HARDWARE = "NVIDIA GB10 (119.7 GB unified memory, Blackwell)"
 
 
 
-def _health_check(client: OpenAI) -> bool:
-    try:
-        resp = client.completions.create(
-            model=MODEL_ID, prompt="Hello", max_tokens=1, temperature=0.0
-        )
-        _ = resp.choices[0].text
-        print(f"[harness] ✓ vLLM health check passed (model={MODEL_ID})")
-        return True
-    except Exception as exc:
-        print(
-            f"[harness] ✗ vLLM health check FAILED: {exc}\n"
-            f"  Run: source .venv/bin/activate && bash start_vllm.sh"
-        )
-        return False
+def _save_partial(
+    output_path   : str,
+    args          : argparse.Namespace,
+    calibration   : dict,
+    results       : list,
+    victim_records: list,
+) -> None:
+    """
+    Write current results to disk immediately after each victim.
+    Safe to call after every victim — uses a temp file + atomic rename
+    so the JSON is never left in a half-written state.
+    """
+    partial_aggregate = aggregate_two_stage(results) if results else {}
 
-
-def _check_apc_enabled() -> bool:
-    try:
-        parsed = urllib.parse.urlparse(VLLM_BASE_URL)
-        metrics_url = urllib.parse.urlunparse(
-            parsed._replace(path="/metrics", query="", fragment="")
-        )
-        with urllib.request.urlopen(metrics_url, timeout=5) as resp:
-            text = resp.read().decode()
-        if "vllm:gpu_prefix_cache_hit_rate_perc" in text:
-            print("[harness] ✓ APC metric found in Prometheus output.")
-            return True
-        else:
-            print("[harness] ⚠ APC metric NOT found.")
-            return False
-    except Exception:
-        print("[harness] ⚠ Cannot reach Prometheus /metrics. Proceeding.")
-        return True
-
-
-
-def run_attack(
-    n_victims   : int  = 50,
-    output_path : str  = "experiments/results/kv_attack_results.json",
-    seed        : int  = 42,
-    known_dob   : bool = True,
-) -> dict:
-
-    run_id    = f"week10-baseline-{datetime.date.today().isoformat()}"
-    client    = OpenAI(base_url=VLLM_BASE_URL, api_key="EMPTY")
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-
-    print("\n" + "=" * 65)
-    print(f"[harness] KV-Cache Timing Attack — Week 10 Baseline")
-    print(f"[harness] Run ID  : {run_id}")
-    print(f"[harness] Model   : {MODEL_ID}")
-    print(f"[harness] Victims : {n_victims}  |  Seed: {seed}")
-    print(f"[harness] known_dob={known_dob}")
-    print("=" * 65 + "\n")
-
-    if not _health_check(client):
-        raise SystemExit("Aborting: vLLM not reachable.")
-    _check_apc_enabled()
-
-    print("\n[harness] PHASE 1 — Building block-aligned system prefix...")
-    system_prefix, n_prefix_tokens = build_aligned_system_prompt(
-        tokenizer, has_bos=detect_has_bos(MODEL_ID)
-    )
-    n_prefix_blocks = (1 + n_prefix_tokens) // BLOCK_SIZE
-    print(f"[harness] System prefix : {n_prefix_tokens} tokens "
-          f"(+ BOS) → {n_prefix_blocks} complete blocks")
-    print(f"[harness] Alignment check: "
-          f"(1 + {n_prefix_tokens}) % {BLOCK_SIZE} = "
-          f"{(1 + n_prefix_tokens) % BLOCK_SIZE}  ← must be 0")
-    assert (1 + n_prefix_tokens) % BLOCK_SIZE == 0, \
-        "System prefix not block-aligned."
-
-    print("\n[harness] PHASE 2 — Seeding victims...")
-    victim_records = seed_victim_prefix(
-        client, tokenizer, system_prefix,
-        n_victims=n_victims, seed=seed,
-    )
-    if not victim_records:
-        raise RuntimeError("No victims seeded — check vLLM connection.")
-
-    avg_priv_blocks = np.mean([r["n_private_blocks"] for r in victim_records])
-    print(f"[harness] Average private blocks per victim: {avg_priv_blocks:.1f}")
-    if avg_priv_blocks < 100:
-        print("[harness] ⚠ WARNING: < 100 private blocks. "
-              "Timing gap may be too small on GB10.")
-
-    print("\n[harness] PHASE 3 — Calibrating timing threshold...")
-
-    def miss_prompt_factory() -> str:
-        unique_name = f"MISS{uuid.uuid4().hex[:12].upper()}"
-        return system_prefix + " " + build_private_block(
-            name      = unique_name,
-            dob       = "1900-01-01",
-            condition = "FAKE_CONDITION_XYZ",
-        )
-
-    calibration = calibrate_threshold(
-        client,
-        known_cached_prompt = victim_records[0]["prompt"],
-        miss_prompt_factory = miss_prompt_factory,
-        n_samples           = 200,
-    )
-    threshold_ms = calibration["threshold_ms"]
-    print(f"[harness] Threshold : {threshold_ms:.2f} ms  "
-          f"(delta={calibration['delta_ms']:.2f} ms, "
-          f"p={calibration['ks_p_value']:.2e})")
-    print(f"[harness] Recommended N_REPEATS for 99% SR: "
-          f"{calibration['recommended_n_rpts']}")
-
-    print(f"\n[harness] PHASE 4 — Attacking {len(victim_records)} victims...")
-    results: list[ReconstructionResult] = []
-    t_attack_start = time.perf_counter()
-
-    for i, record in enumerate(victim_records):
-        gt = record["ground_truth"]
-        print(f"\n[harness] ── Victim {i + 1}/{len(victim_records)} "
-              f"(GT: name='{gt['name']}' | cond='{gt['condition']}') ──")
-
-        evict_cache(client, base_url=VLLM_BASE_URL)
-
-        try:
-            client.completions.create(
-                model=MODEL_ID, prompt=record["prompt"],
-                max_tokens=1, temperature=0.0,
-            )
-        except Exception as exc:
-            print(f"[harness] WARNING: re-seed of victim {i} failed: {exc}")
-            continue
-
-        result = reconstruct_victim(
-            client        = client,
-            tokenizer     = tokenizer,
-            system_prefix = system_prefix,
-            threshold_ms  = threshold_ms,
-            victim_record = record,
-            known_dob     = known_dob,
-            candidate_seed= seed * 1000 + i,
-        )
-        results.append(result)
-
-        gt_match = "✓ EXACT" if result.exact_match else f"TRR={result.token_recovery_rate:.2f}"
-        conf     = "confirmed" if result.confirmed_hit else "best-guess"
-        print(f"[harness] Victim {i + 1} → {gt_match} ({conf})  "
-              f"API calls: {result.total_api_calls}  ARPT: {result.arpt}")
-
-    total_attack_time = time.perf_counter() - t_attack_start
-
-    if not results:
-        raise RuntimeError("No results — all victims failed.")
-
-    trr_vals   = [r.token_recovery_rate for r in results]
-    sr_vals    = [int(r.exact_match)     for r in results]
-    arpt_vals  = [r.arpt                 for r in results]
-    calls_vals = [r.total_api_calls      for r in results]
-    conf_rate  = float(np.mean([int(r.confirmed_hit) for r in results]))
-
-    rng_boot = np.random.default_rng(seed)
-    boot_arpts = [
-        float(np.mean(rng_boot.choice(arpt_vals, size=len(arpt_vals), replace=True)))
-        for _ in range(10_000)
-    ]
-    arpt_ci = (float(np.percentile(boot_arpts, 2.5)),
-               float(np.percentile(boot_arpts, 97.5)))
-
-    aggregate = {
-        "n_victims"            : len(results),
-        "mean_trr"             : round(float(np.mean(trr_vals)), 4),
-        "success_rate"         : round(float(np.mean(sr_vals)),  4),
-        "confirmed_hit_rate"   : round(conf_rate, 4),
-        "mean_arpt"            : round(float(np.mean(arpt_vals)), 2),
-        "arpt_ci_95"           : [round(x, 2) for x in arpt_ci],
-        "mean_total_api_calls" : round(float(np.mean(calls_vals)), 1),
-        "mean_timing_gap_ms"   : round(calibration["delta_ms"], 2),
-        "ks_p_value"           : calibration["ks_p_value"],
-        "total_attack_time_s"  : round(total_attack_time, 1),
-        "known_dob"            : known_dob,
-        "trr_note"             : (
-            "TRR over {name, condition} only — DOB given as prior"
-            if known_dob else
-            "TRR over {name, condition, dob}"
-        ),
-        "arpt_note"            : "ARPT = API calls / vocab tokens in recovered fields (Papers 1-5)",
-        "target_trr"           : 0.85,
-        "target_sr"            : 0.80,
-        "trr_target_met"       : float(np.mean(trr_vals)) >= 0.85,
-        "sr_target_met"        : float(np.mean(sr_vals))  >= 0.80,
-    }
-
-    output = {
-        "run_id"          : run_id,
-        "framework"       : "vllm",
-        "vllm_version"    : "0.27.1",
-        "model"           : MODEL_ID,
-        "hardware"        : "NVIDIA GB10 (119.7 GB unified memory, Blackwell)",
-        "apc_enabled"     : True,
-        "chunked_prefill" : False,
-        "cache_salt"      : False,
-        "note_cache_salt" : "--cache-salt does not exist in vLLM 0.27.1",
-        "kv_cache_cap"    : "2 GB (--kv-cache-memory-bytes 2147483648)",
-        "scenario"        : "S2",
-        "n_prefix_blocks" : (1 + n_prefix_tokens) // BLOCK_SIZE,
-        "calibration"     : calibration,
-        "results": [
+    out_data = {
+        "run_id"        : f"week13-twostage-{datetime.datetime.utcnow().strftime('%Y-%m-%d')}",
+        "algorithm"     : "two_stage_adaptive",
+        "model"         : args.model_id,
+        "hardware"      : HARDWARE,
+        "backend"       : args.backend,
+        "n_victims"     : args.n_victims,
+        "n_victims_done": len(results),
+        "n_calibration" : args.n_calib,
+        "seed"          : args.seed,
+        "calibration"   : calibration,
+        "aggregate"     : partial_aggregate,
+        "results"       : [
             {
-                "victim_id"          : r.victim_id,
-                "ground_truth"       : r.ground_truth,
-                "recovered"          : r.recovered,
-                "token_recovery_rate": round(r.token_recovery_rate, 4),
-                "exact_match"        : r.exact_match,
-                "confirmed_hit"      : r.confirmed_hit,
-                "total_api_calls"    : r.total_api_calls,
-                "arpt"               : r.arpt,
-                "n_private_blocks"   : r.n_private_blocks,
-                "top_scan_results"   : r.scan_results,
+                **{k: v for k, v in dataclasses.asdict(r).items()
+                   if k not in ("scan_results_s1", "scan_results_s2")},
+                "top_scan_s1": r.scan_results_s1[:3],
+                "top_scan_s2": r.scan_results_s2[:3],
             }
             for r in results
         ],
-        "aggregate": aggregate,
     }
 
     out_path = Path(output_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(output, indent=2))
-    print(f"\n[harness] Results written → {out_path}")
+    tmp_path = out_path.with_suffix(".tmp.json")
 
-    print("\n" + "=" * 65)
-    print("[harness] ATTACK SUMMARY — WEEK 10 BASELINE")
-    print("=" * 65)
-    print(f"  Victims attacked      : {aggregate['n_victims']}")
-    print(f"  Mean TRR              : {aggregate['mean_trr']:.4f}  "
-          f"(target >= 0.85 -> {'✓' if aggregate['trr_target_met'] else '✗'})")
-    print(f"  Success Rate (exact)  : {aggregate['success_rate']:.4f}  "
-          f"(target >= 0.80 -> {'✓' if aggregate['sr_target_met'] else '✗'})")
-    print(f"  Confirmed-hit rate    : {aggregate['confirmed_hit_rate']:.4f}")
-    print(f"  Mean ARPT             : {aggregate['mean_arpt']} "
-          f"[95% CI: {aggregate['arpt_ci_95']}]")
-    print(f"  Mean timing gap       : {aggregate['mean_timing_gap_ms']} ms  "
-          f"(KS p = {aggregate['ks_p_value']:.2e})")
-    print(f"  Total attack time     : {aggregate['total_attack_time_s']} s "
-          f"({aggregate['total_attack_time_s'] / 60:.1f} min)")
-    print("=" * 65)
+    with open(tmp_path, "w") as fh:
+        json.dump(out_data, fh, indent=2, cls=_NumpyEncoder)
 
-    return output
+    tmp_path.replace(out_path)
+    print(f"[harness_v2] Incremental save: {len(results)}/{args.n_victims} victims → {output_path}")
+
+
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(
+        description="Week 13 two-stage adaptive KV-cache attack harness"
+    )
+    p.add_argument("--backend",    choices=["vllm", "mock"], default="vllm",
+                   help="Inference backend (default: vllm)")
+    p.add_argument("--base-url",   default=VLLM_BASE_URL,
+                   help="vLLM server URL (ignored for mock backend)")
+    p.add_argument("--model-id",   default=MODEL_ID,
+                   help="HuggingFace model ID")
+    p.add_argument("--n-victims",  type=int, default=5,
+                   help="Number of victims to reconstruct (default: 5)")
+    p.add_argument("--n-calib",    type=int, default=200,
+                   help="Calibration samples per distribution (default: 200)")
+    p.add_argument("--seed",       type=int, default=42,
+                   help="RNG seed for victim generation (default: 42)")
+    p.add_argument("--skip-evict", action="store_true",
+                   help="Skip cache eviction between victims (for quick tests)")
+    p.add_argument("--use-analytical-thresholds", action="store_true",
+                   help="Use analytical T1/T2 instead of empirical calibration")
+    p.add_argument("--output",     required=True,
+                   help="Output JSON path")
+    p.add_argument("--raw-probe-log", default=None,
+                   help="Optional path for a JSONL file with EVERY probe "
+                        "(victim, stage, candidate, truth, probe_index, "
+                        "ttft_ms, predicted_cache_state) — not just the "
+                        "top-3 kept in the main output. Addresses Issue #2's "
+                        "raw-probe-level evidence requirement. Defaults to "
+                        "'<output>.raw_probes.jsonl' if --output is given "
+                        "and this flag is omitted (i.e. it's on by default).")
+    return p.parse_args()
+
+
+
+def make_backend(args: argparse.Namespace, tokenizer: AutoTokenizer):
+    if args.backend == "mock":
+        print("[harness_v2] Using MockBackend (deterministic, no GPU required)")
+        mock = MockBackend(
+            hit_ttft_ms  = 90.2,
+            miss_ttft_ms = 613.6,
+            noise_std_ms = 4.7,
+            apc_enabled  = True,
+            seed         = 0,
+        )
+        return mock
+    else:
+        client = OpenAI(base_url=args.base_url, api_key="EMPTY")
+        try:
+            resp = client.completions.create(
+                model=args.model_id, prompt="health", max_tokens=1, temperature=0.0
+            )
+            _ = resp.choices[0].text
+            print("[harness_v2] vLLM health check: OK")
+        except Exception as exc:
+            raise SystemExit(f"[harness_v2] vLLM not reachable at {args.base_url}: {exc}")
+        return VLLMBackend(base_url=args.base_url, model_id=args.model_id)
 
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(
-        description="KV-cache timing side-channel attack harness (Week 10)"
-    )
-    p.add_argument("--n-victims",   type=int, default=50)
-    p.add_argument("--output",      type=str,
-                   default="experiments/results/kv_attack_results.json")
-    p.add_argument("--seed",        type=int, default=42)
-    p.add_argument("--recover-dob", action="store_true", default=False)
-    args = p.parse_args()
+    args      = parse_args()
+    tokenizer = AutoTokenizer.from_pretrained(args.model_id)
+    backend   = make_backend(args, tokenizer)
 
-    run_attack(
-        n_victims   = args.n_victims,
-        output_path = args.output,
-        seed        = args.seed,
-        known_dob   = not args.recover_dob,
+    raw_probe_log_path = args.raw_probe_log or (str(args.output) + ".raw_probes.jsonl")
+    Path(raw_probe_log_path).parent.mkdir(parents=True, exist_ok=True)
+    open(raw_probe_log_path, "w").close()
+    run_id = f"week13-twostage-{datetime.datetime.utcnow().strftime('%Y-%m-%d')}"
+
+    print("\n" + "=" * 65)
+    print("[harness_v2] Week 13 — True Two-Stage Adaptive Attack")
+    print(f"[harness_v2] Backend   : {args.backend}")
+    print(f"[harness_v2] Model     : {args.model_id}")
+    print(f"[harness_v2] Victims   : {args.n_victims}")
+    print(f"[harness_v2] Output    : {args.output}")
+    print(f"[harness_v2] Raw probes: {raw_probe_log_path}  "
+          f"(Issue #2 — every candidate probe, not just top-3)")
+    print("=" * 65 + "\n")
+
+    system_prefix, n_prefix_tok = build_aligned_system_prompt(
+        tokenizer, has_bos=detect_has_bos(args.model_id)
     )
+    print(f"[harness_v2] System prefix: {n_prefix_tok} tokens\n")
+
+    victim_records = seed_victims_two_stage(
+        client        = OpenAI(base_url=args.base_url, api_key="EMPTY")
+                        if args.backend == "vllm" else None,
+        tokenizer     = tokenizer,
+        system_prefix = system_prefix,
+        n_victims     = args.n_victims,
+        seed          = args.seed,
+    ) if args.backend == "vllm" else _mock_seed_victims(
+        tokenizer, system_prefix, args.n_victims, args.seed
+    )
+
+    if not victim_records:
+        raise SystemExit("[harness_v2] No victims seeded. Aborting.")
+
+    if args.use_analytical_thresholds:
+        t1_ms = T1_THRESHOLD_MS
+        t2_ms = T2_THRESHOLD_MS
+        calibration = {
+            "mode"               : "analytical",
+            "t1_threshold_ms"    : t1_ms,
+            "t2_threshold_ms"    : t2_ms,
+            "t1_analytical_ms"   : T1_THRESHOLD_MS,
+            "t2_analytical_ms"   : T2_THRESHOLD_MS,
+        }
+        print(f"[harness_v2] Using analytical thresholds: T1={t1_ms:.1f} ms, T2={t2_ms:.1f} ms")
+    else:
+        print("[harness_v2] Calibrating T1 and T2 empirically...")
+        calibration = calibrate_two_stage(
+            backend       = backend,
+            tokenizer     = tokenizer,
+            system_prefix = system_prefix,
+            victim_record = victim_records[0],
+            n_samples     = args.n_calib,
+        )
+        t1_ms = calibration["t1_threshold_ms"]
+        t2_ms = calibration["t2_threshold_ms"]
+        print(f"[harness_v2] Empirical thresholds: T1={t1_ms:.1f} ms, T2={t2_ms:.1f} ms\n")
+
+        if not calibration.get("intermediate_feasible", True):
+            raise SystemExit(
+                "\n[harness_v2] ABORT: The S1_HIT (right name, wrong condition) TTFT "
+                "distribution is NOT separable from the MISS distribution on this "
+                f"model/template (p_s1_miss={calibration['ks_s1hit_vs_miss']['p']:.2e}, "
+                f"p_hit_s1={calibration['ks_hit_vs_s1hit']['p']:.2e}).\n"
+                "This means the two-stage speedup cannot be achieved empirically.\n"
+                "RECOMMENDATION: re-run with the linear attack:\n"
+                "  python -m kv_attack.multi_backend_harness --n-victims N\n"
+                "The 12.62x BLQ gain remains valid analytically for architectures where "
+                "the intermediate level exists (see docs/final-report.md Section 6.6)."
+            )
+
+    results: list[TwoStageResult] = []
+
+    for victim_record in victim_records:
+        vid = victim_record["victim_id"]
+        print(f"\n{'─' * 60}")
+        print(f"[harness_v2] Attacking victim {vid} / {len(victim_records)-1} ...")
+        print(f"[harness_v2] Ground truth: "
+              f"name='{victim_record['ground_truth']['name']}'  "
+              f"condition='{victim_record['ground_truth']['condition']}'")
+
+        if not args.skip_evict:
+            print(f"[harness_v2] Evicting KV cache...")
+            n_evict = evict_cache_two_stage(backend, system_prefix, tokenizer)
+            print(f"[harness_v2] Eviction: {n_evict} calls sent")
+        else:
+            print(f"[harness_v2] Skipping cache eviction (--skip-evict)")
+
+        result = reconstruct_victim_two_stage(
+            backend        = backend,
+            tokenizer      = tokenizer,
+            system_prefix  = system_prefix,
+            t1_ms          = t1_ms,
+            t2_ms          = t2_ms,
+            victim_record  = victim_record,
+            candidate_seed = args.seed * 1000 + vid,
+            raw_probe_log_path = raw_probe_log_path,
+            run_id             = run_id,
+        )
+        results.append(result)
+
+        match_str = "✓ EXACT MATCH" if result.exact_match else "✗ MISMATCH"
+        print(f"[harness_v2] Victim {vid}: {match_str}  "
+              f"calls={result.total_api_calls} "
+              f"(s1={result.stage1_api_calls}, s2={result.stage2_api_calls})  "
+              f"BLQ={result.information_theory.get('bits_leaked_per_query', 0):.4f}")
+
+        _save_partial(args.output, args, calibration, results, victim_records)
+
+    aggregate = aggregate_two_stage(results)
+
+    print(f"\n{'=' * 65}")
+    print(f"[harness_v2] === AGGREGATE RESULTS ===")
+    print(f"  Success rate        : {aggregate['success_rate']:.3f} "
+          f"(target: {aggregate['target_sr']})")
+    print(f"  Mean TRR            : {aggregate['mean_trr']:.3f}")
+    print(f"  Mean total calls    : {aggregate['mean_total_api_calls']:.1f} "
+          f"(theoretical: 79.2)")
+    print(f"  Mean S1 calls       : {aggregate['mean_stage1_api_calls']:.1f} "
+          f"(theoretical: 63.1)")
+    print(f"  Mean S2 calls       : {aggregate['mean_stage2_api_calls']:.1f} "
+          f"(theoretical: 13.1)")
+    print(f"  Mean BLQ            : {aggregate['mean_blq']:.6f}")
+    print(f"  BLQ improvement     : {aggregate['blq_improvement_factor']:.2f}× "
+          f"vs linear Week 12")
+    print(f"  Targets met         : TRR={aggregate['trr_target_met']}  "
+          f"SR={aggregate['sr_target_met']}")
+    print(f"{'=' * 65}\n")
+
+    out_data = {
+        "run_id"       : run_id,
+        "algorithm"    : "two_stage_adaptive",
+        "model"        : args.model_id,
+        "hardware"     : HARDWARE,
+        "backend"      : args.backend,
+        "n_victims"    : args.n_victims,
+        "n_calibration": args.n_calib,
+        "seed"         : args.seed,
+        "raw_probe_log": raw_probe_log_path,
+        "calibration"  : calibration,
+        "aggregate"    : aggregate,
+        "results"      : [
+            {
+                **{k: v for k, v in dataclasses.asdict(r).items()
+                   if k not in ("scan_results_s1", "scan_results_s2")},
+                "top_scan_s1": r.scan_results_s1[:3],
+                "top_scan_s2": r.scan_results_s2[:3],
+            }
+            for r in results
+        ],
+    }
+
+    Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+    with open(args.output, "w") as fh:
+        json.dump(out_data, fh, indent=2, cls=_NumpyEncoder)
+    print(f"[harness_v2] Results written to {args.output}")
+
+
+
+def _mock_seed_victims(
+    tokenizer     : AutoTokenizer,
+    system_prefix : str,
+    n_victims     : int,
+    seed          : int,
+) -> list[dict]:
+    """
+    Generate victim records without calling vLLM (for MockBackend runs).
+    The mock backend seeds itself when measure_ttft() is called with a new prompt.
+    """
+    import random
+    from datetime import date, timedelta
+    from kv_attack import FIRST_NAMES, LAST_NAMES, MEDICAL_CONDITIONS
+    from kv_attack.two_stage_victim_seeder import build_two_stage_prompt, count_two_stage_blocks
+
+    rng     = random.Random(seed)
+    records = []
+
+    for i in range(n_victims):
+        name      = f"{rng.choice(FIRST_NAMES)} {rng.choice(LAST_NAMES)}"
+        start     = date(1935, 1, 1)
+        dob       = (start + datetime.timedelta(
+            days=rng.randint(0, (date(2006, 12, 31) - start).days)
+        )).isoformat()
+        condition = rng.choice(MEDICAL_CONDITIONS)
+
+        full_prompt  = build_two_stage_prompt(system_prefix, name, dob, condition, tokenizer)
+        stage1_probe = build_two_stage_prompt(
+            system_prefix, name, dob, condition, tokenizer, use_dummy_cond=True
+        )
+        counts = count_two_stage_blocks(system_prefix, name, dob, condition, tokenizer)
+
+        records.append({
+            "victim_id"      : i,
+            "prompt"         : full_prompt,
+            "stage1_probe"   : stage1_probe,
+            "ground_truth"   : {"name": name, "dob": dob, "condition": condition},
+            "n_name_blocks"  : counts["name_blocks"],
+            "n_cond_blocks"  : counts["cond_blocks"],
+            "n_total_blocks" : counts["total_private_blocks"],
+            "total_tokens"   : counts["total_tokens"],
+        })
+
+    print(f"[mock_seeder] Generated {len(records)} mock victim records")
+    return records
 
 
 if __name__ == "__main__":

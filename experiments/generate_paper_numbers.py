@@ -108,16 +108,28 @@ def main() -> None:
         "source": "miss_mean - hit_mean",
     }
     nums["t1_threshold_ms"] = {
-        "value": _safe_get(calib, "t1_ms", default=438.8),
-        "tag": "derived_from_empirical",
-        "note": "midpoint(miss_mean, s1_hit_mean)",
-        "source": "kv_week13_final.json:calibration.t1_ms or analytical",
+        "value": _safe_get(calib, "t1_threshold_ms", default=438.8),
+        "tag": "empirical",
+        "note": "actual calibrated threshold used by the live attack",
+        "source": "kv_week13_final.json:calibration.t1_threshold_ms",
     }
     nums["t2_threshold_ms"] = {
-        "value": _safe_get(calib, "t2_ms", default=177.1),
-        "tag": "derived_from_empirical",
-        "note": "midpoint(s1_hit_mean, hit_mean)",
-        "source": "kv_week13_final.json:calibration.t2_ms or analytical",
+        "value": _safe_get(calib, "t2_threshold_ms", default=177.1),
+        "tag": "empirical",
+        "note": "actual calibrated threshold used by the live attack",
+        "source": "kv_week13_final.json:calibration.t2_threshold_ms",
+    }
+    nums["t1_threshold_analytical_ms"] = {
+        "value": _safe_get(calib, "t1_analytical_ms", default=438.8),
+        "tag": "analytical_simulated",
+        "note": "midpoint(miss_mean, s1_hit_mean) — theoretical, NOT what the attack actually used",
+        "source": "kv_week13_final.json:calibration.t1_analytical_ms",
+    }
+    nums["t2_threshold_analytical_ms"] = {
+        "value": _safe_get(calib, "t2_analytical_ms", default=177.1),
+        "tag": "analytical_simulated",
+        "note": "midpoint(s1_hit_mean, hit_mean) — theoretical, NOT what the attack actually used",
+        "source": "kv_week13_final.json:calibration.t2_analytical_ms",
     }
 
     summ50 = _safe_get(w10_50, "summary") or _safe_get(w10_50, "aggregate") or {}

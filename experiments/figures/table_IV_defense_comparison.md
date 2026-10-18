@@ -4,7 +4,7 @@
 |---|---|---|---|---|---|---|---|---|
 | D0_no_defense | No defense (shared cache) | 18 | 0.556 | (0.337,0.754) | 0.000 | 222.0 | 589.3 | empirical |
 | D1_full_isolation | Full isolation (cache disabled) | 18 | 0.000 | (0.000,0.176) | 1.000 | 1789.7 | 2228.7 | empirical |
-| D2_tenant_salt | Tenant/user salting | 18 | 0.000 | (0.000,0.176) | 1.000 | 224.9 | 1071.2 | empirical |
+| D2_tenant_salt | Tenant/user salting | 18 | 0.000 | (0.000,0.176) | 1.000 | 224.9 | 1071.2 | empirical |v
 | D3_binary_pii | Binary PII isolation | 18 | 0.000 | (0.000,0.176) | 1.000 | 1784.8 | 2220.2 | empirical |
 | D4_risk_adaptive | Risk-adaptive (Issue #7) | 18 | 0.000 | (0.000,0.176) | 1.000 | 1786.4 | 2226.1 | empirical |
 | D5_risk_behavior | Risk + behavior adaptive (Issue #10 proposed) | 18 | 0.000 | (0.000,0.176) | 1.000 | 1778.5 | 2213.7 | empirical |

@@ -1,0 +1,177 @@
+{
+  "run_id": "backend-cmp-2026-09-18-250db71d",
+  "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+  "n_victims": 10,
+  "seed": 42,
+  "backend_a": "vllm",
+  "backend_b": "mock",
+  "characterizations": [
+    {
+      "backend": "vllm",
+      "framework_version": "vllm",
+      "hit_distribution": {
+        "mean_ms": 251.1
+      },
+      "miss_distribution": {
+        "mean_ms": 1406.6
+      },
+      "s1_hit_mean_ms": 564.3,
+      "roc_auc": 0.9999,
+      "t1_empirical_ms": 874.0,
+      "t2_empirical_ms": 431.5,
+      "timing_gap_ms": 1155.5,
+      "intermediate_feasible": "True",
+      "ks_hit_vs_miss_p": 1.9823306042836678e-29
+    },
+    {
+      "backend": "mock",
+      "framework_version": "mock",
+      "hit_distribution": {
+        "mean_ms": 227.7
+      },
+      "miss_distribution": {
+        "mean_ms": 1456.2
+      },
+      "roc_auc": 1.0,
+      "t1_empirical_ms": 841.9,
+      "timing_gap_ms": 1228.6,
+      "intermediate_feasible": true
+    }
+  ],
+  "attack_summaries": [
+    {
+      "backend": "vllm",
+      "n_victims": 10,
+      "exact_recovery_count": 0,
+      "asr": 0.0,
+      "asr_ci_95_lo": 0.0,
+      "asr_ci_95_hi": 0.2775,
+      "median_api_calls": 12.5,
+      "p95_api_calls": 84.09999999999998,
+      "mean_api_calls": 26.5
+    },
+    {
+      "backend": "mock",
+      "n_victims": 10,
+      "exact_recovery_count": 10,
+      "asr": 1.0,
+      "asr_ci_95_lo": 0.7225,
+      "asr_ci_95_hi": 1.0,
+      "median_api_calls": 53.0,
+      "p95_api_calls": 94.69999999999999
+    }
+  ],
+  "raw_results": [
+    {
+      "backend": "vllm",
+      "results": [
+        {
+          "victim_id": 0,
+          "exact_match": false,
+          "total_api_calls": 10
+        },
+        {
+          "victim_id": 1,
+          "exact_match": false,
+          "total_api_calls": 13
+        },
+        {
+          "victim_id": 2,
+          "exact_match": false,
+          "total_api_calls": 7
+        },
+        {
+          "victim_id": 3,
+          "exact_match": false,
+          "total_api_calls": 18
+        },
+        {
+          "victim_id": 4,
+          "exact_match": false,
+          "total_api_calls": 12
+        },
+        {
+          "victim_id": 5,
+          "exact_match": false,
+          "total_api_calls": 22
+        },
+        {
+          "victim_id": 6,
+          "exact_match": false,
+          "total_api_calls": 12
+        },
+        {
+          "victim_id": 7,
+          "exact_match": false,
+          "total_api_calls": 5
+        },
+        {
+          "victim_id": 8,
+          "exact_match": false,
+          "total_api_calls": 94
+        },
+        {
+          "victim_id": 9,
+          "exact_match": false,
+          "total_api_calls": 72
+        }
+      ]
+    },
+    {
+      "backend": "mock",
+      "results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 87
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 35
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 8
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 8
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 66
+        },
+        {
+          "victim_id": 5,
+          "exact_match": true,
+          "total_api_calls": 59
+        },
+        {
+          "victim_id": 6,
+          "exact_match": true,
+          "total_api_calls": 56
+        },
+        {
+          "victim_id": 7,
+          "exact_match": true,
+          "total_api_calls": 101
+        },
+        {
+          "victim_id": 8,
+          "exact_match": true,
+          "total_api_calls": 50
+        },
+        {
+          "victim_id": 9,
+          "exact_match": true,
+          "total_api_calls": 19
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-09-18T14:50:02.906092+00:00"
+}

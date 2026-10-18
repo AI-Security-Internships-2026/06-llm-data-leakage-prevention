@@ -1,3 +1,14 @@
+"""
+experiments/detector_fp_check.py
+Standalone false-positive / evasion check for kv_attack.probe_detector.ProbeDetector.
+NO server or GPU needed. Feeds synthetic probe sessions with simulated timestamps.
+
+IMPORTANT: this is a SYNTHETIC sanity check, not a paper result. For the paper,
+replace the benign generators with your real/realistic workload (Issue #10 asks
+for controlled + realistic prompts).
+
+Usage:  python experiments/detector_fp_check.py --n-sessions 200 --seed 42
+"""
 import argparse, datetime, json, os, platform, random, subprocess, sys, uuid
 from pathlib import Path
 import numpy as np

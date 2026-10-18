@@ -1,0 +1,177 @@
+{
+  "run_id": "backend-cmp-2026-09-19-b49ae008",
+  "model_id": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+  "n_victims": 10,
+  "seed": 42,
+  "backend_a": "vllm",
+  "backend_b": "mock",
+  "characterizations": [
+    {
+      "backend": "vllm",
+      "framework_version": "vllm",
+      "hit_distribution": {
+        "mean_ms": 179.9
+      },
+      "miss_distribution": {
+        "mean_ms": 1297.7
+      },
+      "s1_hit_mean_ms": 459.1,
+      "roc_auc": 0.9999,
+      "t1_empirical_ms": 602.2,
+      "t2_empirical_ms": 216.4,
+      "timing_gap_ms": 1117.8,
+      "intermediate_feasible": "True",
+      "ks_hit_vs_miss_p": 1.9823306042836678e-29
+    },
+    {
+      "backend": "mock",
+      "framework_version": "mock",
+      "hit_distribution": {
+        "mean_ms": 227.7
+      },
+      "miss_distribution": {
+        "mean_ms": 1456.2
+      },
+      "roc_auc": 1.0,
+      "t1_empirical_ms": 841.9,
+      "timing_gap_ms": 1228.6,
+      "intermediate_feasible": true
+    }
+  ],
+  "attack_summaries": [
+    {
+      "backend": "vllm",
+      "n_victims": 10,
+      "exact_recovery_count": 10,
+      "asr": 1.0,
+      "asr_ci_95_lo": 0.7225,
+      "asr_ci_95_hi": 1.0,
+      "median_api_calls": 82.0,
+      "p95_api_calls": 124.89999999999998,
+      "mean_api_calls": 81.6
+    },
+    {
+      "backend": "mock",
+      "n_victims": 10,
+      "exact_recovery_count": 10,
+      "asr": 1.0,
+      "asr_ci_95_lo": 0.7225,
+      "asr_ci_95_hi": 1.0,
+      "median_api_calls": 53.0,
+      "p95_api_calls": 94.69999999999999
+    }
+  ],
+  "raw_results": [
+    {
+      "backend": "vllm",
+      "results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 95
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 83
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 133
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 45
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 43
+        },
+        {
+          "victim_id": 5,
+          "exact_match": true,
+          "total_api_calls": 69
+        },
+        {
+          "victim_id": 6,
+          "exact_match": true,
+          "total_api_calls": 66
+        },
+        {
+          "victim_id": 7,
+          "exact_match": true,
+          "total_api_calls": 81
+        },
+        {
+          "victim_id": 8,
+          "exact_match": true,
+          "total_api_calls": 115
+        },
+        {
+          "victim_id": 9,
+          "exact_match": true,
+          "total_api_calls": 86
+        }
+      ]
+    },
+    {
+      "backend": "mock",
+      "results": [
+        {
+          "victim_id": 0,
+          "exact_match": true,
+          "total_api_calls": 87
+        },
+        {
+          "victim_id": 1,
+          "exact_match": true,
+          "total_api_calls": 35
+        },
+        {
+          "victim_id": 2,
+          "exact_match": true,
+          "total_api_calls": 8
+        },
+        {
+          "victim_id": 3,
+          "exact_match": true,
+          "total_api_calls": 8
+        },
+        {
+          "victim_id": 4,
+          "exact_match": true,
+          "total_api_calls": 66
+        },
+        {
+          "victim_id": 5,
+          "exact_match": true,
+          "total_api_calls": 59
+        },
+        {
+          "victim_id": 6,
+          "exact_match": true,
+          "total_api_calls": 56
+        },
+        {
+          "victim_id": 7,
+          "exact_match": true,
+          "total_api_calls": 101
+        },
+        {
+          "victim_id": 8,
+          "exact_match": true,
+          "total_api_calls": 50
+        },
+        {
+          "victim_id": 9,
+          "exact_match": true,
+          "total_api_calls": 19
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-09-19T11:16:33.017832+00:00"
+}

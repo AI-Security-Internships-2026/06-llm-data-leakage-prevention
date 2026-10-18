@@ -348,7 +348,7 @@ def _aggregate(results: list[dict]) -> dict:
     s2c   = [r.get("stage2_api_calls", 0) for r in results]
 
     H0 = 10.9658
-    BLQ_LINEAR = 0.014383
+    BLQ_LINEAR = H0 / 1302.5
 
     mean_calls = float(np.mean(calls)) if calls else 0.0
     blq_emp    = H0 / max(mean_calls, 1.0)

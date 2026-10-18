@@ -1,3 +1,25 @@
+"""
+kv_attack.sim_backend
+=====================
+Issue #10 -- Simulated automatic-prefix-cache (APC) backend.
+
+PURPOSE
+    Validate the *evaluation harness* (defended serving layer, attack adapters,
+    statistics, figure/table generation) on a machine with no GPU.  It models a
+    chained-block LRU prefix cache with a linear prefill-cost TTFT model.
+
+WHAT THIS IS NOT
+    It is NOT evidence about vLLM / SGLang.  Every artifact produced with this
+    backend is tagged ``"backend_kind": "simulated"`` and ``reproduce_paper.py``
+    refuses to use it for paper numbers unless ``--allow-simulated`` is given,
+    in which case every output is stamped SIMULATED.
+
+Model
+    tokens  : deterministic whitespace tokenizer (crc32 per word)  [SimTokenizer]
+    blocks  : 16 tokens, chained hash (prefix semantics, like real APC)
+    cache   : LRU with ``capacity_blocks`` entries (real vLLM run: ~45.7k blocks)
+    TTFT    : base_ms + per_block_ms * (#uncached blocks) + load + N(0, noise)
+"""
 from __future__ import annotations
 
 import threading

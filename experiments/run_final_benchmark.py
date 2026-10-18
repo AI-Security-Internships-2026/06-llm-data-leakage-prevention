@@ -1,3 +1,31 @@
+"""
+experiments/run_final_benchmark.py
+Issue #10 -- Final same-testbed security/performance benchmark.
+
+One invocation runs the PRE-REGISTERED matrix in configs/final_benchmark.yaml
+against ONE backend/server, writing append-only raw logs into a fresh run dir:
+
+    experiments/results/final/<kind>-<UTC timestamp>-<8hex>/
+        manifest.json      config, command, git, hardware, backend/server info
+        calibration.jsonl  per-seed attacker thresholds (undefended replica)
+        trials.jsonl       one line per attack trial (RAW observations)
+        oracle.jsonl       one line per oracle probe (TTFT + class + defense)
+        perf.jsonl         one line per benign request
+        perf_runs.jsonl    one line per benign run (wall, throughput, GPU, cache)
+        processed/metrics.json   (derived by analysis.metrics from the raw logs)
+
+Nothing here is ever overwritten; --resume appends only missing trials.
+
+Examples
+    # real (needs vLLM already serving the model, APC on):
+    python experiments/run_final_benchmark.py --backend vllm \
+        --base-url http://localhost:8001/v1 --profile standard \
+        --server-flags "vllm serve <model> --enable-prefix-caching --block-size 16"
+    # cost estimate only
+    python experiments/run_final_benchmark.py --backend vllm --profile standard --dry-run
+    # pipeline check without a GPU (outputs are tagged SIMULATED)
+    python experiments/run_final_benchmark.py --backend sim --profile smoke
+"""
 from __future__ import annotations
 
 import argparse

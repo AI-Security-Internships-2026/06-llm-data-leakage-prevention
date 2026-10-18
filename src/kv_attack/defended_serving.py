@@ -1,3 +1,35 @@
+"""
+kv_attack.defended_serving
+==========================
+Issue #10 -- A policy front-end that sits between *every* actor (victim,
+attacker, benign tenants) and one shared inference backend, so that every
+defense is evaluated END-TO-END against a live attack instead of being
+derived from a formula.
+
+Actors talk to the server through ``TenantClient`` objects that implement the
+``BackendClient`` interface, so the unmodified attack code (A0/A1/A2) runs
+against a defended system.
+
+Defenses (all reuse the repo's own policy code):
+    D0  shared cache                      cache_policy.D0
+    D1  full isolation (cache off)        cache_policy.D1
+    D2  tenant / user salt                cache_policy.D2
+    D3  binary PII isolation              cache_policy.D3
+    D4  risk-adaptive (content)           cache_policy.D4
+    D5  risk + behaviour adaptive         DynamicPolicyEngine (Issue #8)
+        (= FULL in the ablation: content risk + confidence gate + behaviour)
+
+Ablation variants: AB0 none, AB1 content only (= D4 as implemented),
+AB2 content + confidence gate, AB3 behaviour only, FULL (= D5).
+
+Causality.  The decision for request *t* uses the behaviour-detector state
+after request *t-1* (a server cannot know the TTFT of a request it has not
+served yet).  The alert-triggering probe is therefore still answered normally.
+
+Clock.  The behaviour detector runs on a deterministic *virtual* per-tenant
+clock (advances by the observed response time plus a per-role think time), so
+results do not depend on wall-clock speed and are reproducible.
+"""
 from __future__ import annotations
 
 import dataclasses

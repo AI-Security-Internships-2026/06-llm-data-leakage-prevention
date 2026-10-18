@@ -6,7 +6,12 @@ code module and result artifact. All numbers verified against
 
 > Status legend: ✓ verified | ⚠ pending larger run | ✗ correction needed
 >
-> **Last updated: 2026-09-22 — Issue #3 corrections applied.**
+> **Last updated: 2026-10-14 — corrected against `paper_numbers.json` (regenerated).
+> The 2026-09-22 version of this matrix had drifted from the actual result files:
+> several entries below had been copied from stale/fallback-default values instead
+> of the live `paper_numbers.json` output. See `experiments/check_claim_matrix.py`,
+> added in this pass, which now asserts every numeric claim below against
+> `paper_numbers.json` on every run so this cannot silently drift again.**
 
 ---
 
@@ -15,8 +20,8 @@ code module and result artifact. All numbers verified against
 | Paper section | Claim | Evidence artifact | Tag | Verified? | Notes |
 |---|---|---|---|---|---|
 | Abstract | KV-cache timing attack recovers private patient records | `kv_week13_final.json` | empirical | ✓ | 50-victim canonical run (seed=42) |
-| Abstract | Two-stage adaptive reduces queries by ~12.6× vs linear | `kv_week13_final.json:aggregate.blq_improvement_factor` | derived_from_empirical | ✓ | 11.52× measured, 12.62× theoretical — both labelled |
-| Abstract | 100% exact recovery **within bounded search space** | `kv_week13_final.json:aggregate.success_rate=1.0` | empirical | ✓ | **Corrected (Issue #3-E):** qualifier "within bounded 100-name × 20-condition space" added |
+| Abstract | Two-stage adaptive reduces queries **~19.4×** vs linear (n=50 canonical baseline, consistent definition) | `kv_week13_final.json:aggregate.mean_total_api_calls=66.98` vs `kv_attack_results_50.json:summary.mean_total_api_calls=1302.5` | derived_from_empirical | ✗→✓ | **Corrected 2026-10-11.** EERQ(two-stage) = H0/66.98 = 0.1637 bits/query; EERQ(baseline, n=50) = H0/1302.5 = 0.00842 bits/query → 19.4×. The previously-reported "11.52×" and the raw file's own `aggregate.blq_improvement_factor=24.14` are **both wrong, for two separate reasons**: (1) the code constant `BLQ_LINEAR=0.014383` used as the baseline denominator is `H0/762.4`, where 762.4 is the mean query count from the **5-victim** baseline run (`kv_attack_results.json`), not the 50-victim canonical baseline the rest of the paper uses — apples-to-oranges; (2) the stored `aggregate.mean_blq=0.347261` is the mean of each victim's own (H0/calls_i) ratio, not H0/mean(calls) — these differ substantially when per-victim query counts are high-variance (Jensen's inequality). Both bugs fixed in `two_stage_reconstructor.py`/`run_kv_attack.py`: `BLQ_LINEAR` now computed from the n=50 baseline file, with a consistent ratio-of-means definition. |
+| Abstract | 68% exact recovery **within bounded search space** (NOT 100%) | `kv_week13_final.json:aggregate.success_rate=0.68` | empirical | ✗→✓ | **Corrected 2026-10-11.** Previous "100%" entry was wrong — it was the hardcoded fallback default in `generate_paper_numbers.py` (`default=1.0`), not the real value. Actual canonical run: 34/50 exact, `sr_target_met: False` (target was 0.80). This is a real negative result and should be reported as such, not smoothed over. |
 | Intro | HIPAA-relevant multi-tenant risk | System prompt in `victim_seeder.py` | empirical | ✓ | Attack scenario is Scenario S2 (attacker knows system prefix) |
 
 ---
@@ -38,12 +43,16 @@ code module and result artifact. All numbers verified against
 
 | Paper section | Claim | Evidence artifact | Tag | Verified? | Notes |
 |---|---|---|---|---|---|
-| Calibration | Full-hit TTFT: 87.6 ± 4.7 ms | `paper_numbers.json:ttft_hit_mean_ms` | empirical | ✓ | |
-| Calibration | Full-miss TTFT: 576.1 ± 4.7 ms | `paper_numbers.json:ttft_miss_mean_ms` | empirical | ✓ | |
-| Calibration | S1-hit TTFT: 264.0 ms | `paper_numbers.json:ttft_s1_hit_mean_ms` | derived_from_empirical | ✓ | = miss − 128/192 × delta; not independently measured (noted in paper) |
-| Calibration | T1 threshold: 438.8 ms | `paper_numbers.json:t1_threshold_ms` | derived_from_empirical | ✓ | midpoint(miss, s1_hit) |
-| Calibration | T2 threshold: 177.1 ms | `paper_numbers.json:t2_threshold_ms` | derived_from_empirical | ✓ | midpoint(s1_hit, full_hit) |
-| Calibration | KS-test p < 1e-8 distinguishes distributions | `kv_week13_final.json:calibration.ks_p_value` | empirical | ✓ | p = 1.94e-119 (stored in calibration block) |
+| Calibration | Full-hit TTFT: **190.5 ms** (not 87.6) | `paper_numbers.json:ttft_hit_mean_ms` = `kv_week13_final.json:calibration.hit_mean_ms` | empirical | ✗→✓ | **Corrected 2026-10-11.** "87.6 ± 4.7" and the other two rows below were from an earlier/different calibration run, not the canonical `kv_week13_final.json` run this matrix otherwise cites throughout. |
+| Calibration | Full-miss TTFT: **1589.7 ms** (not 576.1) | `paper_numbers.json:ttft_miss_mean_ms` | empirical | ✗→✓ | **Corrected 2026-10-11.** |
+| Calibration | S1-hit TTFT: **560.2 ms** (not 264.0) | `paper_numbers.json:ttft_s1_hit_mean_ms` | derived_from_empirical | ✗→✓ | **Corrected 2026-10-11.** = miss − 128/192 × (miss − hit) = 1589.7 − 0.667×(1589.7−190.5) = 560.2. Formula was already correct; only the inputs were stale. |
+| Calibration | T1 threshold **actually used by the attack**: **1011.9 ms** (not 438.8 — that's the analytical estimate, see row below) | `paper_numbers.json:t1_threshold_ms` = `kv_week13_final.json:calibration.t1_threshold_ms` | empirical | ✗→✓ | **Corrected 2026-10-11 — code bug, not just a stale number.** `generate_paper_numbers.py` read `calib["t1_ms"]`, a key that doesn't exist in `calibration` (the real field is `t1_threshold_ms`); it silently fell through to the hardcoded default (438.8) on every run. Fixed in `generate_paper_numbers.py`. |
+| Calibration | T1 threshold, analytical estimate: 438.8 ms | `paper_numbers.json:t1_threshold_analytical_ms` | **analytical_simulated** | ✓ | midpoint(miss_mean, s1_hit_mean) — theoretical only; the live attack used the calibrated 1011.9 ms value above, not this one. New field, split out 2026-10-11 so the two are never conflated again. |
+| Calibration | T2 threshold **actually used by the attack**: **314.4 ms** (not 177.1) | `paper_numbers.json:t2_threshold_ms` = `kv_week13_final.json:calibration.t2_threshold_ms` | empirical | ✗→✓ | **Corrected 2026-10-11** — same `t2_ms`/`t2_threshold_ms` key bug as T1, fixed alongside it. |
+| Calibration | T2 threshold, analytical estimate: 177.1 ms | `paper_numbers.json:t2_threshold_analytical_ms` | **analytical_simulated** | ✓ | New field, split out 2026-10-11. |
+| Calibration | KS-test p < 1e-8 distinguishes distributions | `kv_week13_final.json:calibration.ks_p_value` | empirical | ✓ | p = 1.94e-119 (stored in calibration block) — this one was already correct and unaffected by the above. |
+
+> **Why this matters for reproducibility (Issue #2):** the thresholds a reader would use to *reproduce* the attack are the calibrated ones (1011.9 ms / 314.4 ms), not the analytical midpoints (438.8 ms / 177.1 ms) the matrix previously — and incorrectly — presented as "the" threshold values. Anyone re-running the attack with the analytical thresholds instead of the calibrated ones would very likely get a different (probably worse) `success_rate` than the reported 0.68, since T1=438.8ms sits inside the real miss/s1-hit distributions' overlap region rather than at their actual midpoint.
 
 ---
 
@@ -51,13 +60,13 @@ code module and result artifact. All numbers verified against
 
 | Paper section | Claim | Evidence artifact | Tag | Verified? | Notes |
 |---|---|---|---|---|---|
-| Results | Exact recovery: 100% (bounded task) | `kv_week13_final.json`, `kv_attack_results_50.json` | empirical | ✓ | Qualifier "within bounded search space" applied (Issue #3-E) |
-| Results | Mean queries (two-stage): 79.8 | `kv_week13_final.json:aggregate.mean_total_api_calls` | empirical | ✓ | n=50 canonical run |
-| Results | E[Q] theoretical: 79.2 | `paper_numbers.json:e_q_theoretical_twostage` | **analytical_simulated** | ✓ | Labelled "analytical estimate" in paper — NOT presented as measured |
-| Results | EERQ empirical (two-stage): 0.16574 bits/query | `kv_week13_final.json:aggregate.mean_blq` | derived_from_empirical | ✓ | **Renamed BLQ → EERQ (Issue #3-D).** H0 / mean_calls |
-| Results | EERQ improvement: 11.52× (empirical), 12.62× (analytical) | `kv_week13_final.json:aggregate.blq_improvement_factor` | derived_from_empirical | ✓ | Both labelled; empirical figure used as primary claim |
-| Results | Baseline mean queries: 1302.5 | `kv_attack_results_50.json:summary.mean_total_api_calls` | empirical | ✓ | |
-| Results | 95% CI — see Fig C | `experiments/figures/fig_c_recovery_ci.json` | derived_from_empirical | ✓ | Wilson score CI generated by script |
+| Results | Exact recovery: **68%** (34/50 victims, bounded task) — below the 80% pre-registered target (`sr_target_met: False`) | `kv_week13_final.json:aggregate.success_rate=0.68` | empirical | ✗→✓ | **Corrected 2026-10-11.** Previous "100%" was the `generate_paper_numbers.py` fallback default, not measured data. This is a negative result against the pre-registered target and should be reported as such (per the Research Reporting Rule), not smoothed into "100% within bounded space." |
+| Results | Mean queries (two-stage): **66.98** | `kv_week13_final.json:aggregate.mean_total_api_calls` | empirical | ✗→✓ | **Corrected 2026-10-11.** Previous "79.8" was the fallback default, not measured — it coincidentally sits close to the *theoretical* E[Q]=79.2 row below, which is likely why it went unnoticed. |
+| Results | E[Q] theoretical: 79.2 | `paper_numbers.json:e_q_theoretical_twostage` | **analytical_simulated** | ✓ | Labelled "analytical estimate" in paper — NOT presented as measured. Note the *empirical* mean (66.98, row above) is actually lower than this theoretical expectation — worth a sentence of discussion in the paper rather than leaving unexplained. |
+| Results | EERQ empirical (two-stage): **0.1637** bits/query (H0/mean_calls) | `kv_week13_final.json:aggregate.mean_total_api_calls=66.98`, H0=10.9658 | derived_from_empirical | ✗→✓ | **Corrected 2026-10-11.** Previous "0.16574" was close but not sourced from the right field. The file's own `aggregate.mean_blq=0.347261` is a *different* statistic (mean of per-victim H0/calls_i, not H0/mean(calls)) — reported separately below, not used as the headline. |
+| Results | EERQ improvement: **19.4×** (empirical, n=50 baseline, consistent ratio-of-means definition on both sides) | computed: `kv_week13_final.json:aggregate.mean_total_api_calls=66.98` vs `kv_attack_results_50.json:summary.mean_total_api_calls=1302.5` | derived_from_empirical | ✗→✓ | **Corrected 2026-10-11** — see Abstract section note above for the full derivation and the two separate bugs (wrong baseline file, inconsistent ratio definition) that produced the old "11.52×"/"24.14×" figures. Secondary stat, clearly labeled: mean-of-per-victim-ratio EERQ = 0.347261 bits/query (`aggregate.mean_blq`), which is higher because a handful of victims finished in very few queries and pull the per-victim mean up — report only if the paper explicitly explains the definition. |
+| Results | Baseline mean queries: 1302.5 | `kv_attack_results_50.json:summary.mean_total_api_calls` | empirical | ⚠ | Baseline run uses `meta-llama/Llama-3.1-8B-Instruct`; the two-stage canonical run uses `deepseek-ai/DeepSeek-R1-Distill-Llama-8B` — **different models**, flagged by `audit_issue10.py` as `NOT_SAME_TESTBED`. The ~19.4× figure above therefore compares across models, not just algorithms; this should be stated explicitly in the paper rather than left implicit. |
+| Results | 95% CI — see Fig C | `experiments/figures/fig_c_recovery_ci.json` | derived_from_empirical | ✓ | Wilson score CI generated by script. Values shown there (sr=0.68, n=50, k=34, CI [0.542, 0.792]) are correct and already consistent with the corrected number above — Fig C was never wrong, only this matrix's prose entries were. |
 
 ---
 
@@ -73,7 +82,7 @@ code module and result artifact. All numbers verified against
 | Manuscript claim (original) | Corrected description | Code source | Status |
 |---|---|---|---|
 | "Stage-2 uses Presidio + BART for NER" | **M3 PII gate uses Presidio NER (`presidio_analyzer.AnalyzerEngine`) + medical-condition keyword regex. BART is NOT used in the paper pipeline.** BART (`facebook/bart-large-mnli`) is the legacy Stage-2 LLM judge in `src/llm_judge.py` (early-work baseline only). | `src/kv_attack/pareto_runner.py:PresidioGate` | ✓ corrected |
-| "Stage-2 triggers on any PII entity" | **Trigger entities: `PERSON`, `DATE_TIME`, `MEDICAL_LICENSE` (Presidio); medical conditions via keyword regex (`pareto_runner.py:_CONDITION_PATTERN`).** `US_DRIVER_LICENSE` and `IN_PAN` are explicitly excluded (too many false positives on reference codes). | `src/kv_attack/pareto_runner.py:PII_ENTITIES`, line 132 | ✓ corrected |
+| "Stage-2 triggers on any PII entity" | **Trigger entities: `PERSON`, `DATE_TIME`, `MEDICAL_LICENSE`, `US_DRIVER_LICENSE` (Presidio); medical conditions via keyword regex (`pareto_runner.py:_CONDITION_PATTERN`).** Corrected 2026-10-11: the previous text said `US_DRIVER_LICENSE`/`IN_PAN` were "explicitly excluded" — backwards for `US_DRIVER_LICENSE` (line 132 includes it); `IN_PAN` doesn't appear in the file at all, included or excluded. | `src/kv_attack/pareto_runner.py:PII_ENTITIES`, line 132 | ✓ corrected (was wrong until 2026-10-11) |
 | "Confidence threshold = X" (unstated) | **Default score gate: 0.0 for most entities; `US_BANK_NUMBER` gated at ≥ 0.80 (`src/detector.py:_SCORE_GATES`). Presidio scores reflect spaCy NER confidence.** | `src/detector.py:_SCORE_GATES`, line 108 | ✓ corrected |
 | "Falls back to …" (unstated) | **Fallback when Presidio not available: regex-only PII detection (condition pattern only). Logged with `WARNING: Presidio not available`.** When no PII detected: cache-sharing proceeds as per lower risk tier. | `src/kv_attack/pareto_runner.py`, line 152 | ✓ corrected |
 | "Stage-2 is synchronous/asynchronous" (unstated) | **Synchronous.** `PresidioGate.scan()` is a blocking call; `pareto_runner.py` wraps it synchronously before the cache-routing decision. No async invocation. | `src/detector.py`, `src/kv_attack/pareto_runner.py` | ✓ corrected |
@@ -112,9 +121,10 @@ code module and result artifact. All numbers verified against
 | B | S1-hit TTFT not independently measured | Measure and store in calibration block | ⚠ Accepted limitation — noted in paper as derived value |
 | C | Stage-2 Presidio trigger conditions | Update manuscript to match code | **✓ RESOLVED** — corrections applied above (2026-09-22) |
 | D | BLQ / EERQ terminology | Add citation or rename consistently | **✓ RESOLVED** — renamed to EERQ throughout |
-| E | "100% recovery" claim | Add "within bounded search space" qualifier | **✓ RESOLVED** — qualifier applied in Abstract and Results |
+| E | "100% recovery" claim | Add "within bounded search space" qualifier | **✗ REOPENED (2026-10-11)** — the qualifier was added but the underlying number (100%) was itself wrong; actual success_rate is 0.68 with `sr_target_met: False`. Fixed in this pass. |
 | F | Analytical M3 latency labeled as empirical | Add "estimated" qualifier | **✓ RESOLVED** — labeled analytical_simulated in paper_numbers.json and matrix |
-| G | paper_numbers.json not yet committed | Run `generate_paper_numbers.py` and commit | **✓ RESOLVED** — 26 values, 0 assertion failures (2026-09-22) |
+| G | paper_numbers.json not yet committed | Run `generate_paper_numbers.py` and commit | **✓ RESOLVED** — 26 values, 0 assertion failures; note this matrix had drifted from it despite that — fixed 2026-10-11, see `check_claim_matrix.py` |
+| H | This matrix itself had drifted from `paper_numbers.json` (success_rate, mean queries, EERQ, improvement factor, PII entity list, SGLang table all wrong as of 2026-09-22) | Correct every entry against the actual result files; add an automated check so it can't silently drift again | **✓ RESOLVED (2026-10-11)** — see `experiments/check_claim_matrix.py` |
 
 ---
 
@@ -158,19 +168,114 @@ viable. Tracked as future work.
 
 **Finding:** The KV-cache timing side-channel is confirmed on a second real
 backend (SGLang 0.5.19). The two-stage exact-value reconstruction algorithm
-does **not** transfer to SGLang without backend-specific block-alignment retuning.
+transfers only partially to SGLang without backend-specific block-alignment
+retuning.
 
-**Evidence (corrected vLLM measurement, 2026-09-19):**
+**Evidence — corrected 2026-10-11 to use the one run that actually measured
+both backends together, same day, same victims, larger sample
+(`backend-cmp-2026-09-25-59c23b91.json`, n=30 each, not the earlier n=10
+figures):**
 
-| Backend | Version | AUC | Timing gap | Exact recovery (ASR) | Median queries |
-|---|---|---|---|---|---|
-| vLLM (corrected) | 0.27.1 | 0.9999 | 1118 ms | **100% (10/10)** | 82 |
-| SGLang | 0.5.19 | 0.9999 | 948 ms | **0% (0/10)** | 28 |
-| Mock (reference) | — | 1.0000 | 1229 ms | 100% (10/10) | 53 |
+| Backend | Version | AUC | Timing gap | Exact recovery (ASR) | 95% CI | Median queries |
+|---|---|---|---|---|---|---|
+| vLLM | 0.27.1 | 0.9999 | 621 ms | **96.7% (29/30)** | [0.833, 0.994] | 79.5 |
+| SGLang | 0.5.19 | 0.9999 | 558 ms | **6.7% (2/30)** | [0.019, 0.213] | 59.5 |
+| Mock (reference) | — | 1.0000 | 1229 ms | 100% (10/10) | — | 53 |
 
-**Conclusion:** Cache-timing oracle generalizes across backends (AUC 0.9999 on
-both). Exact-value reconstruction requires backend-specific retuning for
-SGLang's RadixAttention. Backend and algorithm effects are not conflated —
-per Issue #6 acceptance criteria.
+The previous version of this table ("100% (10/10)" vLLM / "0% (0/10)" SGLang,
+both dated "2026-09-19") was **not a single matched measurement**: the vLLM
+10/10 figure came from `backend-cmp-2026-09-19-b49ae008.json` (vLLM vs mock),
+and the SGLang 0/10 figure came from an earlier, separate run on 2026-09-17/18
+(`backend-cmp-2026-09-17-9b4a5d89.json` or `-2026-09-18-ddb9fed1.json`, SGLang
+vs mock). Presenting two non-concurrent runs as one dated comparison
+overstated the cleanliness of the result — the real matched run shows SGLang
+recovery is low but not literally zero.
 
-**Tag:** `empirical` (corrected measurement, live vLLM 0.27.1 + SGLang 0.5.19, 2026-09-19)
+**Conclusion (unchanged in substance, numbers corrected):** Cache-timing
+oracle generalizes across backends (AUC 0.9999 on both). Exact-value
+reconstruction degrades sharply but not completely on SGLang without
+backend-specific retuning for RadixAttention. Backend and algorithm effects
+are not conflated — per Issue #6 acceptance criteria. Per Issue #6's open
+supervisor request, raw probe-level TTFT for this comparison is still not
+committed anywhere (same root cause as Issue #2's still-open per-probe-data
+request) — that is the one remaining acceptance-criteria gap for this issue
+after this correction.
+
+**Tag:** `empirical` (matched measurement, live vLLM 0.27.1 + SGLang 0.5.19, 2026-09-25, n=30/backend)
+
+---
+
+## Issue #9 — Natural-Error FNR for MEDICAL / ENTERPRISE_CONFIDENTIAL (Finding)
+
+**Finding:** The claim "real-world Presidio FNR may be 15-40% in practice" for
+the MEDICAL and ENTERPRISE_CONFIDENTIAL categories (as stated in the Issue #9
+GitHub comment) was never actually measured. It is a verbatim copy of a
+`recommendation` field inside `pii-error-prop-2026-09-21-2a68b8a3.json:
+natural_errors_note` — an author's qualitative guess embedded in the result
+JSON, not data. The file's own `natural_errors` measurement shows recall=1.0
+for all three detectors, because `sensitivity_workload.py`'s 20 MEDICAL/
+ENTERPRISE templates all include a full person name alongside the condition/
+project — the no-name case the guess is actually about was never tested.
+
+**Evidence (measured 2026-10-14 in the project's pinned environment —
+`presidio-analyzer==2.2.354`, `spacy==3.7.4`, `en_core_web_lg==3.7.1`, per
+`requirements.txt` —
+`experiments/run_natural_error_realistic.py` →
+`natural-error-realistic-2026-10-14-680657e1.json`):** An independently-
+written test set (not reused from `sensitivity_workload.py`, to avoid
+circularity) run against the real `PresidioGate.is_pii()` detector:
+
+| Category | n | Overall FNR | No-name FNR (realistic worst case) | With-name FNR |
+|---|---|---|---|---|
+| MEDICAL | 25 | 36.0% | **50.0%** | 23.1% |
+| ENTERPRISE_CONFIDENTIAL | 10 | 20.0% | 25.0% | 0.0% |
+
+> **Reproducibility note:** this script was first run in a sandbox environment
+> with unpinned, newer Presidio/spaCy versions (`presidio-analyzer==2.2.364`,
+> `spacy==3.7.5`), which gave MEDICAL no-name FNR = 58.3% instead of 50.0% —
+> one single-case difference in detector behavior between library versions
+> (ENTERPRISE_CONFIDENTIAL was unaffected). The numbers above, from the
+> project's actual pinned environment, are the authoritative ones. This is
+> itself worth a sentence in the paper's limitations: `PresidioGate`'s output
+> is not perfectly stable across NER library versions, so exact replication
+> requires the pinned `requirements.txt` versions, not just the same test
+> cases.
+
+**Mechanism (important, previously undocumented):** `PresidioGate.is_pii()`
+checks the medical-condition regex *before and independent of* PERSON
+detection, so a missing name is not itself what causes MEDICAL misses — it's
+whether the specific condition string is in the ~20-item hardcoded keyword
+list. Conditions outside that list (endometriosis, psoriasis, fibromyalgia,
+IBS, eczema, gout, vertigo, and abbreviations like T2DM/HTN) are missed
+regardless of whether a name is present. ENTERPRISE_CONFIDENTIAL has **no**
+keyword-regex supplement at all (unlike MEDICAL) — its "hits" above are
+largely incidental Presidio `DATE_TIME` matches on words like "Friday" or
+"Q4", not genuine recognition of the sensitive project/deal content, so the
+75-80% recall there should not be read as the detector reliably protecting
+that category.
+
+**Conclusion:** The real no-name MEDICAL FNR (50.0%) is *at the very top edge*
+of the previously-guessed 15-40% range — worse than guessed, not within it.
+This should replace the guess wherever it's cited (paper, future issue
+comments), and the mechanism finding (condition-list coverage, not
+name-presence) is a more precise and more useful characterization than "FNR
+may be 15-40%" for deciding how to actually improve the detector (expand the
+keyword list / add a NER model for clinical abbreviations, rather than
+anything related to name detection).
+
+**Tag:** `empirical` (measured 2026-10-14, real `PresidioGate`, pinned environment, independently-written test set, n=25 MEDICAL + n=10 ENTERPRISE)
+
+
+---
+
+## Issue #2 — Raw Per-Probe Evidence, and a Replication-Variance Finding
+
+**Finding 1 (resolved):** Issue #2 was reopened three times by the supervisor over "commit raw per-probe timing data," and it was never actually done — `two_stage_reconstructor.py` computed a full probe log internally (every candidate, every TTFT) but discarded everything except the top 3 candidates per victim per stage before saving. Fixed 2026-10-15: `reconstruct_victim_two_stage()` now streams every probe (stage, probe_index, candidate, truth, ttft_ms, predicted_cache_state) to `<output>.raw_probes.jsonl`, on by default in `week13_harness.py`. Verified against a fresh n=50 run: `kv_week13_final_rerun.json.raw_probes.jsonl` contains 3,107 lines covering all 50 victims, consistent with the per-victim stage1/stage2 call counts once reseed and confirmation calls (not logged as candidate probes) are accounted for.
+
+**Finding 2 (new, unplanned, reported rather than suppressed):** the rerun that produced this raw-probe evidence (`kv_week13_final_rerun.json`, same model, same n=50, same seed=42, same code as the canonical `kv_week13_final.json`) shows **success_rate=0.98** (49/50) and **mean_total_api_calls=79.44**, against the canonical run's **success_rate=0.68** and **mean_total_api_calls=66.98**. The two runs' *empirical calibration thresholds* also differ substantially (T1=492.5ms vs 1011.9ms; T2=162.8ms vs 314.4ms), despite running the identical calibration procedure. This points to the attack's reliability being sensitive to server-side timing conditions at calibration time (background load, GPU state, or similar), not to any code difference between the runs.
+
+**Decision on which number is "canonical":** `kv_week13_final.json` (success_rate=0.68) remains the primary number referenced throughout this matrix, Fig C, the n=50 baseline comparison, and the Issue #6 cross-backend section, since those were already corrected and cross-verified against it specifically; swapping in the higher-success rerun would require re-deriving all of those and the single rerun is not strong enough evidence to justify it. `kv_week13_final_rerun.json` is cited specifically as the Issue #2 raw-probe-evidence source, not as a replacement headline number.
+
+**This variance should be reported in the paper as a limitation, not smoothed over**: two nominally identical 50-victim runs producing a 30-percentage-point swing in exact-recovery rate is itself a finding about the attack's reliability, and is exactly the kind of result the project's own Research Reporting Rule ("do not tune the experiment merely to obtain a positive result... report deviations from the planned setup") calls for reporting honestly rather than cherry-picking the more favorable run.
+
+**Tag:** `empirical` (both runs: live vLLM 0.27.1, DeepSeek-R1-Distill-Llama-8B, n=50, seed=42, 2026-10-14/15)
